@@ -1,0 +1,7 @@
+__pycache__/
+*.pyc
+.venv/
+data/
+results/*/checkpoint.npz
+results/**/*.npz
+.DS_Store

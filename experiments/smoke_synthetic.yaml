@@ -1,0 +1,19 @@
+# Smoke test: verifies the whole pipeline end-to-end with zero heavy deps.
+# Runs in seconds on CPU. Demonstrates FedAvg learning + the non-IID accuracy drop.
+name: smoke_synthetic_dir01
+seed: 0
+dataset: synthetic
+mode: federated
+num_clients: 15
+rounds: 15
+local_epochs: 2
+lr: 0.05
+checkpoint_every: 5
+
+model:
+  backend: numpy_mlp
+  hidden: 64
+
+partition:
+  kind: dirichlet
+  alpha: 0.1

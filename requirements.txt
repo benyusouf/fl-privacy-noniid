@@ -1,0 +1,9 @@
+torch>=2.2
+torchvision>=0.17
+numpy>=1.24
+pandas>=2.0
+matplotlib>=3.7
+pyyaml>=6.0
+opacus>=1.4
+flwr[simulation]>=1.9      # used for the SecAgg+ overhead phase (Phase C)
+medmnist>=3.0              # PathMNIST
