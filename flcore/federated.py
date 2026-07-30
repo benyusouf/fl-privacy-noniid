@@ -63,24 +63,67 @@ def run_federated(
     on_round=None,                  # callback(round, global_acc, test_acc, bytes)
     start_round: int = 0,
     init_params: dict | None = None,
+    strategy: str = "fedavg",
+    strategy_cfg: dict | None = None,
+    server_momentum: float = 0.0,   # >0 enables FedAvgM (Hsu et al., 2019)
 ):
-    """Core FedAvg loop. Returns (final_params, history list of dict rows).
+    """Core FL round loop. Returns (final_params, history list of dict rows).
 
     Deterministic given seed. `start_round`/`init_params` allow resuming from a
     checkpoint. Every client participates each round (cross-silo, full
     participation - analysis.docx D2).
+
+    `strategy` selects the LOCAL objective (fedavg/fedprox/scaffold/moon);
+    server-side averaging is identical for all four. Strategy state (SCAFFOLD
+    control variates, MOON previous model) is kept per client across rounds.
     """
     X_test, y_test = test_data
     global_params = init_params if init_params is not None else model.get_params()
     history = []
+    scfg = dict(strategy_cfg or {})
+    scfg.setdefault("local_epochs", local_epochs)
+    scfg.setdefault("lr", lr)
+
+    use_strategy = strategy != "fedavg"
+    local_fn = None
+    if use_strategy:
+        from flcore.strategies import get_strategy
+        local_fn = get_strategy(strategy)
+    client_state: list[dict | None] = [None] * len(client_train)
+    velocity: dict = {}
+    global_c: dict | None = None
+
     for r in range(start_round, rounds):
-        client_params, weights = [], []
+        client_params, weights, new_states = [], [], []
         for cid, (Xc, yc) in enumerate(client_train):
-            p = local_train(model, Xc, yc, global_params, local_epochs, lr,
-                            seed=seed + 1000 * r + cid)
+            if use_strategy:
+                cfg_c = dict(scfg); cfg_c["seed"] = seed + 1000 * r + cid
+                st = client_state[cid]
+                if strategy == "scaffold" and global_c is not None:
+                    st = dict(st or {}); st["c"] = global_c
+                p, st_new = local_fn(model, Xc, yc, global_params, cfg_c, st)
+                new_states.append(st_new)
+                client_state[cid] = st_new
+            else:
+                p = local_train(model, Xc, yc, global_params, local_epochs, lr,
+                                seed=seed + 1000 * r + cid)
             client_params.append(p)
             weights.append(len(yc))
-        global_params = fedavg_aggregate(client_params, weights)
+
+        aggregated = fedavg_aggregate(client_params, weights)
+
+        if strategy == "scaffold" and new_states:
+            from flcore.strategies import scaffold_server_update
+            if global_c is None:
+                global_c = {k: np.zeros_like(v) for k, v in global_params.items()}
+            global_c = scaffold_server_update(new_states, global_c, len(client_train))
+
+        if server_momentum > 0:
+            from flcore.strategies import server_momentum_step
+            global_params, velocity = server_momentum_step(
+                global_params, aggregated, velocity, beta=server_momentum)
+        else:
+            global_params = aggregated
 
         # metrics
         model.set_params(global_params)
