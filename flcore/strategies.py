@@ -54,7 +54,9 @@ def fedprox_local(model, X, y, global_params, cfg, state=None):
             term = term + ((p - gparams[name]) ** 2).sum()
         return (mu / 2.0) * term
 
-    opt = torch.optim.SGD(model.net.parameters(), lr=cfg["lr"], momentum=0.9)
+    from flcore.models_torch import LOCAL_MOMENTUM
+    opt = torch.optim.SGD(model.net.parameters(), lr=cfg["lr"],
+                          momentum=LOCAL_MOMENTUM)
     for e in range(cfg["local_epochs"]):
         model._epoch(X, y, opt, model.batch_size,
                      cfg.get("seed", 0) + e, extra_loss=prox)
@@ -80,7 +82,8 @@ def scaffold_local(model, X, y, global_params, cfg, state=None):
     c = state.get("c") or {k: np.zeros_like(global_params[k]) for k in keys}
 
     corr = {k: torch.tensor(c[k] - c_i[k], device=model.device) for k in keys}
-    opt = torch.optim.SGD(model.net.parameters(), lr=lr)
+    from flcore.models_torch import LOCAL_MOMENTUM
+    opt = torch.optim.SGD(model.net.parameters(), lr=lr, momentum=LOCAL_MOMENTUM)
     named = dict(model.net.named_parameters())
 
     steps = 0
@@ -171,7 +174,9 @@ def moon_local(model, X, y, global_params, cfg, state=None):
         labels = torch.zeros(len(logits), dtype=torch.long, device=logits.device)
         return mu * F.cross_entropy(logits, labels)
 
-    opt = torch.optim.SGD(model.net.parameters(), lr=cfg["lr"], momentum=0.9)
+    from flcore.models_torch import LOCAL_MOMENTUM
+    opt = torch.optim.SGD(model.net.parameters(), lr=cfg["lr"],
+                          momentum=LOCAL_MOMENTUM)
     for e in range(cfg["local_epochs"]):
         model._epoch(X, y, opt, model.batch_size,
                      cfg.get("seed", 0) + e, extra_loss=contrastive)
@@ -183,10 +188,15 @@ def moon_local(model, X, y, global_params, cfg, state=None):
 # ------------------------------------------------- server momentum (FedAvgM)
 
 def server_momentum_step(global_params, aggregated, velocity, beta: float = 0.9,
-                         server_lr: float = 1.0):
+                         server_lr: float = 0.5):
     """FedAvgM (Hsu et al., 2019): treat (global - aggregated) as a pseudo-gradient.
 
     v <- beta*v + delta ;  w <- w - server_lr * v
+
+    NOTE on server_lr: with beta=0.9 the velocity accumulates toward 10x the
+    per-round delta, so server_lr=1.0 overshoots badly in short runs (we
+    measured below-chance accuracy at 3 rounds). Default is 0.5; tune it on a
+    short run before using FedAvgM in reported results.
     """
     new_v, new_w = {}, {}
     for k in global_params:

@@ -17,6 +17,14 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 
+# Local optimiser momentum, shared by ALL aggregation strategies.
+# Plain SGD (0.0) is the setting used in the FedAvg / FedProx / SCAFFOLD / MOON
+# papers, and is required for SCAFFOLD's correction to be theoretically valid.
+# Change it here (not per strategy) if you want momentum, so the four arms stay
+# comparable.
+LOCAL_MOMENTUM = 0.0
+
+
 class SmallCNN(nn.Module):
     """Compact CNN for 28x28 or 32x32 inputs.
 
@@ -87,10 +95,17 @@ class TorchCNN:
         return xt, torch.tensor(y, dtype=torch.long, device=self.device)
 
     def train_epoch(self, X, y, lr: float, batch_size: int | None = None,
-                    seed: int = 0, **kwargs) -> float:
-        """One local pass of plain SGD (FedAvg local objective)."""
+                    seed: int = 0, momentum: float | None = None, **kwargs) -> float:
+        """One local pass of local SGD (FedAvg local objective).
+
+        Momentum defaults to LOCAL_MOMENTUM (0.0). This must be identical for
+        every strategy: SCAFFOLD's control-variate correction is derived for
+        plain SGD, so mixing momentum across arms would confound the comparison
+        with an optimiser difference rather than a strategy difference.
+        """
         bs = batch_size or self.batch_size
-        opt = torch.optim.SGD(self.net.parameters(), lr=lr, momentum=0.9)
+        m = LOCAL_MOMENTUM if momentum is None else momentum
+        opt = torch.optim.SGD(self.net.parameters(), lr=lr, momentum=m)
         return self._epoch(X, y, opt, bs, seed)
 
     def _epoch(self, X, y, opt, bs, seed, extra_loss=None) -> float:
