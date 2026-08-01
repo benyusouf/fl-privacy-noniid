@@ -45,9 +45,51 @@ def observed_gradient(model, x_true, y_true):
     return [g.detach().clone() for g in grads]
 
 
+def gradient_distance(grads, target_grads, loss_type: str = "cosine_layerwise"):
+    """Distance between the reconstructed and observed gradients.
+
+    IMPORTANT (found by tests/diagnose_attack.py): layer gradient norms in these
+    networks span up to four orders of magnitude, so a single GLOBAL cosine over
+    all layers concatenated is dominated by one layer. That layer is largely
+    determined by the label, which the attacker already knows, so the objective
+    can reach ~0 while carrying no information about the image.
+
+    loss_type:
+      cosine_layerwise  mean of per-layer cosine distances - every layer
+                        contributes equally (default; fixes the domination bug)
+      cosine_global     single cosine over concatenated layers (the buggy
+                        behaviour, kept so the effect can be reported)
+      l2                normalised Euclidean distance, as used by Zhu et al.
+                        (2019) in the original DLG formulation
+    """
+    import torch
+
+    if loss_type == "cosine_global":
+        num = sum((g * t).sum() for g, t in zip(grads, target_grads))
+        den = (sum((g ** 2).sum() for g in grads).sqrt()
+               * sum((t ** 2).sum() for t in target_grads).sqrt())
+        return 1 - num / (den + 1e-12)
+
+    if loss_type == "l2":
+        num = sum(((g - t) ** 2).sum() for g, t in zip(grads, target_grads))
+        den = sum((t ** 2).sum() for t in target_grads)
+        return num / (den + 1e-12)
+
+    if loss_type == "cosine_layerwise":
+        total = 0.0
+        for g, t in zip(grads, target_grads):
+            num = (g * t).sum()
+            den = g.norm() * t.norm() + 1e-12
+            total = total + (1 - num / den)
+        return total / max(1, len(grads))
+
+    raise ValueError(f"unknown loss_type: {loss_type}")
+
+
 def invert_gradient(model, target_grads, shape, num_classes, y_known=None,
                     iterations: int = 3000, lr: float = 0.1,
-                    tv_weight: float = 1e-2, seed: int = 0, verbose: bool = True):
+                    tv_weight: float = 1e-2, seed: int = 0, verbose: bool = True,
+                    loss_type: str = "cosine_layerwise", restarts: int = 1):
     """Reconstruct an input image from an observed gradient.
 
     shape      (batch, channels, H, W) of the image being recovered
@@ -57,42 +99,45 @@ def invert_gradient(model, target_grads, shape, num_classes, y_known=None,
     """
     import torch
 
-    torch.manual_seed(seed)
     device = model.device
-    x_hat = torch.randn(shape, device=device, requires_grad=True)
-    if y_known is None:
-        y_hat = torch.randint(0, num_classes, (shape[0],), device=device)
-    else:
-        y_hat = y_known
-
-    opt = torch.optim.Adam([x_hat], lr=lr)
-    sched = torch.optim.lr_scheduler.MultiStepLR(
-        opt, milestones=[iterations // 2, int(iterations * 0.75)], gamma=0.1)
     params = list(model.net.parameters())
-    history = []
+    y_hat = (y_known if y_known is not None
+             else torch.randint(0, num_classes, (shape[0],), device=device))
 
-    for it in range(iterations):
-        opt.zero_grad()
-        model.net.zero_grad()
-        out = model.net(x_hat)
-        loss = model.criterion(out, y_hat)
-        grads = torch.autograd.grad(loss, params, create_graph=True)
+    best_x, best_loss, history = None, float("inf"), []
 
-        # cosine-similarity objective (scale-invariant, per Geiping et al.)
-        num = sum((g * t).sum() for g, t in zip(grads, target_grads))
-        den = (sum((g ** 2).sum() for g in grads).sqrt()
-               * sum((t ** 2).sum() for t in target_grads).sqrt())
-        rec_loss = 1 - num / (den + 1e-12)
-        rec_loss = rec_loss + tv_weight * total_variation(x_hat)
+    for attempt in range(max(1, restarts)):
+        torch.manual_seed(seed + attempt * 977)
+        # init in [0,1] like natural images, rather than standard normal
+        x_hat = torch.rand(shape, device=device, requires_grad=True)
+        opt = torch.optim.Adam([x_hat], lr=lr)
+        sched = torch.optim.lr_scheduler.MultiStepLR(
+            opt, milestones=[iterations // 2, int(iterations * 0.75)], gamma=0.1)
+        run_hist = []
 
-        rec_loss.backward()
-        opt.step()
-        sched.step()
-        history.append(float(rec_loss.item()))
-        if verbose and it % 500 == 0:
-            print(f"  iter {it:5d}  attack loss {rec_loss.item():.5f}")
+        for it in range(iterations):
+            opt.zero_grad()
+            model.net.zero_grad()
+            loss = model.criterion(model.net(x_hat), y_hat)
+            grads = torch.autograd.grad(loss, params, create_graph=True)
 
-    return x_hat.detach(), history
+            rec_loss = gradient_distance(grads, target_grads, loss_type)
+            rec_loss = rec_loss + tv_weight * total_variation(x_hat)
+
+            rec_loss.backward()
+            opt.step()
+            sched.step()
+            with torch.no_grad():          # images live in [0,1]
+                x_hat.clamp_(0, 1)
+            run_hist.append(float(rec_loss.item()))
+            if verbose and it % 500 == 0:
+                print(f"  [restart {attempt}] iter {it:5d}  "
+                      f"attack loss {rec_loss.item():.5f}")
+
+        if run_hist[-1] < best_loss:
+            best_loss, best_x, history = run_hist[-1], x_hat.detach().clone(), run_hist
+
+    return best_x, history
 
 
 def psnr(a: np.ndarray, b: np.ndarray, data_range: float = 1.0) -> float:
@@ -106,7 +151,9 @@ def psnr(a: np.ndarray, b: np.ndarray, data_range: float = 1.0) -> float:
 
 
 def run_attack_experiment(model, x_true, y_true, dp_noise: float = 0.0,
-                          iterations: int = 3000, seed: int = 0):
+                          iterations: int = 3000, seed: int = 0,
+                          loss_type: str = "cosine_layerwise", restarts: int = 1,
+                          verbose: bool = True):
     """One condition of the RQ4 experiment.
 
     dp_noise > 0 simulates the client having applied DP-SGD: Gaussian noise of
@@ -124,7 +171,8 @@ def run_attack_experiment(model, x_true, y_true, dp_noise: float = 0.0,
 
     x_hat, hist = invert_gradient(
         model, target, tuple(x_true.shape), model.num_classes,
-        y_known=y_true, iterations=iterations, seed=seed)
+        y_known=y_true, iterations=iterations, seed=seed,
+        loss_type=loss_type, restarts=restarts, verbose=verbose)
 
     a = x_hat.cpu().numpy()
     b = x_true.cpu().numpy()
@@ -135,6 +183,7 @@ def run_attack_experiment(model, x_true, y_true, dp_noise: float = 0.0,
     a_n, b_n = norm(a), norm(b)
     return {
         "dp_noise": dp_noise,
+        "loss_type": loss_type,
         "psnr_db": round(psnr(a_n, b_n), 2),
         "mse": round(float(np.mean((a_n - b_n) ** 2)), 5),
         "final_attack_loss": round(hist[-1], 5),
