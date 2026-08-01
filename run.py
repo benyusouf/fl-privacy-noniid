@@ -10,6 +10,7 @@ import csv
 import json
 import os
 import sys
+import time
 import numpy as np
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -135,12 +136,27 @@ def main(cfg_path):
         print(f"  round {r:3d}  test_acc={row['test_acc']:.4f}  "
               f"client_acc_var={row['client_acc_var']:.5f}")
 
+    strategy = str(cfg.get("strategy", "fedavg")).lower()
+    scfg = dict(cfg.get("strategy_params", {}) or {})
+    server_momentum = float(cfg.get("server_momentum", 0.0))
+    print(f"[{name}] strategy={strategy}"
+          + (f" (server_momentum={server_momentum})" if server_momentum else ""))
+
+    t_start = time.time()
     _, _ = run_federated(
         model, client_train, (Xte, yte),
         rounds=int(cfg["rounds"]), local_epochs=int(cfg["local_epochs"]),
         lr=float(cfg["lr"]), seed=seed, on_round=on_round,
         start_round=start_round, init_params=init_params,
+        strategy=strategy, strategy_cfg=scfg, server_momentum=server_momentum,
     )
+    elapsed = time.time() - t_start
+    print(f"[{name}] wall-clock: {elapsed/60:.1f} min "
+          f"({elapsed/max(1,int(cfg['rounds'])-start_round):.1f} s/round)")
+    with open(os.path.join(outdir, "timing.txt"), "w") as f:
+        f.write(f"seconds_total={elapsed:.1f}\n"
+                f"rounds_run={int(cfg['rounds'])-start_round}\n"
+                f"seconds_per_round={elapsed/max(1,int(cfg['rounds'])-start_round):.2f}\n")
     _finish(outdir, cfg, rep)
 
 
