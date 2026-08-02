@@ -30,6 +30,13 @@ BASE = {
     "local_epochs": 2,
     "lr": 0.01,
     "checkpoint_every": 5,
+    # CPU budget lever (see analysis.docx D22). Measured 153 s/round on the full
+    # 50k CIFAR-10 training set, which made the full matrix ~400 hours. A
+    # stratified 20k subsample preserves the label distribution and every
+    # comparison, at a cost in absolute accuracy that the Limitations section
+    # already declares.
+    "subsample": 20000,
+    "subsample_test": 5000,
 }
 MODEL = {
     "backend": "torch_cnn",

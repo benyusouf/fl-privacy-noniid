@@ -80,7 +80,9 @@ def main(cfg_path):
     os.makedirs(outdir, exist_ok=True)
 
     # data
-    Xtr, ytr, Xte, yte = load_dataset(cfg["dataset"], seed=seed)
+    Xtr, ytr, Xte, yte = load_dataset(
+        cfg["dataset"], seed=seed,
+        subsample=cfg.get("subsample"), subsample_test=cfg.get("subsample_test"))
     model_cfg = dict(cfg["model"]); model_cfg.setdefault("seed", seed)
     model_cfg["in_dim"] = Xtr.shape[1]
     model_cfg["num_classes"] = int(ytr.max()) + 1

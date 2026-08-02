@@ -4,6 +4,8 @@ seed: 2
 dataset: cifar10
 mode: centralized
 lr: 0.01
+subsample: 20000
+subsample_test: 5000
 epochs: 30
 model:
   backend: torch_cnn

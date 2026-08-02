@@ -8,6 +8,8 @@ rounds: 60
 local_epochs: 2
 lr: 0.01
 checkpoint_every: 5
+subsample: 20000
+subsample_test: 5000
 strategy: scaffold
 model:
   backend: torch_cnn

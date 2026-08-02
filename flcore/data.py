@@ -15,17 +15,48 @@ from __future__ import annotations
 import numpy as np
 
 
-def load_dataset(name: str, seed: int = 0):
+def load_dataset(name: str, seed: int = 0, subsample: int | None = None,
+                 subsample_test: int | None = None):
+    """Load a dataset, optionally subsampling the training set.
+
+    `subsample` caps the number of TRAINING samples, drawn class-stratified so
+    the label distribution of the pool is preserved before partitioning. This is
+    the CPU-budget lever declared in the thesis Limitations section: it reduces
+    absolute accuracy but leaves the comparisons between configurations intact,
+    because every configuration sees the same reduced pool.
+    """
     name = name.lower()
     if name == "synthetic":
-        return _synthetic(seed)
-    if name == "mnist":
-        return _mnist()
-    if name in ("cifar10", "cifar-10"):
-        return _torchvision_cifar10()
-    if name == "pathmnist":
-        return _pathmnist()
-    raise ValueError(f"unknown dataset: {name}")
+        Xtr, ytr, Xte, yte = _synthetic(seed)
+    elif name == "mnist":
+        Xtr, ytr, Xte, yte = _mnist()
+    elif name in ("cifar10", "cifar-10"):
+        Xtr, ytr, Xte, yte = _torchvision_cifar10()
+    elif name == "pathmnist":
+        Xtr, ytr, Xte, yte = _pathmnist()
+    else:
+        raise ValueError(f"unknown dataset: {name}")
+
+    if subsample and subsample < len(ytr):
+        Xtr, ytr = _stratified_subsample(Xtr, ytr, subsample, seed)
+    if subsample_test and subsample_test < len(yte):
+        Xte, yte = _stratified_subsample(Xte, yte, subsample_test, seed)
+    return Xtr, ytr, Xte, yte
+
+
+def _stratified_subsample(X, y, n_total: int, seed: int = 0):
+    """Class-proportional subsample, so the global label distribution is
+    unchanged and Hellinger distances remain comparable across dataset sizes."""
+    rng = np.random.default_rng(seed)
+    classes, counts = np.unique(y, return_counts=True)
+    props = counts / counts.sum()
+    keep = []
+    for c, p in zip(classes, props):
+        idx = np.where(y == c)[0]
+        take = max(1, int(round(p * n_total)))
+        keep.append(rng.choice(idx, size=min(take, len(idx)), replace=False))
+    keep = np.sort(np.concatenate(keep))
+    return X[keep], y[keep]
 
 
 def _synthetic(seed: int, n_train=6000, n_test=1000, num_classes=10, dim=64):
