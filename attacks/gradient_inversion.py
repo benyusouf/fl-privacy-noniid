@@ -45,6 +45,47 @@ def observed_gradient(model, x_true, y_true):
     return [g.detach().clone() for g in grads]
 
 
+def observed_fedavg_update(model, X, y, local_epochs: int, lr: float,
+                           batch_size: int = 8, seed: int = 0):
+    """The update a client actually sends under practical FedAvg.
+
+    Phases A-D do not transmit a single batch gradient. Each client runs
+    `local_epochs` passes of local SGD and sends the resulting parameter DELTA.
+    Guo et al. (2025) report that this multi-iteration setting resists
+    optimisation-based gradient inversion in a way the single-gradient case does
+    not, and list "practical FedAvg" as one of the factors influencing attack
+    success.
+
+    Returned in gradient form, (w_before - w_after) / (steps * lr), so the same
+    inversion machinery applies. Attacking this rather than a single gradient is
+    the honest test of whether the channel THIS study opens is invertible.
+    """
+    import copy
+    import torch
+
+    before = {k: v.clone() for k, v in model.net.state_dict().items()}
+    steps = 0
+    opt = torch.optim.SGD(model.net.parameters(), lr=lr)
+    g = torch.Generator().manual_seed(seed)
+    model.net.train()
+    for e in range(local_epochs):
+        order = torch.randperm(len(X), generator=g).numpy()
+        for i in range(0, len(order), batch_size):
+            idx = order[i:i + batch_size]
+            xb, yb = model._to_tensor(X[idx], y[idx])
+            opt.zero_grad()
+            model.criterion(model.net(xb), yb).backward()
+            opt.step()
+            steps += 1
+    after = model.net.state_dict()
+    pseudo = []
+    for (k, p_) in model.net.named_parameters():
+        delta = (before[k] - after[k]) / max(1, steps * lr)
+        pseudo.append(delta.detach().clone())
+    model.net.load_state_dict(before)          # restore
+    return pseudo, steps
+
+
 def gradient_distance(grads, target_grads, loss_type: str = "cosine_layerwise"):
     """Distance between the reconstructed and observed gradients.
 
