@@ -11,7 +11,8 @@ checkpoint_every: 5
 subsample: 20000
 subsample_test: 5000
 strategy: fedavg
-server_momentum: 0.5
+server_momentum: 0.9
+server_lr: 0.5
 model:
   backend: torch_cnn
   width: 32

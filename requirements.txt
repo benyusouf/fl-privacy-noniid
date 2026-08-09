@@ -5,5 +5,10 @@ pandas>=2.0
 matplotlib>=3.7
 pyyaml>=6.0
 opacus>=1.4
-flwr[simulation]>=1.9      # used for the SecAgg+ overhead phase (Phase C)
 medmnist>=3.0              # PathMNIST
+
+# No federated-learning framework dependency (D37, 3 Aug 2026).
+# The federated core, the four aggregation strategies and the pairwise-masking
+# secure aggregation are implemented in flcore/. Flower was removed: it supplies
+# FedAvg and FedProx but neither SCAFFOLD nor MOON, and its Ray-backed simulation
+# works against the cross-round client state those two require.

@@ -194,16 +194,43 @@ def psnr(a: np.ndarray, b: np.ndarray, data_range: float = 1.0) -> float:
 def run_attack_experiment(model, x_true, y_true, dp_noise: float = 0.0,
                           iterations: int = 3000, seed: int = 0,
                           loss_type: str = "cosine_layerwise", restarts: int = 1,
-                          verbose: bool = True):
+                          verbose: bool = True,
+                          target_object: str = "single_gradient",
+                          fedavg_ctx: dict | None = None):
     """One condition of the RQ4 experiment.
 
-    dp_noise > 0 simulates the client having applied DP-SGD: Gaussian noise of
-    that standard deviation is added to the shared gradient after clipping.
+    target_object selects WHICH transmitted object is attacked (analysis.docx D32):
+      "single_gradient" - one batch gradient. The object the classical attack
+                          literature assumes (Zhu et al., 2019; Geiping et al.,
+                          2020). NOT what this study's pipeline transmits.
+      "fedavg_delta"    - the multi-epoch parameter delta a client actually
+                          sends in Phases A-D, via observed_fedavg_update().
+                          Requires fedavg_ctx = {"X":.., "y":.., "local_epochs":..,
+                          "lr":.., "batch_size":..}.
+    Every reported result must be labelled with the object it belongs to; a
+    single-gradient reconstruction is not evidence about the deployed pipeline.
+
+    dp_noise is the DP-SGD NOISE MULTIPLIER sigma. The target is clipped to unit
+    L2 norm first, so the clipping norm C = 1 and the Gaussian standard deviation
+    added is sigma * C = sigma. Callers should obtain sigma from
+    flcore.privacy.calibrate_noise_for_epsilon rather than choosing it by hand,
+    so that an "epsilon = 1" condition here means the same thing as in Phase B.
     Returns dict with psnr, mse, and the reconstruction as a numpy array.
     """
     import torch
 
-    target = observed_gradient(model, x_true, y_true)
+    if target_object == "fedavg_delta":
+        if not fedavg_ctx:
+            raise ValueError("target_object='fedavg_delta' requires fedavg_ctx")
+        target, _steps = observed_fedavg_update(
+            model, fedavg_ctx["X"], fedavg_ctx["y"],
+            local_epochs=fedavg_ctx.get("local_epochs", 2),
+            lr=fedavg_ctx.get("lr", 0.01),
+            batch_size=fedavg_ctx.get("batch_size", 8), seed=seed)
+    elif target_object == "single_gradient":
+        target = observed_gradient(model, x_true, y_true)
+    else:
+        raise ValueError(f"unknown target_object: {target_object}")
     if dp_noise > 0:
         # clip then noise: the DP-SGD transformation the client would apply
         flat_norm = torch.sqrt(sum((g ** 2).sum() for g in target))
@@ -224,6 +251,7 @@ def run_attack_experiment(model, x_true, y_true, dp_noise: float = 0.0,
     a_n, b_n = norm(a), norm(b)
     return {
         "dp_noise": dp_noise,
+        "target_object": target_object,
         "loss_type": loss_type,
         "psnr_db": round(psnr(a_n, b_n), 2),
         "mse": round(float(np.mean((a_n - b_n) ** 2)), 5),

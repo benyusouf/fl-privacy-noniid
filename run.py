@@ -93,10 +93,17 @@ def main(cfg_path):
     mode = cfg.get("mode", "federated")
 
     if mode == "centralized":
-        _, hist = train_centralized(model, Xtr, ytr, (Xte, yte),
-                                    int(cfg["epochs"]), float(cfg["lr"]), seed)
+        # D49: select the epoch count on a validation split, then retrain on the
+        # full pool. `rebuild` hands train_centralized a fresh model for stage 2.
+        _, hist = train_centralized(
+            model, Xtr, ytr, (Xte, yte), int(cfg["epochs"]), float(cfg["lr"]),
+            seed, val_fraction=float(cfg.get("val_fraction", 0.1)),
+            rebuild=lambda: build_model(dict(model_cfg)))
         _write_csv(os.path.join(outdir, "metrics.csv"), hist)
-        print(f"[{name}] centralized final test_acc = {hist[-1]['test_acc']}")
+        s2 = [h for h in hist if h.get("stage") == 2]
+        sel = len(s2)
+        print(f"[{name}] centralized: epoch count {sel} selected on validation, "
+              f"retrained on full pool, final test_acc = {hist[-1]['test_acc']}")
         _finish(outdir, cfg, None)
         return
 
@@ -113,16 +120,39 @@ def main(cfg_path):
 
     client_train = [(Xtr[idx], ytr[idx]) for idx in parts]
 
+    # Strategies whose clients carry state between rounds. The checkpoint stores
+    # ONLY the global parameters and the round number (see np.savez below), so a
+    # resumed SCAFFOLD run would restart from a zero control variate and a
+    # resumed MOON run without its previous local model. Neither failure
+    # announces itself in the output. Until client state is checkpointed, these
+    # arms are never resumed -- an interrupted run is restarted from round zero.
+    # analysis.docx D48.
+    STATEFUL = {"scaffold", "moon"}
+
     # resume?
     start_round, init_params, prior = 0, None, []
     ckpt = _checkpoint_path(outdir)
     if os.path.exists(ckpt) and not cfg.get("fresh", False):
         data = np.load(ckpt, allow_pickle=True)
-        start_round = int(data["round"])
-        init_params = {k: data[f"p_{k}"] for k in data["keys"]}
-        if os.path.exists(os.path.join(outdir, "metrics.csv")):
-            prior = list(csv.DictReader(open(os.path.join(outdir, "metrics.csv"))))
-        print(f"[{name}] resuming from round {start_round}")
+        ckpt_round = int(data["round"])
+        strat = str(cfg.get("strategy", "fedavg")).lower()
+        if strat in STATEFUL and ckpt_round > 0:
+            stamp = time.strftime("%Y%m%d-%H%M%S")
+            for fname in ("checkpoint.npz", "metrics.csv"):
+                src = os.path.join(outdir, fname)
+                if os.path.exists(src):
+                    os.rename(src, os.path.join(outdir, f"{fname}.superseded-{stamp}"))
+            print(f"[{name}] REFUSING TO RESUME a stateful arm ({strat}) from "
+                  f"round {ckpt_round}: client state is not checkpointed, so the "
+                  f"run would continue from a zero control variate / absent "
+                  f"previous model. Restarting from round 0. Partial outputs "
+                  f"renamed with suffix .superseded-{stamp}.")
+        else:
+            start_round = ckpt_round
+            init_params = {k: data[f"p_{k}"] for k in data["keys"]}
+            if os.path.exists(os.path.join(outdir, "metrics.csv")):
+                prior = list(csv.DictReader(open(os.path.join(outdir, "metrics.csv"))))
+            print(f"[{name}] resuming from round {start_round}")
 
     metrics_path = os.path.join(outdir, "metrics.csv")
     ckpt_every = int(cfg.get("checkpoint_every", 5))
@@ -141,8 +171,10 @@ def main(cfg_path):
     strategy = str(cfg.get("strategy", "fedavg")).lower()
     scfg = dict(cfg.get("strategy_params", {}) or {})
     server_momentum = float(cfg.get("server_momentum", 0.0))
+    server_lr = float(cfg.get("server_lr", 0.5))
     print(f"[{name}] strategy={strategy}"
-          + (f" (server_momentum={server_momentum})" if server_momentum else ""))
+          + (f" (FedAvgM: beta={server_momentum}, server_lr={server_lr})"
+             if server_momentum else ""))
 
     t_start = time.time()
     _, _ = run_federated(
@@ -151,6 +183,7 @@ def main(cfg_path):
         lr=float(cfg["lr"]), seed=seed, on_round=on_round,
         start_round=start_round, init_params=init_params,
         strategy=strategy, strategy_cfg=scfg, server_momentum=server_momentum,
+        server_lr=server_lr,
     )
     elapsed = time.time() - t_start
     print(f"[{name}] wall-clock: {elapsed/60:.1f} min "

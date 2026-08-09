@@ -86,7 +86,7 @@ def main():
         print("Attack works. Use this configuration for RQ4; we then rerun the "
               "three DP conditions on it.")
     elif best[1] - grey > 3:
-        print("Partial only. Report to Claude; we decide between one more fix "
+        print("Partial only. Report to Display; we decide between one more fix "
               "and reporting the negative result.")
     else:
         print("Still failing. This is the negative-result path: report that "

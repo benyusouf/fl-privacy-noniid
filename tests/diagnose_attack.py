@@ -129,7 +129,7 @@ def main():
           f"-> {best[1][0]:.2f} dB")
     if best[1][0] < 15:
         print("  No configuration reconstructs. The probe needs redesign, not "
-              "tuning. Report this whole output to Claude.")
+              "tuning. Report this whole output to Display.")
     elif best[1][0] < 20:
         print("  Partial reconstruction only. Usable as a qualitative figure "
               "but should not be described as a full reconstruction.")

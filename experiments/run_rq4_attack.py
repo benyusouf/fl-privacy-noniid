@@ -35,6 +35,7 @@ import numpy as np
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
+from flcore.privacy import calibrate_noise_for_epsilon
 from attacks.gradient_inversion import (run_attack_experiment, observed_gradient,
                                         invert_gradient, psnr)
 
@@ -140,8 +141,24 @@ def main():
 
     rows, images, titles = [], [x_np], ["ground truth"]
 
-    conditions = [("no defence", 0.0), ("DP eps=8", 0.005),
-                  ("DP eps=4", 0.02), ("DP eps=1", 0.05)]
+    # --- DP noise multipliers CALIBRATED to the epsilon budgets, not hand-set.
+    # Phase B's per-client training regime supplies sample_rate and steps, so an
+    # "epsilon = 1" condition here means the same thing it means in Phase B
+    # (D45). Hand-picked sigmas labelled with an epsilon would not be defensible.
+    PHASE_B = dict(clients=15, train_n=20000, batch_size=64, rounds=60,
+                   local_epochs=2, delta=1e-5)
+    per_client = PHASE_B["train_n"] / PHASE_B["clients"]
+    sample_rate = PHASE_B["batch_size"] / per_client
+    steps = int(PHASE_B["rounds"] * PHASE_B["local_epochs"]
+                * np.ceil(per_client / PHASE_B["batch_size"]))
+    sigma = {e: calibrate_noise_for_epsilon(e, sample_rate, steps,
+                                            PHASE_B["delta"]) for e in (8, 4, 1)}
+    print(f"calibrated sigma (q={sample_rate:.4f}, T={steps}, "
+          f"delta={PHASE_B['delta']}): "
+          + ", ".join(f"eps={e} -> {s:.4f}" for e, s in sigma.items()) + "\n")
+
+    conditions = [("no defence", 0.0), ("DP eps=8", sigma[8]),
+                  ("DP eps=4", sigma[4]), ("DP eps=1", sigma[1])]
     for tag, noise in conditions:
         r = run_attack_experiment(model, x_true, y_true, dp_noise=noise,
                                   iterations=args.iters, seed=0,

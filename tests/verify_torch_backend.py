@@ -81,7 +81,7 @@ def main():
                             strategy="fedavg", server_momentum=0.9)
     print(f"PASS: fedavgm   final test_acc={hist[-1]['test_acc']:.3f} (server momentum)")
 
-    print("\nAll strategies executed. If any line says CHECK, tell Claude which one.")
+    print("\nAll strategies executed. If any line says CHECK, tell Display which one.")
 
 
 if __name__ == "__main__":

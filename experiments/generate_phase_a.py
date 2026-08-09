@@ -69,6 +69,19 @@ def yaml_dump(d, indent=0):
     return "\n".join(l for l in lines if l)
 
 
+# FedAvgM (Hsu et al., 2019). TWO parameters, and they are not the same thing.
+#   FEDAVGM_BETA      momentum coefficient. Hsu et al. sweep {0, .7, .9, .97, .99,
+#                     .997}; 0.9 is their representative value and is what the
+#                     overshoot analysis in server_momentum_step assumes.
+#   FEDAVGM_SERVER_LR server learning rate. Hsu et al. have NO such term - their
+#                     update is w <- w - v, i.e. server_lr = 1.0. We use 0.5
+#                     because 1.0 gave below-chance accuracy at 3 rounds.
+# Both divergences from the paper must be declared in Ch.3 Section 3.7.5, along
+# with the fact that our step is plain momentum where Hsu et al. use Nesterov.
+FEDAVGM_BETA = 0.9
+FEDAVGM_SERVER_LR = 0.5
+
+
 def make(name, dataset, strategy, partition_key, seed, server_momentum=0.0,
          mode="federated"):
     cfg = {"name": name, "seed": seed, "dataset": dataset, "mode": mode}
@@ -80,7 +93,8 @@ def make(name, dataset, strategy, partition_key, seed, server_momentum=0.0,
     else:
         cfg["strategy"] = strategy
         if server_momentum:
-            cfg["server_momentum"] = server_momentum
+            cfg["server_momentum"] = server_momentum   # beta
+            cfg["server_lr"] = FEDAVGM_SERVER_LR       # set explicitly, never defaulted
     model = dict(MODEL)
     if dataset == "pathmnist":
         model["img_size"] = 28
@@ -109,7 +123,7 @@ def build_all():
     # --- CIFAR-10 FedAvgM, only at alpha=0.1, 3 seeds ---
     for s in SEEDS_MULTI:
         n = f"A_cifar10_fedavgm_dir0.1_s{s}"
-        configs.append(make(n, "cifar10", "fedavg", "dir0.1", s, server_momentum=0.5))
+        configs.append(make(n, "cifar10", "fedavg", "dir0.1", s, server_momentum=FEDAVGM_BETA))
     # --- CIFAR-10 centralized baseline, 3 seeds ---
     for s in SEEDS_MULTI:
         configs.append(make(f"A_cifar10_centralized_s{s}", "cifar10", None, None,
@@ -121,7 +135,7 @@ def build_all():
             configs.append(make(n, "pathmnist", strat, pk, 0))
     # --- PathMNIST FedAvgM at alpha=0.1 + centralized, 1 seed ---
     configs.append(make("A_pathmnist_fedavgm_dir0.1_s0", "pathmnist", "fedavg",
-                        "dir0.1", 0, server_momentum=0.5))
+                        "dir0.1", 0, server_momentum=FEDAVGM_BETA))
     configs.append(make("A_pathmnist_centralized_s0", "pathmnist", None, None,
                         0, mode="centralized"))
     return configs

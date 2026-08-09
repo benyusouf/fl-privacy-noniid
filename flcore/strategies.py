@@ -37,9 +37,13 @@ def fedavg_local(model, X, y, global_params, cfg, state=None):
 def fedprox_local(model, X, y, global_params, cfg, state=None):
     """Proximal term mu/2 * ||w - w_global||^2 added to the local loss.
 
-    Implemented as a gradient-level correction (equivalent, and backend-neutral):
-    after each epoch, pull weights toward the global point by mu * lr.
-    For the torch backend the exact penalty is applied inside the loop.
+    The EXACT penalty is applied inside the training loop: `prox` sums
+    (p - p_global)^2 over every named parameter, scales by mu/2, and is passed
+    to _epoch as `extra_loss`, so it enters the objective rather than being
+    approximated by a post-hoc pull toward the global point. No gradient-level
+    approximation is involved. (An earlier version of this docstring described
+    such an approximation; the function has not worked that way since the torch
+    backend replaced it. Corrected 4 Aug 2026.)
     """
     import torch  # local import: FedProx exact form needs autograd
 

@@ -114,7 +114,7 @@ def main():
               f"({nodp_psnr:.1f} dB, loss {nodp_loss:.3f}); "
               f"DP mitigation {'clear' if mitigated else 'weak'} "
               f"({nodp_psnr - strong_psnr:+.1f} dB)")
-    print("\nReport these two lines to Claude. Expected: lenet reconstructs and "
+    print("\nReport these two lines to Display. Expected: lenet reconstructs and "
           "DP mitigates; smallcnn resists inversion even undefended.")
 
 

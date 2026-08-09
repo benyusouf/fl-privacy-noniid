@@ -76,7 +76,7 @@ def main(quick: bool = False):
                                   iterations=iters, seed=0)
         print(f"   {label:10s} PSNR {r['psnr_db']:6.2f} dB   MSE {r['mse']:.5f}")
     print("\nExpected pattern: PSNR highest with no DP and falling as noise rises.")
-    print("If PSNR does not fall with DP, tell Claude — the attack or the noise "
+    print("If PSNR does not fall with DP, tell Display — the attack or the noise "
           "scaling needs adjusting before this goes in Chapter 4.")
 
 

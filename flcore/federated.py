@@ -65,7 +65,8 @@ def run_federated(
     init_params: dict | None = None,
     strategy: str = "fedavg",
     strategy_cfg: dict | None = None,
-    server_momentum: float = 0.0,   # >0 enables FedAvgM (Hsu et al., 2019)
+    server_momentum: float = 0.0,   # beta in Hsu et al. (2019); >0 enables FedAvgM
+    server_lr: float = 0.5,         # NOT in Hsu et al.; see server_momentum_step
 ):
     """Core FL round loop. Returns (final_params, history list of dict rows).
 
@@ -121,7 +122,8 @@ def run_federated(
         if server_momentum > 0:
             from flcore.strategies import server_momentum_step
             global_params, velocity = server_momentum_step(
-                global_params, aggregated, velocity, beta=server_momentum)
+                global_params, aggregated, velocity,
+                beta=server_momentum, server_lr=server_lr)
         else:
             global_params = aggregated
 
@@ -130,14 +132,31 @@ def run_federated(
         test_acc, test_loss = model.evaluate(X_test, y_test)
         train_acc, per_client = evaluate_global(
             model, global_params, client_train)
-        bytes_up = sum(params_nbytes(p) for p in client_params)
+        # Client-to-server payload for one round. Nothing is actually
+        # transmitted here -- this is a single-process simulation -- so the
+        # figure is a deterministic model of what the PROTOCOL would send, not a
+        # measurement. See analysis.docx D52 and Ch.3 Section 3.9.
+        #   model update            every strategy
+        # + control variate         SCAFFOLD only: the protocol transmits c_i
+        #                           alongside the update, which is what makes a
+        #                           SCAFFOLD round cost ~2x a FedAvg round
+        #                           (Karimireddy et al. 2020; Acar et al. 2021).
+        # MOON's prev_params is NOT counted: it is retained on the client and
+        # never sent. Secure aggregation adds nothing here either, since a
+        # masked update is the same size as a plaintext one; its key-agreement
+        # traffic is reported separately in Phase C.
+        bytes_model = sum(params_nbytes(p) for p in client_params)
+        bytes_state = sum(params_nbytes(st["c_i"])
+                          for st in new_states if st and "c_i" in st)
         row = {
             "round": r + 1,
             "test_acc": round(test_acc, 4),
             "test_loss": round(test_loss, 4),
             "mean_client_acc": round(train_acc, 4),
             "client_acc_var": round(float(np.var(per_client)), 6),
-            "bytes_up": bytes_up,
+            "bytes_up": bytes_model + bytes_state,
+            "bytes_model": bytes_model,
+            "bytes_state": bytes_state,
         }
         history.append(row)
         if on_round:
@@ -145,13 +164,62 @@ def run_federated(
     return global_params, history
 
 
-def train_centralized(model, X, y, test_data, epochs: int, lr: float, seed: int = 0):
-    """Centralized baseline on the pooled data (RQ1 reference)."""
+def train_centralized(model, X, y, test_data, epochs: int, lr: float, seed: int = 0,
+                      val_fraction: float = 0.1, rebuild=None):
+    """Centralized baseline on the pooled data (RQ1 reference). Two stages.
+
+    STAGE 1 selects the epoch count on a held-out validation split carved from
+    the training pool, class-stratified. STAGE 2 discards that model, rebuilds
+    from scratch and retrains on the FULL training pool for the selected number
+    of epochs.
+
+    Why two stages (analysis.docx D49). Fixed-epoch training overfits this
+    baseline badly: every centralized run peaked near epoch 18-21 and then
+    degraded, by 4 points on CIFAR-10 and 12 on PathMNIST. Reported at the final
+    epoch the baseline fell BELOW the federated arms, which inverts RQ1. Early
+    stopping fixes that, but stopping on the test set is selection on the
+    evaluation data, and training on 90% of the pool would handicap the baseline
+    relative to federated arms that see all of it - a bias running in favour of
+    this study's own subject. Selecting on validation and retraining on the full
+    pool avoids both.
+
+    `rebuild()` must return a freshly initialised model; if None, stage 2 is
+    skipped and the stage-1 model is returned (with a warning in the history).
+    """
     X_test, y_test = test_data
-    history = []
+    rng = np.random.default_rng(seed)
+
+    # --- stage 1: class-stratified validation split, select the epoch count ---
+    idx_tr, idx_val = [], []
+    for c in np.unique(y):
+        ci = np.where(y == c)[0]
+        rng.shuffle(ci)
+        k = max(1, int(round(val_fraction * len(ci))))
+        idx_val.extend(ci[:k].tolist())
+        idx_tr.extend(ci[k:].tolist())
+    idx_tr, idx_val = np.array(sorted(idx_tr)), np.array(sorted(idx_val))
+
+    history, best_acc, best_epoch = [], -1.0, epochs
     for e in range(epochs):
+        model.train_epoch(X[idx_tr], y[idx_tr], lr, seed=seed + e)
+        v_acc, v_loss = model.evaluate(X[idx_val], y[idx_val])
+        t_acc, t_loss = model.evaluate(X_test, y_test)
+        if v_acc > best_acc:
+            best_acc, best_epoch = v_acc, e + 1
+        history.append({"stage": 1, "epoch": e + 1,
+                        "val_acc": round(v_acc, 4), "val_loss": round(v_loss, 4),
+                        "test_acc": round(t_acc, 4), "test_loss": round(t_loss, 4)})
+
+    if rebuild is None:
+        history.append({"stage": 1, "epoch": -1, "val_acc": round(best_acc, 4),
+                        "val_loss": 0.0, "test_acc": 0.0, "test_loss": 0.0})
+        return model.get_params(), history
+
+    # --- stage 2: retrain from scratch on the FULL pool for best_epoch epochs ---
+    model = rebuild()
+    for e in range(best_epoch):
         model.train_epoch(X, y, lr, seed=seed + e)
-        acc, loss = model.evaluate(X_test, y_test)
-        history.append({"epoch": e + 1, "test_acc": round(acc, 4),
-                        "test_loss": round(loss, 4)})
+        t_acc, t_loss = model.evaluate(X_test, y_test)
+        history.append({"stage": 2, "epoch": e + 1, "val_acc": "", "val_loss": "",
+                        "test_acc": round(t_acc, 4), "test_loss": round(t_loss, 4)})
     return model.get_params(), history
