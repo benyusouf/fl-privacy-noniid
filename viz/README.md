@@ -132,6 +132,24 @@ Five things blocked static export. Four were expected; the fifth was not.
    time; `SettingsProvider` still reads the real cookie client-side via `useObjectCookie`, so theme
    switching works. A returning visitor with a non-default theme may see one frame of the default
    before hydration — the normal trade-off for a static site.
+6. **The catch-all 404 route was replaced.** `app/[...not-found]/page.tsx` is a dynamic segment,
+   and static export must enumerate every route at build time, so it failed with "missing
+   `generateStaticParams()`". `app/not-found.tsx` is the App Router convention for this and exports
+   to `404.html` — exactly the file GitHub Pages serves for an unmatched path.
+7. **Raw image sources wrapped in `asset()`.** Next.js rewrites `basePath` into `next/link` and
+   `next/image`, but not into plain string props such as `<img src>` or MUI's `<Avatar src>`. Those
+   resolve to the domain root and 404 on a project page — and only in the deployed build, never in
+   development.
+8. **The login page and its route group were removed.** A form with fake authentication on a static
+   site with no server is scaffolding that could only mislead. Nothing referenced it. If you want
+   it back, restore `src/views/Login.tsx` and `src/app/(blank-layout-pages)/` from the template.
+
+### If `pnpm typecheck` fails on a route you deleted
+
+`tsconfig.json` includes `.next/dev/types/**/*.ts`, which Next.js generates and does not always
+prune. After removing a route you may see `Cannot find module '../../../src/app/<old-route>'`.
+`pnpm clean` (or `rm -rf .next`) clears it. CI never hits this because it starts from a fresh
+checkout.
 
 Both `.gitignore` files were modified, deliberately:
 

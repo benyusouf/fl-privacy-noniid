@@ -18,6 +18,9 @@ import type { SystemMode } from '@core/types'
 // Hook Imports
 import { useImageVariant } from '@core/hooks/useImageVariant'
 
+// Util Imports
+import { asset } from '@/utils/asset'
+
 // Styled Components
 const MaskImg = styled('img')({
   blockSize: 'auto',
@@ -30,8 +33,10 @@ const MaskImg = styled('img')({
 
 const NotFound = ({ mode }: { mode: SystemMode }) => {
   // Vars
-  const darkImg = '/images/pages/misc-mask-dark.png'
-  const lightImg = '/images/pages/misc-mask-light.png'
+  // asset() prefixes the deployment basePath. These are raw <img> sources, which
+  // Next.js does not rewrite, so without it they 404 on a project page.
+  const darkImg = asset('/images/pages/misc-mask-dark.png')
+  const lightImg = asset('/images/pages/misc-mask-light.png')
 
   // Hooks
   const theme = useTheme()
@@ -45,15 +50,15 @@ const NotFound = ({ mode }: { mode: SystemMode }) => {
           <Typography className='font-medium text-8xl' color='text.primary'>
             404
           </Typography>
-          <Typography variant='h4'>Page Not Found ⚠️</Typography>
-          <Typography>we couldn&#39;t find the page you are looking for.</Typography>
+          <Typography variant='h4'>Page not found</Typography>
+          <Typography>That page isn&#39;t part of this results explorer.</Typography>
         </div>
         <Button href='/' component={Link} variant='contained'>
-          Back To Home
+          Back to overview
         </Button>
         <img
           alt='error-404-illustration'
-          src='/images/illustrations/characters/1.png'
+          src={asset('/images/illustrations/characters/1.png')}
           className='object-cover bs-[400px] md:bs-[450px] lg:bs-[500px] mbs-10 md:mbs-14 lg:mbs-20'
         />
       </div>
