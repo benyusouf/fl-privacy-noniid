@@ -239,18 +239,19 @@ If you would rather have a charting library later, the change is contained to
 - Import resolution across all 528 path-aliased and relative imports; `'use client'` placement;
   brace balance; unused imports; package declarations.
 
-**Not verified — the first execution is still yours:**
+- **`tsc --noEmit` passes**, once `node_modules` exists. This covers the two things that looked
+  riskiest: the MUI `Select` value unions in `RunExplorer.tsx`, which mix `number` with the string
+  `'all'`, and `src/lib/chart-geometry.mjs`, which is JavaScript consumed through `allowJs` and
+  JSDoc.
+- **ESLint passes** with the template's own configuration.
 
-- **TypeScript has never been compiled.** No type-checker was available in the authoring
-  environment. Run `pnpm typecheck` first; it is the cheapest way to surface what remains. Two
-  likely spots: the MUI `Select` value unions in `RunExplorer.tsx`, which mix `number` and the
-  string `'all'`; and `src/lib/chart-geometry.mjs`, which is JavaScript consumed through `allowJs`
-  and JSDoc. If TypeScript objects to the `.mjs` import specifier, renaming it to `.js` and
-  updating the four import sites is the whole fix — `"**/*.mjs"` has been added to the tsconfig
-  `include` list to head this off.
-- **Nothing was rendered in a browser.** Layout, spacing, dark mode and the SVG tooltips are
-  unverified against real MUI styling. The charts themselves were rendered as standalone SVG and
-  inspected, so the geometry is sound, but their integration with MUI theming is not.
-- **`next build` has never run**, so the static export itself is untested end to end.
+**Not verified:**
+
+- **`next build` has not been run end to end.** It needs a platform-native SWC binary, which
+  cannot be fetched on a machine where the registry is blocked. CI runs it, and it is the gate
+  that matters most — treat a green workflow run as the real confirmation.
+- **Nothing has been checked visually beyond the charts.** Those were rendered as standalone SVG
+  from real data and inspected, so the geometry is sound, but layout, spacing, dark mode and the
+  SVG tooltips are unverified against real MUI styling in a browser.
 
 Report what breaks and it can be fixed directly.
