@@ -93,17 +93,17 @@ def main(cfg_path):
     mode = cfg.get("mode", "federated")
 
     if mode == "centralized":
-        # D49: select the epoch count on a validation split, then retrain on the
-        # full pool. `rebuild` hands train_centralized a fresh model for stage 2.
+        # D53: full pool, fixed epochs, cosine learning-rate decay, final epoch
+        # reported. No validation split and no epoch selection - see the
+        # docstring of train_centralized for why the earlier two-stage scheme
+        # was withdrawn.
         _, hist = train_centralized(
             model, Xtr, ytr, (Xte, yte), int(cfg["epochs"]), float(cfg["lr"]),
-            seed, val_fraction=float(cfg.get("val_fraction", 0.1)),
-            rebuild=lambda: build_model(dict(model_cfg)))
+            seed, lr_schedule=str(cfg.get("lr_schedule", "cosine")))
         _write_csv(os.path.join(outdir, "metrics.csv"), hist)
-        s2 = [h for h in hist if h.get("stage") == 2]
-        sel = len(s2)
-        print(f"[{name}] centralized: epoch count {sel} selected on validation, "
-              f"retrained on full pool, final test_acc = {hist[-1]['test_acc']}")
+        tail = [h["test_acc"] for h in hist[-5:]]
+        print(f"[{name}] centralized: final test_acc = {hist[-1]['test_acc']} "
+              f"(last 5 epochs {tail}, spread {max(tail)-min(tail):.4f})")
         _finish(outdir, cfg, None)
         return
 

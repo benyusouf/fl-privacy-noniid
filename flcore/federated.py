@@ -16,6 +16,7 @@ local steps live in strategies.py (torch) and are dispatched by config.
 from __future__ import annotations
 
 import copy
+import math
 import numpy as np
 
 
@@ -165,61 +166,41 @@ def run_federated(
 
 
 def train_centralized(model, X, y, test_data, epochs: int, lr: float, seed: int = 0,
-                      val_fraction: float = 0.1, rebuild=None):
-    """Centralized baseline on the pooled data (RQ1 reference). Two stages.
+                      lr_schedule: str = "cosine"):
+    """Centralized baseline on the pooled data (RQ1 reference).
 
-    STAGE 1 selects the epoch count on a held-out validation split carved from
-    the training pool, class-stratified. STAGE 2 discards that model, rebuilds
-    from scratch and retrains on the FULL training pool for the selected number
-    of epochs.
+    Trains on the FULL pooled training set for `epochs` epochs and reports the
+    final epoch. No early stopping, no validation split, no selection of any
+    kind - the reported number is simply where training ended.
 
-    Why two stages (analysis.docx D49). Fixed-epoch training overfits this
-    baseline badly: every centralized run peaked near epoch 18-21 and then
-    degraded, by 4 points on CIFAR-10 and 12 on PathMNIST. Reported at the final
-    epoch the baseline fell BELOW the federated arms, which inverts RQ1. Early
-    stopping fixes that, but stopping on the test set is selection on the
-    evaluation data, and training on 90% of the pool would handicap the baseline
-    relative to federated arms that see all of it - a bias running in favour of
-    this study's own subject. Selecting on validation and retraining on the full
-    pool avoids both.
+    LEARNING-RATE DECAY IS THE POINT (analysis.docx D53, superseding D49/D50).
+    At a constant lr = 0.01 this baseline does not converge, it OSCILLATES:
+    consecutive epochs differ by 3.8-4.3 accuracy points, against 0.4-0.5 for
+    the federated arms on the same data and the same nominal rate. The rate was
+    chosen for the federated setting, where averaging fifteen clients each round
+    damps the noise - parameter averaging acts as variance reduction. Remove the
+    averaging and the same rate is too large to settle.
 
-    `rebuild()` must return a freshly initialised model; if None, stage 2 is
-    skipped and the stage-1 model is returned (with a warning in the history).
+    An earlier reading of that oscillation as OVERFITTING was wrong, and the fix
+    it motivated - selecting an epoch count on a validation split - made matters
+    worse, because the argmax of a noisy curve is a lucky epoch rather than a
+    better model. It widened the seed spread from 2.7 to 7.7 points.
+
+    Cosine decay to zero over `epochs` keeps the NOMINAL rate identical to the
+    federated arms, so the comparison is not confounded by a different learning
+    rate; only the schedule differs, and it differs for a stated reason. The
+    federated arms need no schedule because averaging already provides the
+    damping. Declare this asymmetry in Ch.3 Section 3.12.1.
     """
     X_test, y_test = test_data
-    rng = np.random.default_rng(seed)
-
-    # --- stage 1: class-stratified validation split, select the epoch count ---
-    idx_tr, idx_val = [], []
-    for c in np.unique(y):
-        ci = np.where(y == c)[0]
-        rng.shuffle(ci)
-        k = max(1, int(round(val_fraction * len(ci))))
-        idx_val.extend(ci[:k].tolist())
-        idx_tr.extend(ci[k:].tolist())
-    idx_tr, idx_val = np.array(sorted(idx_tr)), np.array(sorted(idx_val))
-
-    history, best_acc, best_epoch = [], -1.0, epochs
+    history = []
     for e in range(epochs):
-        model.train_epoch(X[idx_tr], y[idx_tr], lr, seed=seed + e)
-        v_acc, v_loss = model.evaluate(X[idx_val], y[idx_val])
-        t_acc, t_loss = model.evaluate(X_test, y_test)
-        if v_acc > best_acc:
-            best_acc, best_epoch = v_acc, e + 1
-        history.append({"stage": 1, "epoch": e + 1,
-                        "val_acc": round(v_acc, 4), "val_loss": round(v_loss, 4),
-                        "test_acc": round(t_acc, 4), "test_loss": round(t_loss, 4)})
-
-    if rebuild is None:
-        history.append({"stage": 1, "epoch": -1, "val_acc": round(best_acc, 4),
-                        "val_loss": 0.0, "test_acc": 0.0, "test_loss": 0.0})
-        return model.get_params(), history
-
-    # --- stage 2: retrain from scratch on the FULL pool for best_epoch epochs ---
-    model = rebuild()
-    for e in range(best_epoch):
-        model.train_epoch(X, y, lr, seed=seed + e)
-        t_acc, t_loss = model.evaluate(X_test, y_test)
-        history.append({"stage": 2, "epoch": e + 1, "val_acc": "", "val_loss": "",
-                        "test_acc": round(t_acc, 4), "test_loss": round(t_loss, 4)})
+        if lr_schedule == "cosine":
+            lr_e = lr * 0.5 * (1.0 + math.cos(math.pi * e / max(1, epochs)))
+        else:
+            lr_e = lr
+        model.train_epoch(X, y, lr_e, seed=seed + e)
+        acc, loss = model.evaluate(X_test, y_test)
+        history.append({"epoch": e + 1, "lr": round(lr_e, 6),
+                        "test_acc": round(acc, 4), "test_loss": round(loss, 4)})
     return model.get_params(), history
