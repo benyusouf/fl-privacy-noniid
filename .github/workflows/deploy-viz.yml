@@ -55,30 +55,35 @@ jobs:
       - name: Install
         run: pnpm install --frozen-lockfile
 
-      # Regenerate the results bundle from results/ rather than trusting the
-      # committed copy. If the two ever disagree, the run should fail here.
-      - name: Build data bundle
+      # The results bundle is generated here, never committed. results/ is the
+      # source of truth and is in the repository; the bundle is derived from it
+      # and is gitignored, so there is nothing to keep in sync by hand.
+      - name: Generate results bundle
         run: pnpm run build:data
 
-      # This works because the bundle is deterministic: build-data.mjs writes a
-      # content hash of the results rather than a build timestamp, so rebuilding
-      # identical inputs produces a byte-identical file. If that ever changes,
-      # this step starts failing on every push.
-      - name: Fail if the committed data bundle is stale
+      # Record which dataset was deployed. build-data.mjs hashes the results
+      # payload, so this identifies the exact figures on the published site.
+      - name: Report dataset identity
         run: |
-          if ! git ls-files --error-unmatch src/data/generated/results.json >/dev/null 2>&1; then
-            echo "::error::src/data/generated/results.json is not tracked by git."
-            echo "Commit it so this check can compare the committed copy against a fresh build."
-            exit 1
-          fi
-          if ! git diff --quiet -- src/data/generated/results.json; then
-            echo "::error::src/data/generated/results.json is out of date with results/."
-            echo "Run 'node scripts/build-data.mjs' in viz/ and commit the result."
-            git diff --stat -- src/data/generated/results.json
-            exit 1
-          fi
+          node -e '
+            const b = require("./src/data/generated/results.json");
+            const lines = [
+              "### Results explorer deployment",
+              "",
+              "| | |",
+              "|---|---|",
+              `| Runs | ${b.runCount} |`,
+              `| Dataset hash | \`${b.dataHash}\` |`,
+              `| Excluded directories | ${b.excluded.length} |`,
+              `| Integrity warnings | ${b.integrityWarnings.length} |`
+            ];
+            require("fs").appendFileSync(process.env.GITHUB_STEP_SUMMARY, lines.join("\n") + "\n");
+            if (b.integrityWarnings.length) {
+              for (const w of b.integrityWarnings) console.log(`::warning::${w}`);
+            }
+          '
 
-      # These gate the deployment. Both run without network and both catch the
+      # These gate the deployment. All three run without network and catch the
       # classes of error that are easy to miss locally.
       - name: Unit tests
         run: pnpm run test

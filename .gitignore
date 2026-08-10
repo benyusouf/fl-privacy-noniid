@@ -1,7 +1,10 @@
 __pycache__/
 *.pyc
 .venv/
-data/
+# Leading slash anchors this to the repository root. Without it the pattern
+# matches any directory named "data" at any depth — including viz/src/data/,
+# whose contents were being silently excluded from the repository.
+/data/
 results/*/checkpoint.npz
 results/**/*.npz
 .DS_Store

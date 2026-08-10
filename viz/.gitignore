@@ -39,3 +39,10 @@ next-env.d.ts
 # icon generated file
 src/assets/iconify-icons/generated-icons.js
 src/assets/iconify-icons/generated-icons.css
+
+# generated results bundle
+# Derived from ../results/ by scripts/build-data.mjs, which every entry point
+# runs first (predev, prebuild, pretypecheck, prelint) and which CI runs before
+# building. results/ is the source of truth and is committed; this is build
+# output and committing it would only create something to keep in sync by hand.
+src/data/generated/
