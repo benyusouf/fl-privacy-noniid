@@ -1,0 +1,27 @@
+{
+  "measured_at": "2026-08-11 12:30:47",
+  "strategy": "fedavg",
+  "alpha": 1.0,
+  "seed": 0,
+  "rounds_per_arm": 3,
+  "target_epsilon": 4.0,
+  "processor_seconds": {
+    "plain": 471.006268,
+    "dp": 734.512536
+  },
+  "wall_seconds": {
+    "plain": 128.79679233394563,
+    "dp": 207.1824517090572
+  },
+  "per_round_processor_seconds": {
+    "plain": 157.00208933333332,
+    "dp": 244.83751199999998
+  },
+  "overhead_ratio": 1.5594538457394795,
+  "assumed_ratio": 3.0,
+  "projected_phase_b_processor_hours": 146.90250719999997,
+  "final_test_acc": {
+    "plain": 0.244,
+    "dp": 0.1178
+  }
+}

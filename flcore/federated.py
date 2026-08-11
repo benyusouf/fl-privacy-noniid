@@ -68,6 +68,7 @@ def run_federated(
     strategy_cfg: dict | None = None,
     server_momentum: float = 0.0,   # beta in Hsu et al. (2019); >0 enables FedAvgM
     server_lr: float = 0.5,         # NOT in Hsu et al.; see server_momentum_step
+    dp_cfg: dict | None = None,     # sample-level DP-SGD; None = unprotected
 ):
     """Core FL round loop. Returns (final_params, history list of dict rows).
 
@@ -78,6 +79,17 @@ def run_federated(
     `strategy` selects the LOCAL objective (fedavg/fedprox/scaffold/moon);
     server-side averaging is identical for all four. Strategy state (SCAFFOLD
     control variates, MOON previous model) is kept per client across rounds.
+
+    `dp_cfg` switches every client to local DP-SGD (Chapter 3, Section 3.8.2):
+        {"target_epsilon": 4.0, "delta": 1e-5, "max_grad_norm": 1.0}
+    The noise multiplier is not supplied. It is calibrated PER CLIENT, because
+    a Dirichlet partition leaves clients holding very different amounts of data
+    and both quantities the accountant needs - the sampling ratio q = B / N_c
+    and the number of noised steps - are functions of N_c. Calibrating one
+    sigma from the mean client size would hand the smallest silo a weaker
+    guarantee than the one the run is labelled with. Every client therefore
+    spends the same epsilon and the smallest silos carry the most noise, which
+    is the interaction with heterogeneity that RQ2 asks about. See D58.
     """
     X_test, y_test = test_data
     global_params = init_params if init_params is not None else model.get_params()
@@ -86,9 +98,31 @@ def run_federated(
     scfg.setdefault("local_epochs", local_epochs)
     scfg.setdefault("lr", lr)
 
-    use_strategy = strategy != "fedavg"
+    dp_on = bool(dp_cfg)
+    dp_sigmas: list[float] = []
+    if dp_on:
+        from flcore.privacy import calibrate_noise_for_epsilon, accountant_epsilon
+        target = float(dp_cfg["target_epsilon"])
+        delta = float(dp_cfg.get("delta", 1e-5))
+        bs = model.batch_size
+        for cid, (Xc, _) in enumerate(client_train):
+            n_c = len(Xc)
+            q = min(1.0, bs / max(1, n_c))
+            steps_pr = int(np.ceil(n_c / bs)) * local_epochs
+            total = steps_pr * rounds
+            sig = calibrate_noise_for_epsilon(target, q, total, delta)
+            got = accountant_epsilon(sig, q, total, delta)
+            dp_sigmas.append(sig)
+            print(f"    DP client {cid:2d}: n={n_c:5d} q={q:.4f} steps={total:6d} "
+                  f"sigma={sig:.4f} -> eps={got:.3f}")
+        scfg["dp_max_grad_norm"] = float(dp_cfg.get("max_grad_norm", 1.0))
+
+    use_strategy = dp_on or strategy != "fedavg"
     local_fn = None
-    if use_strategy:
+    if dp_on:
+        from flcore.dp_local import get_dp_strategy
+        local_fn = get_dp_strategy(strategy)
+    elif use_strategy:
         from flcore.strategies import get_strategy
         local_fn = get_strategy(strategy)
     client_state: list[dict | None] = [None] * len(client_train)
@@ -100,6 +134,8 @@ def run_federated(
         for cid, (Xc, yc) in enumerate(client_train):
             if use_strategy:
                 cfg_c = dict(scfg); cfg_c["seed"] = seed + 1000 * r + cid
+                if dp_on:
+                    cfg_c["dp_sigma"] = dp_sigmas[cid]
                 st = client_state[cid]
                 if strategy == "scaffold" and global_c is not None:
                     st = dict(st or {}); st["c"] = global_c

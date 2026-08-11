@@ -75,13 +75,26 @@ def accountant_epsilon(noise_multiplier: float, sample_rate: float,
 
     `steps` is the total number of noised gradient steps taken by one client
     across all rounds (local_steps_per_round * rounds).
+
+    The history is written in Opacus' own compressed form - one
+    (sigma, q, count) triple - rather than by calling step() `steps` times.
+    Identical steps compose to exactly the same RDP either way, but the
+    calibration in calibrate_noise_for_epsilon evaluates this function about
+    sixty times per client, and at Phase B's step counts the naive loop turns
+    the start of every run into millions of Python calls. The loop is kept as a
+    fallback in case a future Opacus changes the attribute.
     """
     from opacus.accountants import RDPAccountant
 
     acct = RDPAccountant()
-    for _ in range(steps):
-        acct.step(noise_multiplier=noise_multiplier, sample_rate=sample_rate)
-    return float(acct.get_epsilon(delta=delta))
+    try:
+        acct.history = [(float(noise_multiplier), float(sample_rate), int(steps))]
+        return float(acct.get_epsilon(delta=delta))
+    except Exception:
+        acct = RDPAccountant()
+        for _ in range(steps):
+            acct.step(noise_multiplier=noise_multiplier, sample_rate=sample_rate)
+        return float(acct.get_epsilon(delta=delta))
 
 
 def calibrate_noise_for_epsilon(target_epsilon: float, sample_rate: float,

@@ -172,6 +172,18 @@ def main(cfg_path):
     scfg = dict(cfg.get("strategy_params", {}) or {})
     server_momentum = float(cfg.get("server_momentum", 0.0))
     server_lr = float(cfg.get("server_lr", 0.5))
+
+    # Sample-level DP (Phase B). Absent or disabled -> unprotected run.
+    dp_cfg = cfg.get("dp") or None
+    if dp_cfg and not dp_cfg.get("enabled", True):
+        dp_cfg = None
+    if dp_cfg:
+        dp_cfg = {"target_epsilon": float(dp_cfg["target_epsilon"]),
+                  "delta": float(dp_cfg.get("delta", 1e-5)),
+                  "max_grad_norm": float(dp_cfg.get("max_grad_norm", 1.0))}
+        print(f"[{name}] DP-SGD on: target eps={dp_cfg['target_epsilon']} "
+              f"delta={dp_cfg['delta']} C={dp_cfg['max_grad_norm']}")
+
     print(f"[{name}] strategy={strategy}"
           + (f" (FedAvgM: beta={server_momentum}, server_lr={server_lr})"
              if server_momentum else ""))
@@ -183,7 +195,7 @@ def main(cfg_path):
         lr=float(cfg["lr"]), seed=seed, on_round=on_round,
         start_round=start_round, init_params=init_params,
         strategy=strategy, strategy_cfg=scfg, server_momentum=server_momentum,
-        server_lr=server_lr,
+        server_lr=server_lr, dp_cfg=dp_cfg,
     )
     elapsed = time.time() - t_start
     print(f"[{name}] wall-clock: {elapsed/60:.1f} min "
