@@ -71,6 +71,36 @@ def _checkpoint_path(outdir):
     return os.path.join(outdir, "checkpoint.npz")
 
 
+class _Tee:
+    """Mirror stdout into the run's own directory.
+
+    Phase A and the first Phase B were run without capturing their terminal
+    output, and it is gone: the round-by-round numbers survive in metrics.csv,
+    but the warnings, the calibration table and the start time do not. Runs from
+    here on write their own transcript beside their results, so a run is
+    self-describing without anyone having to remember to redirect it.
+    """
+
+    def __init__(self, path, stream):
+        self.file = open(path, "a", buffering=1, encoding="utf-8")
+        self.stream = stream
+
+    def write(self, s):
+        self.stream.write(s)
+        self.file.write(s)
+        return len(s)
+
+    def flush(self):
+        self.stream.flush()
+        self.file.flush()
+
+    def close(self):
+        try:
+            self.file.close()
+        except Exception:
+            pass
+
+
 def main(cfg_path):
     cfg = _load_yaml(cfg_path)
     seed = int(cfg.get("seed", 0))
@@ -78,6 +108,15 @@ def main(cfg_path):
     name = cfg["name"]
     outdir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "results", name)
     os.makedirs(outdir, exist_ok=True)
+
+    # Append, never truncate: a resumed run should extend its transcript rather
+    # than erase the part that recorded how it started.
+    log = _Tee(os.path.join(outdir, "run.log"), sys.stdout)
+    sys.stdout = log
+    print(f"\n{'=' * 70}\n{name}  started {time.strftime('%Y-%m-%d %H:%M:%S')}\n"
+          f"config: {cfg_path}\n{'=' * 70}")
+    import atexit
+    atexit.register(lambda: (setattr(sys, "stdout", log.stream), log.close()))
 
     # data
     Xtr, ytr, Xte, yte = load_dataset(

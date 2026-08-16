@@ -1,0 +1,56 @@
+PROVENANCE RECORD - RECONSTRUCTED, NOT A TRANSCRIPT
+===================================================================
+This run was executed before run.py captured its own output, so no
+log of it exists. Everything below was assembled afterwards from the
+files the run wrote. It records what the run was and what it
+produced. It does not record what appeared on the terminal, and no
+warning, timestamp or message from the session survives.
+
+Runs from Phase C onward carry a real transcript in run.log.
+===================================================================
+
+run: A_cifar10_fedprox_dir1.0_s1
+
+CONFIGURATION AS EXECUTED
+-------------------------
+  phase          A
+  dataset        cifar10
+  mode           federated
+  strategy       fedprox
+  seed           1
+  rounds/epochs  60
+  local epochs   2
+  learning rate  0.01
+  clients        15
+  train subsample 20000  test 5000
+  model          {'backend': 'torch_cnn', 'width': 32, 'batch_size': 64, 'in_channels': 3, 'img_size': 32}
+
+PARTITION AS DRAWN
+------------------
+  kind           dirichlet, alpha=1.0
+  clients        15
+  sizes          min 479  max 2823  ratio 5.89
+  Hellinger      mean 0.2915  max 0.4065
+
+OUTCOME AS RECORDED
+-------------------
+  rounds recorded 60
+  final test_acc  0.4438
+  best test_acc   0.4504 at round 57
+
+TIMING AS MEASURED (UNRELIABLE - SEE SECTION 3.11)
+--------------------------------------------------
+  seconds total     5660.6
+  rounds run        60
+  seconds per round 94.34
+  
+  Elapsed wall clock continues to accumulate while the machine
+  sleeps. Across 68 Phase A runs the rate ranged 41.0 to 869.0
+  seconds for identical work. This figure is recorded, not trusted.
+
+FILES THIS RUN WROTE
+--------------------
+  config_used.json
+  metrics.csv
+  partition_report.json
+  timing.txt

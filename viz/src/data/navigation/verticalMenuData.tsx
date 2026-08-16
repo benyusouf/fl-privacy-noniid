@@ -11,9 +11,11 @@ const verticalMenuData = (): VerticalMenuDataType[] => [
     label: 'Results',
     isSection: true,
     children: [
-      { label: 'Headline result (RQ1)', href: '/rq1', icon: 'tabler-chart-dots' },
+      { label: 'Heterogeneity (RQ1)', href: '/rq1', icon: 'tabler-chart-dots' },
+      { label: 'Cost of privacy (RQ2)', href: '/privacy', icon: 'tabler-lock' },
       { label: 'Run explorer', href: '/runs', icon: 'tabler-table' },
-      { label: 'Phases A–E', href: '/phases', icon: 'tabler-list-check' }
+      { label: 'Phases A–E', href: '/phases', icon: 'tabler-list-check' },
+      { label: 'Data and records', href: '/downloads', icon: 'tabler-download' }
     ]
   },
   {

@@ -100,13 +100,45 @@ def accountant_epsilon(noise_multiplier: float, sample_rate: float,
 def calibrate_noise_for_epsilon(target_epsilon: float, sample_rate: float,
                                 steps: int, delta: float = 1e-5,
                                 lo: float = 0.3, hi: float = 30.0,
-                                tol: float = 0.01) -> float:
+                                tol: float = 0.01, hi_cap: float = 4096.0,
+                                strict: bool = True) -> float:
     """Binary-search the noise multiplier that spends exactly `target_epsilon`.
 
     Used to run the experiment grid at eps in {1, 4, 8} rather than at arbitrary
     sigma values, so results are reported in the units the literature uses.
+
+    THE UPPER BOUND IS NOT FIXED, and this matters more than it sounds. A
+    bisection over [lo, hi] only means anything if eps(hi) is already below the
+    target; if it is not, the search converges on `hi` itself and returns a
+    sigma that spends more budget than asked for. That is not hypothetical. At
+    alpha = 0.1 the smallest silo holds 88 examples, so with a batch of 64 its
+    sampling ratio is 0.73, subsampling amplification does almost nothing, and
+    eps = 1 is unreachable below sigma = 30 - which was the old fixed bound.
+    Four Phase B runs were labelled eps = 1 while that client actually spent
+    1.58. See D69.
+
+    `hi` is therefore doubled until it genuinely brackets the target, and a
+    search that cannot converge raises instead of returning a wrong number.
+    Set strict=False to get the best available sigma and a warning instead.
     """
-    for _ in range(60):
+    if accountant_epsilon(lo, sample_rate, steps, delta) <= target_epsilon:
+        return lo                      # even minimal noise is within budget
+
+    while accountant_epsilon(hi, sample_rate, steps, delta) > target_epsilon:
+        hi *= 2.0
+        if hi > hi_cap:
+            msg = (f"cannot reach epsilon={target_epsilon} at sample_rate="
+                   f"{sample_rate:.4f} over {steps} steps: even sigma={hi_cap} "
+                   f"spends more. Subsampling amplification is too weak at this "
+                   f"sampling ratio. Reduce the batch size for this client, or "
+                   f"report the epsilon actually delivered.")
+            if strict:
+                raise ValueError(msg)
+            import warnings
+            warnings.warn(msg)
+            return hi_cap
+
+    for _ in range(200):
         mid = (lo + hi) / 2
         eps = accountant_epsilon(mid, sample_rate, steps, delta)
         if abs(eps - target_epsilon) < tol:
@@ -115,7 +147,18 @@ def calibrate_noise_for_epsilon(target_epsilon: float, sample_rate: float,
             lo = mid
         else:
             hi = mid
-    return (lo + hi) / 2
+        if hi - lo < 1e-9:
+            break
+
+    got = accountant_epsilon(hi, sample_rate, steps, delta)
+    if abs(got - target_epsilon) > 10 * tol:
+        msg = (f"calibration did not converge: sigma={hi:.4f} spends "
+               f"epsilon={got:.4f} against a target of {target_epsilon}")
+        if strict:
+            raise ValueError(msg)
+        import warnings
+        warnings.warn(msg)
+    return hi
 
 
 # ------------------------------------------------------- client-level DP ----

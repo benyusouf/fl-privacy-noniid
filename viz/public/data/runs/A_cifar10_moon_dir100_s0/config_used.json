@@ -1,0 +1,31 @@
+{
+  "name": "A_cifar10_moon_dir100_s0",
+  "seed": 0,
+  "dataset": "cifar10",
+  "mode": "federated",
+  "num_clients": 15,
+  "rounds": 60,
+  "local_epochs": 2,
+  "lr": 0.01,
+  "checkpoint_every": 5,
+  "subsample": 20000,
+  "subsample_test": 5000,
+  "strategy": "moon",
+  "model": {
+    "backend": "torch_cnn",
+    "width": 32,
+    "batch_size": 64,
+    "in_channels": 3,
+    "img_size": 32
+  },
+  "strategy_params": {
+    "mu": 0.01,
+    "moon_mu": 1.0,
+    "moon_tau": 0.5
+  },
+  "partition": {
+    "kind": "dirichlet",
+    "alpha": 100.0,
+    "num_clients": 15
+  }
+}

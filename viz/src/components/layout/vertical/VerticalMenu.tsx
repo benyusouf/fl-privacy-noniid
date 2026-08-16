@@ -74,13 +74,19 @@ const VerticalMenu = ({ scrollMenu }: Props) => {
 
         <MenuSection label='Results'>
           <MenuItem href='/rq1' icon={<i className='tabler-chart-dots' />}>
-            Headline result (RQ1)
+            Heterogeneity (RQ1)
+          </MenuItem>
+          <MenuItem href='/privacy' icon={<i className='tabler-lock' />}>
+            Cost of privacy (RQ2)
           </MenuItem>
           <MenuItem href='/runs' icon={<i className='tabler-table' />}>
             Run explorer
           </MenuItem>
           <MenuItem href='/phases' icon={<i className='tabler-list-check' />}>
             Phases A–E
+          </MenuItem>
+          <MenuItem href='/downloads' icon={<i className='tabler-download' />}>
+            Data and records
           </MenuItem>
         </MenuSection>
 

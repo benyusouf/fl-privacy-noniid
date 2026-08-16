@@ -7,6 +7,42 @@
  */
 
 export type Dataset = 'cifar10' | 'pathmnist'
+
+/** Per-client differential privacy accounting. Noise is calibrated per client. */
+export type DpClient = {
+  client: number
+  /** Samples held by this client. */
+  n: number
+  /** Sampling ratio, batch / n. Subsampling amplification weakens as this rises. */
+  q: number
+  /** Noised steps across all rounds. */
+  steps: number
+  sigma: number
+  realised_epsilon: number
+  saturated: boolean
+  sigma_needed_for_target: number | null
+}
+
+export type Dp = {
+  granularity: 'sample-level'
+  /** The label on the directory — what was asked for. */
+  targetEpsilon: 1 | 4 | 8
+  /**
+   * The worst client's realised budget — what was actually delivered. A
+   * federation can only claim its weakest guarantee, so this is the number to
+   * display. It agreed with targetEpsilon on every current run, but did not
+   * before the D69 re-run.
+   */
+  deliveredEpsilon: number
+  labelHonoured: boolean
+  delta: number
+  maxGradNorm: number
+  sigmaMin: number
+  sigmaMax: number
+  /** sigmaMax / sigmaMin. A result about unequal burden, not a detail. */
+  sigmaRatio: number
+  clients: DpClient[]
+}
 export type Strategy = 'fedavg' | 'fedprox' | 'scaffold' | 'moon'
 export type Partition = 'dir100' | 'dir1.0' | 'dir0.1' | 'quantity' | 'path1'
 export type RunMode = 'federated' | 'centralized'
@@ -78,8 +114,45 @@ export type Run = {
   secondsPerRound: number | null
   secondsTotal: number | null
 
+  /** Present on Phase B runs, null elsewhere. Its presence means "protected". */
+  dp: Dp | null
+
+  /**
+   * For a Phase B run, the name of the Phase A run it is measured against —
+   * identical in every respect but the mechanism. Never reconstruct this by
+   * string surgery on the run name.
+   */
+  comparator: string | null
+
+  /** A captured transcript exists. */
+  hasLog: boolean
+
+  /**
+   * A record was reconstructed after the fact from the run's artefacts. This is
+   * NOT a transcript and must never be labelled as one — the provenance file
+   * says so in its own header.
+   */
+  hasProvenance: boolean
+
   config: Record<string, unknown>
   curve: Curve
+}
+
+/** src/data/generated/downloads.json */
+export type DownloadFile = {
+  file: string
+  description: string
+  size: number
+  sizeLabel: string
+}
+
+export type Downloads = {
+  runs: Record<string, DownloadFile[]>
+  archive: { path: string; size: number; sizeLabel: string }
+  totalFiles: number
+  totalBytes: number
+  totalLabel: string
+  note: string
 }
 
 export type ResultsBundle = {

@@ -36,7 +36,17 @@ const RESULTS_DIR = resolve(VIZ_ROOT, '..', 'results')
 const OUT_DIR = join(VIZ_ROOT, 'src', 'data', 'generated')
 const OUT_FILE = join(OUT_DIR, 'results.json')
 
-const SUPERSEDED_SUFFIXES = ['.pre-D49', '.d50-twostage']
+/*
+ * A superseded copy keeps the original name and gains a suffix AFTER the seed:
+ *   ..._s0.pre-D49          the centralized runs before D49
+ *   ..._s0.d50-twostage     the withdrawn two-stage scheme
+ *   ..._s0.sigma30-<stamp>  the eps=1 runs whose noise search hit its ceiling (D69)
+ *
+ * Matching on the seed rather than on a bare dot matters: partition names carry
+ * dots of their own (dir0.1, dir1.0), and a naive test drops two thirds of the
+ * phase without saying so.
+ */
+const SUPERSEDED_RE = /_s\d+\..+$/
 
 // ---------------------------------------------------------------------------
 // Labels. Phase names are locked by Chapter One — do not rename (HANDOFF §1).
@@ -138,6 +148,21 @@ const decodeName = (name, config) => {
   if (!isCentralized) {
     strategy = config?.strategy ?? parts[2]
     partition = parts.slice(3, parts.length - 1).join('_') || null
+
+    /*
+     * Phase B directories carry the privacy budget in the name:
+     *   B_<dataset>_<strategy>_<partition>_eps<N>_s<seed>
+     *
+     * Left in place, the partition reads "dir0.1_eps1", which matches no entry
+     * in PARTITION_LABELS, appears in no facet list, and never groups with the
+     * Phase A run it is measured against — so a Phase B run would be
+     * unreachable from the partition filter and mislabelled everywhere it
+     * appeared. The budget is already carried, more precisely, on run.dp.
+     *
+     * Anchored on the _eps<digits> segment specifically, not on a loose split:
+     * partition names legitimately contain dots and digits (dir0.1, dir1.0).
+     */
+    if (partition) partition = partition.replace(/_eps\d+$/, '')
   }
 
   const isFedAvgM = !isCentralized && config?.server_momentum !== undefined
@@ -163,7 +188,7 @@ const strategyLabelFor = (strategy, isFedAvgM) => {
 // Build
 // ---------------------------------------------------------------------------
 
-const isSuperseded = name => SUPERSEDED_SUFFIXES.some(s => name.endsWith(s))
+const isSuperseded = name => SUPERSEDED_RE.test(name)
 
 const collect = () => {
   if (!existsSync(RESULTS_DIR)) {
@@ -187,8 +212,19 @@ const collect = () => {
       continue
     }
 
-    if (!name.startsWith('A_')) {
-      excluded.push({ name, reason: 'not a Phase A result directory' })
+    /*
+     * Phases A to E are all real results. Anything else in results/ is a probe
+     * or a fixture: attack_probe has no config_used.json and unresolved
+     * provenance, smoke_synthetic_dir01 is a synthetic test, and
+     * B_pilot_dp_overhead holds one timing measurement rather than a run.
+     */
+    if (!/^[A-E]_/.test(name)) {
+      excluded.push({ name, reason: 'not a phase result directory' })
+      continue
+    }
+
+    if (name === 'B_pilot_dp_overhead') {
+      excluded.push({ name, reason: 'overhead pilot, not a training run' })
       continue
     }
 
@@ -198,6 +234,8 @@ const collect = () => {
     }
 
     const config = readJson(configPath)
+    const dpCalPath = join(dir, 'dp_calibration.json')
+    const dpCal = existsSync(dpCalPath) ? readJson(dpCalPath) : null
     const curve = parseCsv(readFileSync(metricsPath, 'utf8'))
     const meta = decodeName(name, config)
 
@@ -298,6 +336,43 @@ const collect = () => {
       bytesUpPerRound,
       secondsPerRound: timing?.seconds_per_round ?? null,
       secondsTotal: timing?.seconds_total ?? null,
+
+      /*
+       * Differential privacy, present only where the run configured it.
+       *
+       * targetEpsilon is the label on the directory. deliveredEpsilon is the
+       * WORST client's realised budget, which is the guarantee the federation
+       * can actually claim, and the two coincide only when no client was
+       * short-changed. sigmaRatio is a result in its own right: noise is
+       * calibrated per client, so the smallest silo carries the most of it, and
+       * the ratio grows with skew (D58, D69).
+       */
+      dp: dpCal
+        ? {
+            granularity: dpCal.granularity,
+            targetEpsilon: dpCal.target_epsilon,
+            deliveredEpsilon: dpCal.epsilon_run_level,
+            labelHonoured: dpCal.label_honoured,
+            delta: dpCal.delta,
+            maxGradNorm: dpCal.max_grad_norm,
+            sigmaMin: dpCal.sigma_min,
+            sigmaMax: dpCal.sigma_max,
+            sigmaRatio: dpCal.sigma_ratio,
+            clients: dpCal.clients
+          }
+        : null,
+
+      /** The Phase A run this one is measured against, where the config names it. */
+      comparator: config.comparator ?? null,
+
+      /*
+       * Which record of the run survives. Phase A and the first Phase B predate
+       * run.py capturing its own output, so they carry a reconstruction rather
+       * than a transcript, and the site must not present the two as equivalent.
+       */
+      hasLog: existsSync(join(dir, 'run.log')),
+      hasProvenance: existsSync(join(dir, 'provenance.txt')),
+
       config,
       curve
     })

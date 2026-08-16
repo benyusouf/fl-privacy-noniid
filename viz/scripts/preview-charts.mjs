@@ -77,7 +77,15 @@ const seedGroups = runs => {
   const map = new Map()
 
   for (const r of runs) {
-    const k = [r.dataset, r.mode, r.isFedAvgM ? 'fedavgm' : r.strategy ?? 'centralized', r.partition ?? 'none'].join('|')
+    // Must match groupKey in src/lib/results.ts, including the privacy budget:
+    // without it a Phase A cell and its Phase B cells collapse into one group.
+    const k = [
+      r.dataset,
+      r.mode,
+      r.isFedAvgM ? 'fedavgm' : r.strategy ?? 'centralized',
+      r.partition ?? 'none',
+      r.dp ? `eps${r.dp.targetEpsilon}` : 'unprotected'
+    ].join('|')
 
     if (!map.has(k)) map.set(k, [])
     map.get(k).push(r)
@@ -102,7 +110,8 @@ const seedGroups = runs => {
 }
 
 const rq1Svg = dataset => {
-  const fed = bundle.runs.filter(r => r.mode === 'federated' && r.dataset === dataset && !r.isFedAvgM)
+  // Unprotected only — RQ1 is the no-mechanism baseline. Matches rq1Points().
+  const fed = bundle.runs.filter(r => r.mode === 'federated' && r.dataset === dataset && !r.isFedAvgM && r.dp === null)
   const pts = seedGroups(fed).sort((a, b) => a.x - b.x)
   const cen = bundle.runs.filter(r => r.mode === 'centralized' && r.dataset === dataset)
   const cAcc = cen.map(r => r.finalAcc * 100)
@@ -255,11 +264,102 @@ const clientSvg = runName => {
   })
 }
 
+// --- privacy cost, mirroring PrivacyCostChart.tsx -------------------------
+
+const CONDITIONS = [
+  { key: 'unprotected', label: 'No privacy mechanism', epsilon: null, colour: '#28C76F' },
+  { key: 'eps8', label: 'eps = 8', epsilon: 8, colour: '#B9A7FF' },
+  { key: 'eps4', label: 'eps = 4', epsilon: 4, colour: '#8264F0' },
+  { key: 'eps1', label: 'eps = 1', epsilon: 1, colour: '#4B2FBF' }
+]
+
+const privacyCostSvg = dataset => {
+  const parts = ['dir100', 'dir1.0', 'dir0.1']
+  const strats = ['fedavg', 'fedprox', 'scaffold', 'moon']
+
+  const cell = (p, s, e) =>
+    bundle.runs.find(
+      r =>
+        r.dataset === dataset &&
+        r.mode === 'federated' &&
+        !r.isFedAvgM &&
+        r.partition === p &&
+        r.strategy === s &&
+        r.seed === 0 &&
+        (e === null ? r.dp === null : r.dp && r.dp.targetEpsilon === e)
+    )
+
+  const series = CONDITIONS.map(c => ({
+    ...c,
+    points: parts
+      .map(p => {
+        const cs = strats.map(s => cell(p, s, c.epsilon)).filter(Boolean)
+        const accs = cs.map(r => r.finalAcc * 100)
+
+        return {
+          partition: p,
+          hellinger: mean(cs.map(r => r.hellingerMean)),
+          acc: mean(accs),
+          min: Math.min(...accs),
+          max: Math.max(...accs),
+          n: cs.length
+        }
+      })
+      .sort((a, b) => a.hellinger - b.hellinger)
+  }))
+
+  // printed alongside the SVG so the drawing can be checked against numbers
+  console.log(`\n  privacy cost, ${dataset} (seed 0, mean of 4 strategies):`)
+  for (const s of series) {
+    const line = s.points.map(p => `${p.partition}=${p.acc.toFixed(2)}%`).join('  ')
+    const spread = Math.max(...s.points.map(p => p.acc)) - Math.min(...s.points.map(p => p.acc))
+
+    console.log(`    ${s.label.padEnd(22)} ${line}   spread ${spread.toFixed(2)} pts`)
+  }
+
+  const all = series.flatMap(s => s.points)
+  const yMax = Math.max(...all.map(p => p.max))
+  const xMax = Math.max(...all.map(p => p.hellinger))
+
+  return frame({
+    vbHeight: 420,
+    xDomain: [0, Math.max(xMax * 1.15, 0.7)],
+    yDomain: [0, yMax * 1.15],
+    xLabel: 'measured mean Hellinger distance',
+    yLabel: 'final test accuracy (%)',
+    formatY: v => `${v.toFixed(0)}%`,
+    body: ({ x, y, area }) => {
+      let s = ''
+
+      for (const c of series) {
+        for (const p of c.points) {
+          s += `<line x1="${x(p.hellinger)}" x2="${x(p.hellinger)}" y1="${y(p.min)}" y2="${y(p.max)}" stroke="${c.colour}" stroke-width="1" opacity="0.45"/>`
+        }
+        s += `<path d="${linePath(c.points.map(p => ({ x: x(p.hellinger), y: y(p.acc) })))}" fill="none" stroke="${c.colour}" stroke-width="${c.epsilon === null ? 3 : 2}" stroke-linejoin="round"/>`
+        for (const p of c.points) {
+          s += `<circle cx="${x(p.hellinger)}" cy="${y(p.acc)}" r="${c.epsilon === null ? 6 : 4.5}" fill="${c.colour}" stroke="${c.colour}" stroke-width="2"/>`
+        }
+      }
+
+      let lx = area.x0 + 8
+
+      for (const c of CONDITIONS) {
+        s += `<rect x="${lx}" y="${area.y0 + 4}" width="10" height="10" fill="${c.colour}"/>`
+        s += `<text x="${lx + 15}" y="${area.y0 + 13}" font-size="11" fill="${TEXT}">${esc(c.label)}</text>`
+        lx += 150
+      }
+
+      return s
+    }
+  })
+}
+
 // ---------------------------------------------------------------------------
 
 mkdirSync(OUT, { recursive: true })
 
 const files = {
+  'privacy-cost-cifar10.svg': privacyCostSvg('cifar10'),
   'rq1-cifar10.svg': rq1Svg('cifar10'),
   'rq1-pathmnist.svg': rq1Svg('pathmnist'),
   'curve-scaffold-divergence.svg': curveSvg(

@@ -20,6 +20,7 @@ import Typography from '@mui/material/Typography'
 
 // Component Imports
 import Caveat from '@/components/site/Caveat'
+import FigureData from '@/components/site/FigureData'
 import HellingerScatterChart from '@/components/charts/HellingerScatterChart'
 
 // Type Imports
@@ -39,8 +40,12 @@ import {
 const Rq1View = () => {
   const [dataset, setDataset] = useState<Dataset>('cifar10')
 
+  // Unprotected only, matching rq1Points(). RQ1 is the no-mechanism baseline;
+  // without this filter the Phase B runs join the table and, since the lookup
+  // below takes the first group per (partition, strategy), a differentially
+  // private cell could be shown as if it were the baseline.
   const groups = useMemo(
-    () => seedGroups(federatedRuns.filter(r => r.dataset === dataset && !r.isFedAvgM)),
+    () => seedGroups(federatedRuns.filter(r => r.dataset === dataset && !r.isFedAvgM && r.dp === null)),
     [dataset]
   )
 
@@ -58,7 +63,10 @@ const Rq1View = () => {
 
   // Runs whose last recorded round misstates them by more than five points.
   const unstable = useMemo(
-    () => federatedRuns.filter(r => r.dataset === dataset && !r.isFedAvgM && hasUnrepresentativeFinal(r)),
+    () =>
+      federatedRuns.filter(
+        r => r.dataset === dataset && !r.isFedAvgM && r.dp === null && hasUnrepresentativeFinal(r)
+      ),
     [dataset]
   )
 
@@ -69,6 +77,16 @@ const Rq1View = () => {
           title='Final accuracy against measured heterogeneity'
           subheader='Each point is one (strategy, partition) block. Bars span min to max across seeds.'
           action={
+            <div className='flex gap-2 items-center flex-wrap'>
+            <FigureData
+              filename={`rq1_accuracy_vs_hellinger_${dataset}`}
+              columns={['strategy', 'partition', 'hellinger_mean', 'mean_final_acc', 'min_acc', 'max_acc', 'seeds']}
+              rows={groups.map(g => [
+                g.strategyLabel, g.partition, g.meanHellinger,
+                g.meanFinalAcc * 100, g.minFinalAcc * 100, g.maxFinalAcc * 100, g.n
+              ])}
+              sources={groups.flatMap(g => g.runs.map(r => r.name))}
+            />
             <ToggleButtonGroup
               exclusive
               size='small'
@@ -78,6 +96,7 @@ const Rq1View = () => {
               <ToggleButton value='cifar10'>CIFAR-10</ToggleButton>
               <ToggleButton value='pathmnist'>PathMNIST</ToggleButton>
             </ToggleButtonGroup>
+            </div>
           }
         />
         <CardContent>

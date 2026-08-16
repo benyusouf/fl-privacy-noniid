@@ -1,0 +1,83 @@
+PROVENANCE RECORD - RECONSTRUCTED, NOT A TRANSCRIPT
+===================================================================
+This run was executed before run.py captured its own output, so no
+log of it exists. Everything below was assembled afterwards from the
+files the run wrote. It records what the run was and what it
+produced. It does not record what appeared on the terminal, and no
+warning, timestamp or message from the session survives.
+
+Runs from Phase C onward carry a real transcript in run.log.
+===================================================================
+
+run: B_cifar10_moon_dir1.0_eps8_s0
+
+CONFIGURATION AS EXECUTED
+-------------------------
+  phase          B
+  dataset        cifar10
+  mode           federated
+  strategy       moon
+  seed           0
+  rounds/epochs  60
+  local epochs   2
+  learning rate  0.01
+  clients        15
+  train subsample 20000  test 5000
+  model          {'backend': 'torch_cnn', 'width': 32, 'batch_size': 64, 'in_channels': 3, 'img_size': 32}
+  comparator     A_cifar10_moon_dir1.0_s0
+
+PARTITION AS DRAWN
+------------------
+  kind           dirichlet, alpha=1.0
+  clients        15
+  sizes          min 558  max 2304  ratio 4.13
+  Hellinger      mean 0.3179  max 0.4556
+
+DIFFERENTIAL PRIVACY AS CALIBRATED
+----------------------------------
+  granularity    sample-level
+  target epsilon 8.0   delta 1e-05
+  clipping norm  1.0
+  sigma          min 1.3677  max 2.5406  ratio 1.86
+  delivered eps  worst client 8.0093  (label honoured: True)
+  
+  per client:
+    client  0  n= 1344  q=0.0476  steps=  2520  sigma=  1.6994  eps=7.9973
+    client  1  n= 1397  q=0.0458  steps=  2640  sigma=  1.6777  eps=7.9956
+    client  2  n= 1102  q=0.0581  steps=  2160  sigma=  1.8843  eps=7.9938
+    client  3  n= 1246  q=0.0514  steps=  2400  sigma=  1.7738  eps=7.9994
+    client  4  n= 1421  q=0.0450  steps=  2760  sigma=  1.6849  eps=7.9914
+    client  5  n= 1019  q=0.0628  steps=  1920  sigma=  1.9170  eps=7.9964
+    client  6  n= 1842  q=0.0347  steps=  3480  sigma=  1.4964  eps=8.0087
+    client  7  n=  700  q=0.0914  steps=  1320  sigma=  2.2650  eps=7.9966
+    client  8  n= 1088  q=0.0588  steps=  2040  sigma=  1.8590  eps=7.9997
+    client  9  n=  739  q=0.0866  steps=  1440  sigma=  2.2433  eps=7.9920
+    client 10  n= 1840  q=0.0348  steps=  3480  sigma=  1.4982  eps=8.0044
+    client 11  n= 2304  q=0.0278  steps=  4320  sigma=  1.3677  eps=8.0009
+    client 12  n= 1597  q=0.0401  steps=  3000  sigma=  1.5834  eps=7.9969
+    client 13  n= 1803  q=0.0355  steps=  3480  sigma=  1.5218  eps=8.0093
+    client 14  n=  558  q=0.1147  steps=  1080  sigma=  2.5406  eps=7.9974
+
+OUTCOME AS RECORDED
+-------------------
+  rounds recorded 60
+  final test_acc  0.2636
+  best test_acc   0.2660 at round 59
+
+TIMING AS MEASURED (UNRELIABLE - SEE SECTION 3.11)
+--------------------------------------------------
+  seconds total     5667.6
+  rounds run        60
+  seconds per round 94.46
+  
+  Elapsed wall clock continues to accumulate while the machine
+  sleeps. Across 68 Phase A runs the rate ranged 41.0 to 869.0
+  seconds for identical work. This figure is recorded, not trusted.
+
+FILES THIS RUN WROTE
+--------------------
+  config_used.json
+  dp_calibration.json
+  metrics.csv
+  partition_report.json
+  timing.txt

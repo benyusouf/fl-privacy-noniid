@@ -27,6 +27,24 @@ export const colourFor = (strategy: Strategy | null, isFedAvgM = false) => {
   return STRATEGY_COLOURS[strategy] ?? CENTRALIZED_COLOUR
 }
 
+/*
+ * Privacy conditions.
+ *
+ * Epsilon is an ordered quantity, so the three protected conditions share one
+ * hue and darken as the budget tightens. The unprotected baseline sits outside
+ * that ramp deliberately: it is a different kind of thing, not the fourth step
+ * of the same scale.
+ */
+export const UNPROTECTED_COLOUR = '#28C76F'
+export const EPSILON_COLOURS: Record<number, string> = {
+  8: '#B9A7FF',
+  4: '#8264F0',
+  1: '#4B2FBF'
+}
+
+export const conditionColour = (epsilon: number | null) =>
+  epsilon === null ? UNPROTECTED_COLOUR : (EPSILON_COLOURS[epsilon] ?? CENTRALIZED_COLOUR)
+
 /** Distinct colours for arbitrary multi-run comparison, where strategy is not the axis. */
 export const SERIES_COLOURS = [
   '#666CFF',

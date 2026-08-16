@@ -1,0 +1,56 @@
+PROVENANCE RECORD - RECONSTRUCTED, NOT A TRANSCRIPT
+===================================================================
+This run was executed before run.py captured its own output, so no
+log of it exists. Everything below was assembled afterwards from the
+files the run wrote. It records what the run was and what it
+produced. It does not record what appeared on the terminal, and no
+warning, timestamp or message from the session survives.
+
+Runs from Phase C onward carry a real transcript in run.log.
+===================================================================
+
+run: A_pathmnist_scaffold_dir100_s0
+
+CONFIGURATION AS EXECUTED
+-------------------------
+  phase          A
+  dataset        pathmnist
+  mode           federated
+  strategy       scaffold
+  seed           0
+  rounds/epochs  60
+  local epochs   2
+  learning rate  0.01
+  clients        15
+  train subsample 20000  test 5000
+  model          {'backend': 'torch_cnn', 'width': 32, 'batch_size': 64, 'in_channels': 3, 'img_size': 28}
+
+PARTITION AS DRAWN
+------------------
+  kind           dirichlet, alpha=100.0
+  clients        15
+  sizes          min 1288  max 1441  ratio 1.12
+  Hellinger      mean 0.0339  max 0.0472
+
+OUTCOME AS RECORDED
+-------------------
+  rounds recorded 60
+  final test_acc  0.7015
+  best test_acc   0.7203 at round 57
+
+TIMING AS MEASURED (UNRELIABLE - SEE SECTION 3.11)
+--------------------------------------------------
+  seconds total     3244.3
+  rounds run        60
+  seconds per round 54.07
+  
+  Elapsed wall clock continues to accumulate while the machine
+  sleeps. Across 68 Phase A runs the rate ranged 41.0 to 869.0
+  seconds for identical work. This figure is recorded, not trusted.
+
+FILES THIS RUN WROTE
+--------------------
+  config_used.json
+  metrics.csv
+  partition_report.json
+  timing.txt

@@ -82,13 +82,19 @@ const HorizontalMenu = () => {
           Overview
         </MenuItem>
         <MenuItem href='/rq1' icon={<i className='tabler-chart-dots' />}>
-          Headline result
+          Heterogeneity
+        </MenuItem>
+        <MenuItem href='/privacy' icon={<i className='tabler-lock' />}>
+          Cost of privacy
         </MenuItem>
         <MenuItem href='/runs' icon={<i className='tabler-table' />}>
           Run explorer
         </MenuItem>
         <MenuItem href='/phases' icon={<i className='tabler-list-check' />}>
           Phases
+        </MenuItem>
+        <MenuItem href='/downloads' icon={<i className='tabler-download' />}>
+          Data
         </MenuItem>
         <MenuItem href='/concepts' icon={<i className='tabler-bulb' />}>
           Concepts

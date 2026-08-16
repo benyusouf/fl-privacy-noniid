@@ -24,11 +24,15 @@ import ToggleButtonGroup from '@mui/material/ToggleButtonGroup'
 import Typography from '@mui/material/Typography'
 import Button from '@mui/material/Button'
 import Tooltip from '@mui/material/Tooltip'
+import IconButton from '@mui/material/IconButton'
 
 // Component Imports
 import AccuracyCurveChart from '@/components/charts/AccuracyCurveChart'
-import ClientDistributionChart from '@/components/charts/ClientDistributionChart'
 import Caveat from '@/components/site/Caveat'
+import FigureData from '@/components/site/FigureData'
+import LinkButton from '@/components/site/LinkButton'
+import RunDetail from '@/components/site/RunDetail'
+import RunLink from '@/components/site/RunLink'
 
 // Type Imports
 import type { Dataset, Partition, Strategy } from '@/types/results'
@@ -37,9 +41,11 @@ import type { Dataset, Partition, Strategy } from '@/types/results'
 import {
   PARTITION_ORDER,
   STRATEGY_ORDER,
-  bytes,
+
   collapsed,
+  curvePoints,
   endedBelowChance,
+  EPSILONS,
   VOLATILITY_THRESHOLD_PTS,
   filterRuns,
   finalGapPts,
@@ -48,6 +54,7 @@ import {
   pct,
   volatilityPts
 } from '@/lib/results'
+import { runHref } from '@/lib/runHref'
 
 const MAX_COMPARE = 6
 
@@ -72,13 +79,14 @@ const RunExplorer = () => {
   const [partition, setPartition] = useState<Partition | 'all'>('all')
   const [seed, setSeed] = useState<number | 'all'>('all')
   const [mode, setMode] = useState<'all' | 'federated' | 'centralized'>('all')
+  const [privacy, setPrivacy] = useState<'all' | 'none' | number>('all')
   const [metric, setMetric] = useState('test_acc')
   const [selected, setSelected] = useState<string[]>([])
   const [focused, setFocused] = useState<string | null>(null)
 
   const runs = useMemo(
-    () => filterRuns({ dataset, strategy, partition, seed, mode }),
-    [dataset, strategy, partition, seed, mode]
+    () => filterRuns({ dataset, strategy, partition, seed, mode, privacy }),
+    [dataset, strategy, partition, seed, mode, privacy]
   )
 
   const selectedRuns = useMemo(() => runs.filter(r => selected.includes(r.name)), [runs, selected])
@@ -112,7 +120,7 @@ const RunExplorer = () => {
       <Card>
         <CardHeader title='Filter' subheader={`${runs.length} run${runs.length === 1 ? '' : 's'} match`} />
         <CardContent>
-          <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4'>
+          <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4'>
             <FormControl size='small' fullWidth>
               <InputLabel>Dataset</InputLabel>
               <Select label='Dataset' value={dataset} onChange={e => setDataset(e.target.value as Dataset | 'all')}>
@@ -172,6 +180,23 @@ const RunExplorer = () => {
                 <MenuItem value='centralized'>Centralized</MenuItem>
               </Select>
             </FormControl>
+
+            <FormControl size='small' fullWidth>
+              <InputLabel>Privacy</InputLabel>
+              <Select
+                label='Privacy'
+                value={privacy}
+                onChange={e => setPrivacy(e.target.value === 'all' || e.target.value === 'none' ? e.target.value : Number(e.target.value))}
+              >
+                <MenuItem value='all'>All</MenuItem>
+                <MenuItem value='none'>No mechanism</MenuItem>
+                {EPSILONS.map(v => (
+                  <MenuItem key={v} value={v}>
+                    ε = {v}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
           </div>
         </CardContent>
       </Card>
@@ -191,6 +216,14 @@ const RunExplorer = () => {
                     ))}
                   </ToggleButtonGroup>
                 )}
+                <FigureData
+                  filename='comparison'
+                  columns={['run', 'step', activeMetric]}
+                  rows={selectedRuns.flatMap(r =>
+                    curvePoints(r).map(p => [r.name, p[r.stepUnit], p[activeMetric]])
+                  )}
+                  sources={selectedRuns.map(r => r.name)}
+                />
                 <Button size='small' variant='tonal' color='secondary' onClick={() => setSelected([])}>
                   Clear
                 </Button>
@@ -219,7 +252,23 @@ const RunExplorer = () => {
       <Card>
         <CardHeader
           title='Runs'
-          subheader={`Select up to ${MAX_COMPARE} to overlay; click a row name to inspect it in full`}
+          subheader={`Select up to ${MAX_COMPARE} to overlay; open a run for its full record`}
+          action={
+            <FigureData
+              filename='runs_table'
+              columns={[
+                'run','phase','dataset','strategy','partition','seed','target_epsilon','delivered_epsilon',
+                'hellinger_mean','final_acc','best_acc','best_step','tail10_mean'
+              ]}
+              rows={runs.map(r => [
+                r.name, r.phase, r.dataset, r.strategyLabel, r.partition, r.seed,
+                r.dp?.targetEpsilon ?? null, r.dp?.deliveredEpsilon ?? null,
+                r.hellingerMean, r.finalAcc, r.bestAcc, r.bestStep, r.tailMean
+              ])}
+              sources={runs.map(r => r.name)}
+              label='Download this table'
+            />
+          }
         />
         <CardContent>
           <TableContainer>
@@ -255,14 +304,20 @@ const RunExplorer = () => {
                         />
                       </TableCell>
                       <TableCell>
-                        <Button
-                          size='small'
-                          variant='text'
-                          className='p-0 min-is-0 normal-case'
-                          onClick={() => setFocused(focused === r.name ? null : r.name)}
-                        >
-                          <code className='text-xs'>{r.name}</code>
-                        </Button>
+                        <div className='flex items-center gap-1'>
+                          <RunLink name={r.name} />
+                          <Tooltip title={focused === r.name ? 'Hide details' : 'Preview details here'}>
+                            <IconButton
+                              size='small'
+                              onClick={() => setFocused(focused === r.name ? null : r.name)}
+                              aria-label={focused === r.name ? 'Hide details' : 'Preview details'}
+                            >
+                              <i
+                                className={focused === r.name ? 'tabler-chevron-up text-[16px]' : 'tabler-chevron-down text-[16px]'}
+                              />
+                            </IconButton>
+                          </Tooltip>
+                        </div>
                       </TableCell>
                       <TableCell>
                         {r.isFedAvgM ? (
@@ -297,6 +352,11 @@ const RunExplorer = () => {
                       </TableCell>
                       <TableCell>
                         <div className='flex gap-1 flex-wrap'>
+                          {r.dp && (
+                            <Tooltip title={`Delivered ε = ${r.dp.deliveredEpsilon.toFixed(4)} — the worst client's realised budget`}>
+                              <Chip size='small' variant='tonal' color='secondary' label={`ε = ${r.dp.targetEpsilon}`} />
+                            </Tooltip>
+                          )}
                           {below && <Chip size='small' variant='tonal' color='error' label='below chance' />}
                           {lost && !below && <Chip size='small' variant='tonal' color='warning' label='lost ground' />}
                           {noisy && (
@@ -338,111 +398,27 @@ const RunExplorer = () => {
       {focusedRun && (
         <Card>
           <CardHeader
-            title={<code className='text-sm'>{focusedRun.name}</code>}
+            title={<RunLink name={focusedRun.name} plain />}
             subheader={`${focusedRun.datasetLabel} · ${focusedRun.strategyLabel}${
               focusedRun.partitionLabel ? ` · ${focusedRun.partitionLabel}` : ''
             } · seed ${focusedRun.seed ?? '—'}`}
             action={
-              <Button size='small' variant='tonal' color='secondary' onClick={() => setFocused(null)}>
-                Close
-              </Button>
+              <div className='flex gap-2'>
+                <LinkButton href={runHref(focusedRun.name)} size='small' variant='tonal'>
+                  Open full record
+                </LinkButton>
+                <Button size='small' variant='tonal' color='secondary' onClick={() => setFocused(null)}>
+                  Close
+                </Button>
+              </div>
             }
           />
-          <CardContent className='flex flex-col gap-6'>
-            {endedBelowChance(focusedRun) && (
-              <Caveat severity='error' title='This run diverged'>
-                It ends at {pct(focusedRun.finalAcc)}, below the chance level for this dataset, having peaked at{' '}
-                {pct(focusedRun.bestAcc)} at {focusedRun.stepUnit} {focusedRun.bestStep}. Read this as divergence with
-                a named peak, not as a low final score.
-              </Caveat>
-            )}
-
-            <div>
-              <Typography variant='subtitle2' className='mbe-2'>
-                Accuracy
-              </Typography>
-              <AccuracyCurveChart runs={[focusedRun]} metric='test_acc' />
-            </div>
-
-            {focusedRun.clientSizes && (
-              <div>
-                <Typography variant='subtitle2' className='mbe-2'>
-                  What the partition produced
-                </Typography>
-                <ClientDistributionChart run={focusedRun} />
-              </div>
-            )}
-
-            <div className='grid grid-cols-1 lg:grid-cols-2 gap-6'>
-              <div>
-                <Typography variant='subtitle2' className='mbe-2'>
-                  Recorded quantities
-                </Typography>
-                <TableContainer>
-                  <Table size='small'>
-                    <TableBody>
-                      <TableRow>
-                        <TableCell>Steps recorded</TableCell>
-                        <TableCell align='right'>
-                          {focusedRun.steps} {focusedRun.stepUnit}s
-                        </TableCell>
-                      </TableRow>
-                      <TableRow>
-                        <TableCell>Final / best accuracy</TableCell>
-                        <TableCell align='right'>
-                          {pct(focusedRun.finalAcc)} / {pct(focusedRun.bestAcc)}
-                        </TableCell>
-                      </TableRow>
-                      {focusedRun.hellingerMean !== null && (
-                        <TableRow>
-                          <TableCell>Hellinger mean / max</TableCell>
-                          <TableCell align='right'>
-                            {focusedRun.hellingerMean.toFixed(4)} / {focusedRun.hellingerMax?.toFixed(4)}
-                          </TableCell>
-                        </TableRow>
-                      )}
-                      {focusedRun.bytesUpPerRound !== null && (
-                        <TableRow>
-                          <TableCell>
-                            Uplink per round
-                            <Typography variant='caption' color='text.secondary' className='block'>
-                              analytic, not measured
-                            </Typography>
-                          </TableCell>
-                          <TableCell align='right'>{bytes(focusedRun.bytesUpPerRound)}</TableCell>
-                        </TableRow>
-                      )}
-                      {focusedRun.secondsPerRound !== null && (
-                        <TableRow>
-                          <TableCell>
-                            Seconds per round
-                            <Typography variant='caption' color='error.main' className='block'>
-                              unreliable — see Limitations
-                            </Typography>
-                          </TableCell>
-                          <TableCell align='right'>{focusedRun.secondsPerRound.toFixed(1)}</TableCell>
-                        </TableRow>
-                      )}
-                    </TableBody>
-                  </Table>
-                </TableContainer>
-              </div>
-
-              <div>
-                <Typography variant='subtitle2' className='mbe-2'>
-                  Configuration as executed
-                </Typography>
-                <Typography variant='caption' color='text.secondary' className='block mbe-2'>
-                  Verbatim from <code>config_used.json</code> — the authoritative record of what this run actually did.
-                </Typography>
-                <pre className='text-xs overflow-auto max-bs-[380px] p-4 rounded bg-actionHover'>
-                  {JSON.stringify(focusedRun.config, null, 2)}
-                </pre>
-              </div>
-            </div>
+          <CardContent>
+            <RunDetail run={focusedRun} embedded />
           </CardContent>
         </Card>
       )}
+
     </div>
   )
 }

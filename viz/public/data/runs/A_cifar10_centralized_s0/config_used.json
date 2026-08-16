@@ -1,0 +1,17 @@
+{
+  "name": "A_cifar10_centralized_s0",
+  "seed": 0,
+  "dataset": "cifar10",
+  "mode": "centralized",
+  "lr": 0.01,
+  "subsample": 20000,
+  "subsample_test": 5000,
+  "epochs": 30,
+  "model": {
+    "backend": "torch_cnn",
+    "width": 32,
+    "batch_size": 64,
+    "in_channels": 3,
+    "img_size": 32
+  }
+}

@@ -1,0 +1,169 @@
+{
+  "target_epsilon": 1.0,
+  "delta": 1e-05,
+  "max_grad_norm": 1.0,
+  "batch_size": 64,
+  "local_epochs": 2,
+  "rounds": 60,
+  "granularity": "sample-level",
+  "clients": [
+    {
+      "client": 0,
+      "n": 1344,
+      "q": 0.047619,
+      "steps": 2520,
+      "sigma": 9.813281,
+      "realised_epsilon": 0.991,
+      "saturated": false,
+      "sigma_needed_for_target": null
+    },
+    {
+      "client": 1,
+      "n": 1397,
+      "q": 0.045812,
+      "steps": 2640,
+      "sigma": 9.58125,
+      "realised_epsilon": 1.0005,
+      "saturated": false,
+      "sigma_needed_for_target": null
+    },
+    {
+      "client": 2,
+      "n": 1102,
+      "q": 0.058076,
+      "steps": 2160,
+      "sigma": 10.973437,
+      "realised_epsilon": 1.0009,
+      "saturated": false,
+      "sigma_needed_for_target": null
+    },
+    {
+      "client": 3,
+      "n": 1246,
+      "q": 0.051364,
+      "steps": 2400,
+      "sigma": 10.277344,
+      "realised_epsilon": 0.9962,
+      "saturated": false,
+      "sigma_needed_for_target": null
+    },
+    {
+      "client": 4,
+      "n": 1421,
+      "q": 0.045039,
+      "steps": 2760,
+      "sigma": 9.58125,
+      "realised_epsilon": 1.0061,
+      "saturated": false,
+      "sigma_needed_for_target": null
+    },
+    {
+      "client": 5,
+      "n": 1019,
+      "q": 0.062807,
+      "steps": 1920,
+      "sigma": 11.205469,
+      "realised_epsilon": 0.9992,
+      "saturated": false,
+      "sigma_needed_for_target": null
+    },
+    {
+      "client": 6,
+      "n": 1842,
+      "q": 0.034745,
+      "steps": 3480,
+      "sigma": 8.421094,
+      "realised_epsilon": 0.9911,
+      "saturated": false,
+      "sigma_needed_for_target": null
+    },
+    {
+      "client": 7,
+      "n": 700,
+      "q": 0.091429,
+      "steps": 1320,
+      "sigma": 13.525781,
+      "realised_epsilon": 0.9984,
+      "saturated": false,
+      "sigma_needed_for_target": null
+    },
+    {
+      "client": 8,
+      "n": 1088,
+      "q": 0.058824,
+      "steps": 2040,
+      "sigma": 10.741406,
+      "realised_epsilon": 1.0074,
+      "saturated": false,
+      "sigma_needed_for_target": null
+    },
+    {
+      "client": 9,
+      "n": 739,
+      "q": 0.086604,
+      "steps": 1440,
+      "sigma": 13.29375,
+      "realised_epsilon": 1.0056,
+      "saturated": false,
+      "sigma_needed_for_target": null
+    },
+    {
+      "client": 10,
+      "n": 1840,
+      "q": 0.034783,
+      "steps": 3480,
+      "sigma": 8.421094,
+      "realised_epsilon": 0.9923,
+      "saturated": false,
+      "sigma_needed_for_target": null
+    },
+    {
+      "client": 11,
+      "n": 2304,
+      "q": 0.027778,
+      "steps": 4320,
+      "sigma": 7.492969,
+      "realised_epsilon": 0.9934,
+      "saturated": false,
+      "sigma_needed_for_target": null
+    },
+    {
+      "client": 12,
+      "n": 1597,
+      "q": 0.040075,
+      "steps": 3000,
+      "sigma": 8.885156,
+      "realised_epsilon": 1.0072,
+      "saturated": false,
+      "sigma_needed_for_target": null
+    },
+    {
+      "client": 13,
+      "n": 1803,
+      "q": 0.035496,
+      "steps": 3480,
+      "sigma": 8.537109,
+      "realised_epsilon": 0.9994,
+      "saturated": false,
+      "sigma_needed_for_target": null
+    },
+    {
+      "client": 14,
+      "n": 558,
+      "q": 0.114695,
+      "steps": 1080,
+      "sigma": 15.382031,
+      "realised_epsilon": 0.9954,
+      "saturated": false,
+      "sigma_needed_for_target": null
+    }
+  ],
+  "sigma_min": 7.492969,
+  "sigma_max": 15.382031,
+  "sigma_ratio": 2.0528619563219865,
+  "epsilon_max_abs_error": 0.00901,
+  "epsilon_run_level": 1.0074,
+  "label_honoured": true,
+  "exceeds_retired_ceiling": [],
+  "note": "Reconstructed from config_used.json and partition_report.json, not logged at run time. The calibration is deterministic in (client size, batch size, local epochs, rounds, target epsilon, delta), so these are the values the run used. The ceiling on the noise search now expands until it brackets the target, so no client is silently capped. See D58, D63, D69."
+}

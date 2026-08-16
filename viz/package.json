@@ -4,7 +4,7 @@
   "license": "Commercial",
   "private": true,
   "scripts": {
-    "build:data": "node scripts/build-data.mjs",
+    "build:data": "node scripts/build-data.mjs && node scripts/build-downloads.mjs",
     "test": "node scripts/test-chart-geometry.mjs",
     "typecheck": "tsc --noEmit",
     "check": "npm run test && npm run typecheck && npm run lint",
@@ -14,7 +14,7 @@
     "build": "next build",
     "pretypecheck": "npm run build:data",
     "prelint": "npm run build:data",
-    "build:site": "node scripts/build-data.mjs && BASEPATH=/fl-privacy-noniid next build && touch out/.nojekyll",
+    "build:site": "npm run build:data && BASEPATH=/fl-privacy-noniid next build && touch out/.nojekyll",
     "start": "next start",
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
     "lint:fix": "eslint . --ext .js,.jsx,.ts,.tsx --fix",
@@ -22,7 +22,8 @@
     "build:icons": "tsx src/assets/iconify-icons/bundle-icons-css.ts",
     "postinstall": "npm run build:icons",
     "clean": "rm -rf .next",
-    "clear": "rm -rf node_modules .next"
+    "clear": "rm -rf node_modules .next",
+    "build:downloads": "node scripts/build-downloads.mjs"
   },
   "dependencies": {
     "@emotion/cache": "11.14.0",

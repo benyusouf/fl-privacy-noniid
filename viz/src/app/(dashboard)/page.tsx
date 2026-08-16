@@ -4,6 +4,7 @@ import CardContent from '@mui/material/CardContent'
 import CardHeader from '@mui/material/CardHeader'
 import Chip from '@mui/material/Chip'
 import Divider from '@mui/material/Divider'
+import Button from '@mui/material/Button'
 import Typography from '@mui/material/Typography'
 
 // Component Imports
@@ -13,7 +14,8 @@ import StatCard from '@/components/site/StatCard'
 import Caveat from '@/components/site/Caveat'
 
 // Lib Imports
-import { allRuns, bundle, centralizedRuns, federatedRuns, seedGroups } from '@/lib/results'
+import { allRuns, bundle, centralizedRuns, federatedRuns, protectedRuns, seedGroups } from '@/lib/results'
+import { archiveUrl, downloads } from '@/lib/downloads'
 
 export const metadata = {
   title: 'Federated Learning with Non-IID Data — results explorer',
@@ -29,7 +31,7 @@ const RQS = [
   },
   {
     id: 'RQ2',
-    phase: 'B, C',
+    phase: 'B (done), C',
     q: 'What accuracy and communication cost do differential privacy and secure aggregation add, and how do those costs interact with heterogeneity?'
   },
   {
@@ -63,7 +65,11 @@ const Page = () => {
       </Caveat>
 
       <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mbe-6'>
-        <StatCard label='Runs recorded' value={String(allRuns.length)} hint='Phase A, superseded runs excluded' />
+        <StatCard
+          label='Runs recorded'
+          value={String(allRuns.length)}
+          hint={`Phases A and B of 120 planned; superseded runs excluded`}
+        />
         <StatCard
           label='Federated / centralized'
           value={`${federatedRuns.length} / ${centralizedRuns.length}`}
@@ -74,7 +80,11 @@ const Page = () => {
           value={`${multiSeed} of ${multiSeed + singleSeed}`}
           hint={`${singleSeed} run at a single seed`}
         />
-        <StatCard label='Datasets' value='2' hint='CIFAR-10 and PathMNIST' />
+        <StatCard
+          label='Under differential privacy'
+          value={String(protectedRuns.length)}
+          hint='sample-level, ε ∈ {8, 4, 1}, seed 0'
+        />
       </div>
 
       <Card className='mbe-6'>
@@ -95,8 +105,8 @@ const Page = () => {
         <Divider />
         <CardContent>
           <Typography variant='body2' color='text.secondary'>
-            Only Phase A has been run. Phases B–E are pending, and are shown on this site with that status rather than
-            hidden.
+            Phases A and B have been run. C, D and E are pending, and are shown on this site with that status rather
+            than hidden.
           </Typography>
         </CardContent>
       </Card>
@@ -160,6 +170,34 @@ const Page = () => {
             because system sleep is counted as compute. Timings are recorded on this site but never plotted as if they
             meant something.
           </Typography>
+        </CardContent>
+      </Card>
+
+      <Card className='mbe-6'>
+        <CardHeader
+          title='Every figure here comes from a file you can download'
+          subheader={`${downloads.totalFiles} files, ${downloads.totalLabel}`}
+        />
+        <CardContent className='flex flex-col gap-3'>
+          <Typography>
+            Each run publishes its metrics, the configuration it executed with, its partition report where it has one,
+            and a record of itself. Nothing on this site is computed from anything that is not served alongside it — if
+            a number here cannot be traced to one of these files, it should not be here.
+          </Typography>
+          <Typography variant='body2' color='text.secondary'>
+            {downloads.note}
+          </Typography>
+          <Button
+            component='a'
+            href={archiveUrl()}
+            download
+            variant='tonal'
+            size='small'
+            className='self-start'
+            startIcon={<i className='tabler-download' />}
+          >
+            Download all results ({downloads.archive.sizeLabel})
+          </Button>
         </CardContent>
       </Card>
 
