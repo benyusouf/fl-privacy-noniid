@@ -2,6 +2,9 @@
 import PageHeader from '@/components/site/PageHeader'
 import PrivacyView from '@/views/privacy/PrivacyView'
 
+// Lib Imports
+import { protectedRuns } from '@/lib/results'
+
 export const metadata = {
   title: 'The cost of differential privacy (RQ2) — FL with non-IID data',
   description:
@@ -13,7 +16,7 @@ const Page = () => (
     <PageHeader
       eyebrow='RQ2 · Phase B'
       title='The cost of differential privacy'
-      status={{ label: 'Phase B complete · 36 runs', color: 'success' }}
+      status={{ label: `Phase B complete · ${protectedRuns.length} runs`, color: 'success' }}
       lede='What accuracy differential privacy costs, and what it does to the relationship between heterogeneity and accuracy that Phase A established. The headline cost is about nineteen points; the more interesting result is that accuracy stops tracking heterogeneity at all.'
     />
     <PrivacyView />

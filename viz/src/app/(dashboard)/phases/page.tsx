@@ -23,7 +23,7 @@ type Phase = {
   id: string
   title: string
   rq: string
-  status: 'complete' | 'pending'
+  status: 'complete' | 'running' | 'pending'
   varies: string
   fixed: string
   answers: string
@@ -61,7 +61,7 @@ const PHASES: Phase[] = [
     id: 'C',
     title: 'Secure aggregation',
     rq: 'RQ2',
-    status: 'pending',
+    status: 'running',
     runs: '4 runs',
     varies: 'Masking scheme and its parameters, layered on the Phase B configurations.',
     fixed: 'The Phase A training configuration.',
@@ -95,6 +95,7 @@ const PHASES: Phase[] = [
 const Page = () => {
   const phaseA = allRuns.filter(r => r.phase === 'A')
   const phaseB = allRuns.filter(r => r.phase === 'B')
+  const phaseC = allRuns.filter(r => r.phase === 'C')
 
   return (
     <div className='flex flex-col'>
@@ -104,11 +105,12 @@ const Page = () => {
         lede='Five phases, each isolating one variable against a fixed baseline. Phase names are fixed by Chapter One. Phases that have not been run are shown with that status rather than omitted.'
       />
 
-      <Caveat severity='info' title='Two phases of five have results'>
-        Phase A is complete at {phaseA.length} runs and Phase B at {phaseB.length}, giving {allRuns.length} of the 120
-        training runs the design calls for. Phases C, D and E are pending — 4 runs, 8 runs, and 14 attack conditions
-        that train nothing. Showing them as pending is deliberate: a reader should be able to see the shape of the
-        whole study and how much of it has been executed.
+      <Caveat severity='info' title='How much of the study has been run'>
+        Phase A is complete at {phaseA.length} runs and Phase B at {phaseB.length}. Phase C is under way with{' '}
+        {phaseC.length} of its 4 recorded so far. That is {allRuns.length} of the 120 training runs the design calls
+        for, with D still to come at 8 runs and E at 14 attack conditions that train nothing. Showing the unfinished
+        phases rather than hiding them is deliberate: a reader should be able to see the shape of the whole study and
+        how much of it has been executed.
       </Caveat>
 
       <div className='flex flex-col gap-6'>
@@ -125,8 +127,8 @@ const Page = () => {
                   <Chip
                     size='small'
                     variant='tonal'
-                    color={p.status === 'complete' ? 'success' : 'default'}
-                    label={p.status === 'complete' ? 'complete' : 'pending'}
+                    color={p.status === 'complete' ? 'success' : p.status === 'running' ? 'info' : 'default'}
+                    label={p.status === 'complete' ? 'complete' : p.status === 'running' ? `in progress · ${phaseC.length} recorded` : 'pending'}
                   />
                   {p.runs && <Chip size='small' variant='tonal' color='secondary' label={p.runs} />}
                 </div>

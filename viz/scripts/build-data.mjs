@@ -133,6 +133,8 @@ const readJson = p => JSON.parse(readFileSync(p, 'utf8'))
 // rather than from the directory name, which is the more robust signal.
 // ---------------------------------------------------------------------------
 
+const unknownPartitions = new Set()
+
 const decodeName = (name, config) => {
   const parts = name.split('_')
   const phase = parts[0]
@@ -144,25 +146,42 @@ const decodeName = (name, config) => {
 
   let strategy = null
   let partition = null
+  let arm = null
 
   if (!isCentralized) {
     strategy = config?.strategy ?? parts[2]
-    partition = parts.slice(3, parts.length - 1).join('_') || null
 
     /*
-     * Phase B directories carry the privacy budget in the name:
-     *   B_<dataset>_<strategy>_<partition>_eps<N>_s<seed>
+     * Split the middle of the name into a partition and an "arm".
      *
-     * Left in place, the partition reads "dir0.1_eps1", which matches no entry
-     * in PARTITION_LABELS, appears in no facet list, and never groups with the
-     * Phase A run it is measured against — so a Phase B run would be
-     * unreachable from the partition filter and mislabelled everywhere it
-     * appeared. The budget is already carried, more precisely, on run.dp.
+     * Directory names put the experimental arm after the partition, and each
+     * phase adds its own:
+     *   A_<ds>_<strat>_<partition>_s<seed>
+     *   B_<ds>_<strat>_<partition>_eps<N>_s<seed>
+     *   C_<ds>_<strat>_<partition>_{plain,secagg}_s<seed>
      *
-     * Anchored on the _eps<digits> segment specifically, not on a loose split:
-     * partition names legitimately contain dots and digits (dir0.1, dir1.0).
+     * Taking the whole middle as the partition yields "dir0.1_eps1" or
+     * "dir0.1_secagg" — values that match no entry in PARTITION_LABELS, appear
+     * in no facet list, and never group with the Phase A run they are measured
+     * against. The run then becomes unreachable from the partition filter and
+     * mislabelled everywhere it appears.
+     *
+     * Rather than strip each new suffix as it turns up — which is how this was
+     * missed twice — the partition is resolved against the known set, and
+     * whatever follows is kept as the arm. An unrecognised partition raises a
+     * warning instead of silently becoming its own bogus category.
      */
-    if (partition) partition = partition.replace(/_eps\d+$/, '')
+    const middle = parts.slice(3, parts.length - 1)
+    const known = Object.keys(PARTITION_LABELS)
+    const idx = middle.findIndex(seg => known.includes(seg))
+
+    if (idx === -1) {
+      partition = middle.join('_') || null
+      if (partition) unknownPartitions.add(`${name}: "${partition}" is not a known partition`)
+    } else {
+      partition = middle[idx]
+      arm = middle.slice(idx + 1).join('_') || null
+    }
   }
 
   const isFedAvgM = !isCentralized && config?.server_momentum !== undefined
@@ -173,6 +192,8 @@ const decodeName = (name, config) => {
     seed,
     strategy,
     partition,
+    /** The experimental arm within a partition: eps1, plain, secagg, ... */
+    arm,
     isFedAvgM,
     mode: isCentralized ? 'centralized' : 'federated'
   }
@@ -385,7 +406,7 @@ const { runs, excluded } = collect()
 
 // Integrity checks. These are assertions about the emitted bundle, not about the
 // experiment — they catch a broken conversion, not a broken result.
-const problems = []
+const problems = [...unknownPartitions]
 
 for (const r of runs) {
   if (r.finalAcc === null) problems.push(`${r.name}: no test_acc column`)

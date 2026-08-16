@@ -21,7 +21,7 @@ type Props = {
  * One page per run.
  *
  * Static export has to enumerate every dynamic route at build time, which is
- * exactly what generateStaticParams does here — 108 pages, one per recorded run.
+ * exactly what generateStaticParams does here — one page per recorded run.
  * The point is citability: a run becomes a URL that can be linked, bookmarked or
  * quoted, rather than a state you have to reproduce by setting filters.
  */

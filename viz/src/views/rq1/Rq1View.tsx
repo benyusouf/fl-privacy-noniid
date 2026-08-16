@@ -45,7 +45,7 @@ const Rq1View = () => {
   // below takes the first group per (partition, strategy), a differentially
   // private cell could be shown as if it were the baseline.
   const groups = useMemo(
-    () => seedGroups(federatedRuns.filter(r => r.dataset === dataset && !r.isFedAvgM && r.dp === null)),
+    () => seedGroups(federatedRuns.filter(r => r.dataset === dataset && !r.isFedAvgM && r.dp === null && r.arm === null)),
     [dataset]
   )
 
@@ -65,7 +65,7 @@ const Rq1View = () => {
   const unstable = useMemo(
     () =>
       federatedRuns.filter(
-        r => r.dataset === dataset && !r.isFedAvgM && r.dp === null && hasUnrepresentativeFinal(r)
+        r => r.dataset === dataset && !r.isFedAvgM && r.dp === null && r.arm === null && hasUnrepresentativeFinal(r)
       ),
     [dataset]
   )

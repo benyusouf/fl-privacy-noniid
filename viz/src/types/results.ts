@@ -75,6 +75,13 @@ export type Run = {
   partition: Partition | null
   partitionLabel: string | null
 
+  /**
+   * The experimental arm within a partition — 'eps1', 'plain', 'secagg', … —
+   * or null for the Phase A baseline. Two runs sharing a partition but not an
+   * arm are different conditions and must never be pooled.
+   */
+  arm: string | null
+
   /** Number of recorded rows, and the unit of the step column ('round' | 'epoch'). */
   steps: number
   stepUnit: string
@@ -188,6 +195,13 @@ export type SeedGroup = {
   isFedAvgM: boolean
   partition: Partition | null
   partitionLabel: string | null
+
+  /**
+   * The experimental arm within a partition — 'eps1', 'plain', 'secagg', … —
+   * or null for the Phase A baseline. Two runs sharing a partition but not an
+   * arm are different conditions and must never be pooled.
+   */
+  arm: string | null
   mode: RunMode
   runs: Run[]
   n: number

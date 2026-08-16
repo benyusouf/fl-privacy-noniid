@@ -123,9 +123,9 @@ const CAPABILITIES = [
 ]
 
 const Page = () => {
-  // Unprotected configurations only. Phase B was run at a single seed by
-  // design, so including it would report that decision as missing coverage.
-  const groups = seedGroups(federatedRuns.filter(r => r.dp === null))
+  // Baseline arm only. Later phases reuse the Phase A grid at a single seed by
+  // design, so including them would report that decision as missing coverage.
+  const groups = seedGroups(federatedRuns.filter(r => r.dp === null && r.arm === null))
   const multiSeed = groups.filter(g => !g.singleSeed).length
   const singleSeed = groups.filter(g => g.singleSeed).length
 
@@ -141,7 +141,7 @@ const Page = () => {
         <StatCard
           label='Runs recorded'
           value={String(allRuns.length)}
-          hint='Phases A and B of 120 planned'
+          hint='of the 120 the design calls for'
           icon='tabler-database'
           color='primary'
         />

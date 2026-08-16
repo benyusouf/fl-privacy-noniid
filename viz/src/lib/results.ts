@@ -25,6 +25,13 @@ export const centralizedRuns = allRuns.filter(r => r.mode === 'centralized')
  * but ties the meaning to a naming convention rather than to the mechanism.
  */
 export const unprotectedRuns = allRuns.filter(r => r.dp === null)
+
+/**
+ * The Phase A baseline: no privacy mechanism and no experimental arm. Filtering
+ * on dp alone is not enough — a Phase C "plain" control also carries dp: null,
+ * and would otherwise be plotted as if it were the original baseline.
+ */
+export const baselineRuns = allRuns.filter(r => r.dp === null && r.arm === null)
 export const protectedRuns = allRuns.filter(r => r.dp !== null)
 
 export const phaseRuns = (phase: string) => allRuns.filter(r => r.phase === phase)
@@ -68,13 +75,13 @@ export const hasColumn = (run: Run, col: string) => run.curve.cols.includes(col)
 // ---------------------------------------------------------------------------
 
 /*
- * The privacy budget is part of the identity of a configuration.
+ * The experimental arm is part of the identity of a configuration.
  *
- * Phase B runs share dataset, strategy and partition with the Phase A run they
- * are measured against — that is the point of the design. Without epsilon in
- * the key, a Phase A cell and its three Phase B cells collapse into one group
- * of six runs, and every "spread across seeds" figure computed from it would
- * silently be a spread across privacy budgets instead.
+ * Later phases reuse the Phase A grid deliberately — same dataset, strategy and
+ * partition, one mechanism changed. Without the arm in the key those runs
+ * collapse into one group with their baseline, and every "spread across seeds"
+ * figure computed from it would silently be a spread across mechanisms instead.
+ * Phase B adds eps1/eps4/eps8; Phase C adds plain/secagg.
  */
 const groupKey = (r: Run) =>
   [
@@ -82,7 +89,7 @@ const groupKey = (r: Run) =>
     r.mode,
     r.isFedAvgM ? 'fedavgm' : (r.strategy ?? 'centralized'),
     r.partition ?? 'none',
-    r.dp ? `eps${r.dp.targetEpsilon}` : 'unprotected'
+    r.arm ?? 'baseline'
   ].join('|')
 
 const mean = (xs: number[]) => xs.reduce((a, b) => a + b, 0) / xs.length
@@ -115,6 +122,7 @@ export const seedGroups = (runs: Run[] = allRuns): SeedGroup[] => {
       isFedAvgM: head.isFedAvgM,
       partition: head.partition,
       partitionLabel: head.partitionLabel,
+      arm: head.arm,
       mode: head.mode,
       runs: sorted,
       n: sorted.length,
@@ -141,10 +149,10 @@ export const seedGroups = (runs: Run[] = allRuns): SeedGroup[] => {
  * is a central methodological commitment of the study — do not substitute alpha.
  */
 export const rq1Points = (dataset: Dataset) =>
-  // Unprotected runs only. RQ1 asks how federated training compares with
-  // centralized as heterogeneity rises, with no privacy mechanism in play;
-  // including Phase B here would plot noised runs as if they were baselines.
-  seedGroups(federatedRuns.filter(r => r.dataset === dataset && !r.isFedAvgM && r.dp === null))
+  // Baseline arm only. RQ1 asks how federated training compares with centralized
+  // as heterogeneity rises, with no mechanism in play; a Phase B noised run or a
+  // Phase C control would otherwise be plotted as if it were that baseline.
+  seedGroups(federatedRuns.filter(r => r.dataset === dataset && !r.isFedAvgM && r.dp === null && r.arm === null))
     .map(g => ({
       ...g,
       x: g.meanHellinger ?? 0,
@@ -218,7 +226,7 @@ export const dpCell = (dataset: Dataset, partition: Partition, strategy: Strateg
       r.partition === partition &&
       r.strategy === strategy &&
       r.seed === DP_SEED &&
-      (epsilon === null ? r.dp === null : r.dp?.targetEpsilon === epsilon)
+      (epsilon === null ? r.dp === null && r.arm === null : r.dp?.targetEpsilon === epsilon)
   ) ?? null
 
 /**

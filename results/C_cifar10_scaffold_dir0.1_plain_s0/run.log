@@ -1,0 +1,41 @@
+
+======================================================================
+C_cifar10_scaffold_dir0.1_plain_s0  started 2026-08-17 00:10:26
+config: experiments/phase_c/C_cifar10_scaffold_dir0.1_plain_s0.yaml
+======================================================================
+[C_cifar10_scaffold_dir0.1_plain_s0] model params: 189,130 | train 20000 test 5000
+[C_cifar10_scaffold_dir0.1_plain_s0] partition dirichlet | HD mean=0.6282 max=0.8269 | sizes[88,3591]
+[C_cifar10_scaffold_dir0.1_plain_s0] strategy=scaffold
+  round   1  test_acc=0.1512  client_acc_var=0.01844
+  round   2  test_acc=0.1682  client_acc_var=0.03131
+  round   3  test_acc=0.1844  client_acc_var=0.02870
+  round   4  test_acc=0.1930  client_acc_var=0.03143
+  round   5  test_acc=0.2202  client_acc_var=0.03133
+  round   6  test_acc=0.2184  client_acc_var=0.03253
+  round   7  test_acc=0.2416  client_acc_var=0.02783
+  round   8  test_acc=0.2418  client_acc_var=0.02881
+  round   9  test_acc=0.2602  client_acc_var=0.01865
+  round  10  test_acc=0.2412  client_acc_var=0.02746
+  round  11  test_acc=0.2466  client_acc_var=0.03066
+  round  12  test_acc=0.2486  client_acc_var=0.03235
+  round  13  test_acc=0.2628  client_acc_var=0.03184
+  round  14  test_acc=0.2650  client_acc_var=0.03221
+  round  15  test_acc=0.2654  client_acc_var=0.03863
+  round  16  test_acc=0.2502  client_acc_var=0.03489
+  round  17  test_acc=0.2664  client_acc_var=0.02752
+  round  18  test_acc=0.2792  client_acc_var=0.03075
+  round  19  test_acc=0.2830  client_acc_var=0.02629
+  round  20  test_acc=0.2776  client_acc_var=0.02918
+  round  21  test_acc=0.2712  client_acc_var=0.02893
+  round  22  test_acc=0.2506  client_acc_var=0.04098
+  round  23  test_acc=0.2746  client_acc_var=0.04270
+  round  24  test_acc=0.2816  client_acc_var=0.02860
+  round  25  test_acc=0.2978  client_acc_var=0.02005
+  round  26  test_acc=0.2842  client_acc_var=0.03045
+  round  27  test_acc=0.2904  client_acc_var=0.03254
+  round  28  test_acc=0.2930  client_acc_var=0.03027
+  round  29  test_acc=0.2994  client_acc_var=0.02745
+  round  30  test_acc=0.2880  client_acc_var=0.03589
+  round  31  test_acc=0.2894  client_acc_var=0.03227
+  round  32  test_acc=0.2864  client_acc_var=0.03651
+  round  33  test_acc=0.2824  client_acc_var=0.03136
