@@ -3,7 +3,6 @@ import Card from '@mui/material/Card'
 import CardContent from '@mui/material/CardContent'
 import CardHeader from '@mui/material/CardHeader'
 import Chip from '@mui/material/Chip'
-import Divider from '@mui/material/Divider'
 import Button from '@mui/material/Button'
 import Typography from '@mui/material/Typography'
 
@@ -11,105 +10,221 @@ import Typography from '@mui/material/Typography'
 import LinkButton from '@/components/site/LinkButton'
 import PageHeader from '@/components/site/PageHeader'
 import StatCard from '@/components/site/StatCard'
-import Caveat from '@/components/site/Caveat'
+import CustomAvatar from '@core/components/mui/Avatar'
 
 // Lib Imports
 import { allRuns, bundle, centralizedRuns, federatedRuns, protectedRuns, seedGroups } from '@/lib/results'
 import { archiveUrl, downloads } from '@/lib/downloads'
 
+// Config Imports
+import author from '@configs/author'
+
 export const metadata = {
   title: 'Federated Learning with Non-IID Data — results explorer',
   description:
-    'Results explorer supplementing an MSc dissertation on privacy-preserving federated learning under non-IID data.'
+    'Results, charts and downloadable data from Abdullahi Yusuf\u2019s MSc research into privacy-preserving federated learning with non-IID data.'
 }
 
 const RQS = [
   {
     id: 'RQ1',
-    phase: 'A',
-    q: 'How does federated learning compare with centralized training as data heterogeneity increases, across four aggregation strategies?'
+    phase: 'Phase A',
+    status: 'answered',
+    icon: 'tabler-chart-dots',
+    color: 'primary' as const,
+    q: 'How does federated learning compare with centralized training as data heterogeneity increases, across four aggregation strategies?',
+    href: '/rq1'
   },
   {
     id: 'RQ2',
-    phase: 'B (done), C',
-    q: 'What accuracy and communication cost do differential privacy and secure aggregation add, and how do those costs interact with heterogeneity?'
+    phase: 'Phase B answered · Phase C pending',
+    status: 'partly answered',
+    icon: 'tabler-lock',
+    color: 'success' as const,
+    q: 'What accuracy and communication cost do differential privacy and secure aggregation add, and how do those costs interact with heterogeneity?',
+    href: '/privacy'
   },
   {
     id: 'RQ3',
-    phase: 'D',
-    q: 'Which differential-privacy granularity is viable at cross-silo scale, and does time-adaptive budget spending help?'
+    phase: 'Phase D',
+    status: 'pending',
+    icon: 'tabler-adjustments',
+    color: 'warning' as const,
+    q: 'Which differential-privacy granularity is viable at cross-silo scale, and does time-adaptive budget spending help?',
+    href: '/phases'
   },
   {
     id: 'RQ4',
-    phase: 'E',
-    q: 'Can gradient inversion recover training data, and does the pipeline stop it?'
+    phase: 'Phase E',
+    status: 'pending',
+    icon: 'tabler-shield-lock',
+    color: 'error' as const,
+    q: 'Can gradient inversion recover training data, and does the pipeline stop it?',
+    href: '/phases'
+  }
+]
+
+/*
+ * What the site offers, stated plainly.
+ *
+ * Kept factual about the records: reconstructed records exist for every run,
+ * transcripts do not exist yet. Promising "logs" without that distinction would
+ * be the one thing on this page that is not true.
+ */
+const CAPABILITIES = [
+  {
+    icon: 'tabler-chart-dots',
+    color: 'primary' as const,
+    title: 'See how heterogeneity affects accuracy',
+    body: 'Accuracy against measured Hellinger distance for four aggregation strategies, against a centralized baseline.',
+    href: '/rq1',
+    action: 'Open the heterogeneity results'
+  },
+  {
+    icon: 'tabler-lock',
+    color: 'success' as const,
+    title: 'See what differential privacy costs',
+    body: 'The accuracy cost at each privacy budget, how it changes the heterogeneity relationship, and which clients carry the noise.',
+    href: '/privacy',
+    action: 'Open the privacy results'
+  },
+  {
+    icon: 'tabler-table',
+    color: 'info' as const,
+    title: 'Explore every run',
+    body: 'Filter and compare all recorded runs, then open any one of them for its full record: curves, partition, configuration and files.',
+    href: '/runs',
+    action: 'Open the run explorer'
+  },
+  {
+    icon: 'tabler-download',
+    color: 'warning' as const,
+    title: 'Download the results',
+    body: 'Raw metrics, configurations, partition reports, privacy calibration, timings and per-run records — individually or as one archive.',
+    href: '/downloads',
+    action: 'Open data and records'
+  },
+  {
+    icon: 'tabler-table-export',
+    color: 'secondary' as const,
+    title: 'Take the data behind any chart',
+    body: 'Every chart and table has a download giving the exact rows it was drawn from, with the runs they came from named in the file.',
+    href: '/rq1',
+    action: 'See an example'
+  },
+  {
+    icon: 'tabler-flask',
+    color: 'error' as const,
+    title: 'Read how it was done',
+    body: 'The experimental design and threat model, explanations of the concepts involved, and a full account of what the study cannot conclude.',
+    href: '/methodology',
+    action: 'Open the methodology'
   }
 ]
 
 const Page = () => {
-  const groups = seedGroups(federatedRuns)
+  // Unprotected configurations only. Phase B was run at a single seed by
+  // design, so including it would report that decision as missing coverage.
+  const groups = seedGroups(federatedRuns.filter(r => r.dp === null))
   const multiSeed = groups.filter(g => !g.singleSeed).length
   const singleSeed = groups.filter(g => g.singleSeed).length
 
   return (
     <div className='flex flex-col'>
       <PageHeader
-        eyebrow='MSc Computer Science · University of Abuja'
+        eyebrow={`${author.name} · ${author.role} · ${author.affiliation}`}
         title='Federated Learning for Privacy-Preserving AI Models'
-        lede='A study on secure, decentralized model training with non-IID data. This site is a browsable supplement to the dissertation: every figure and table an examiner needs is in the dissertation document itself, and nothing here is required to read it.'
+        lede='The complete record of this research on secure, decentralized model training with non-IID data. Every experiment, every result, every chart and every file the study produced is here, and all of it can be read on the page or taken away as data.'
       />
-
-      <Caveat severity='info' title='What this site is'>
-        A supplement, not a dependency. The dissertation stands alone. This explorer exists so that the recorded runs
-        can be inspected directly rather than only through the figures selected for the written document.
-      </Caveat>
 
       <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mbe-6'>
         <StatCard
           label='Runs recorded'
           value={String(allRuns.length)}
-          hint={`Phases A and B of 120 planned; superseded runs excluded`}
+          hint='Phases A and B of 120 planned'
+          icon='tabler-database'
+          color='primary'
         />
         <StatCard
           label='Federated / centralized'
           value={`${federatedRuns.length} / ${centralizedRuns.length}`}
           hint='15 institutional clients, full participation'
-        />
-        <StatCard
-          label='Configurations at 3 seeds'
-          value={`${multiSeed} of ${multiSeed + singleSeed}`}
-          hint={`${singleSeed} run at a single seed`}
+          icon='tabler-topology-star-3'
+          color='info'
         />
         <StatCard
           label='Under differential privacy'
           value={String(protectedRuns.length)}
-          hint='sample-level, ε ∈ {8, 4, 1}, seed 0'
+          hint='sample-level, ε ∈ {8, 4, 1}'
+          icon='tabler-lock'
+          color='success'
+        />
+        <StatCard
+          label='Repeated at three seeds'
+          value={`${multiSeed} of ${multiSeed + singleSeed}`}
+          hint='of the unprotected configurations'
+          icon='tabler-repeat'
+          color='warning'
         />
       </div>
 
       <Card className='mbe-6'>
-        <CardHeader title='The four research questions' />
-        <CardContent className='flex flex-col gap-4'>
-          {RQS.map(rq => (
-            <div key={rq.id} className='flex gap-4 items-start'>
-              <Chip size='small' variant='tonal' color='primary' label={rq.id} className='mbs-1' />
-              <div className='flex flex-col gap-1'>
-                <Typography>{rq.q}</Typography>
-                <Typography variant='caption' color='text.secondary'>
-                  Phase {rq.phase}
-                </Typography>
-              </div>
-            </div>
-          ))}
-        </CardContent>
-        <Divider />
+        <CardHeader title='What you can do here' />
         <CardContent>
-          <Typography variant='body2' color='text.secondary'>
-            Phases A and B have been run. C, D and E are pending, and are shown on this site with that status rather
-            than hidden.
-          </Typography>
+          <div className='grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5'>
+            {CAPABILITIES.map(c => (
+              <div key={c.title} className='flex gap-4 items-start'>
+                <CustomAvatar color={c.color} skin='light' variant='rounded' size={40}>
+                  <i className={`${c.icon} text-[22px]`} />
+                </CustomAvatar>
+                <div className='flex flex-col items-start gap-1'>
+                  <Typography className='font-medium'>{c.title}</Typography>
+                  <Typography variant='body2' color='text.secondary'>
+                    {c.body}
+                  </Typography>
+                  <LinkButton href={c.href} size='small' variant='text' className='p-0 min-is-0'>
+                    {c.action}
+                  </LinkButton>
+                </div>
+              </div>
+            ))}
+          </div>
         </CardContent>
       </Card>
+
+      <Typography variant='h5' className='mbe-4'>
+        The four research questions
+      </Typography>
+      <div className='grid grid-cols-1 md:grid-cols-2 gap-6 mbe-6'>
+        {RQS.map(rq => (
+          <Card key={rq.id}>
+            <CardContent className='flex flex-col gap-3'>
+              <div className='flex items-center gap-3'>
+                <CustomAvatar color={rq.color} skin='light' variant='rounded' size={40}>
+                  <i className={`${rq.icon} text-[24px]`} />
+                </CustomAvatar>
+                <div className='flex flex-col'>
+                  <Typography className='font-medium'>{rq.id}</Typography>
+                  <Typography variant='caption' color='text.secondary'>
+                    {rq.phase}
+                  </Typography>
+                </div>
+                <Chip
+                  size='small'
+                  variant='tonal'
+                  color={rq.status === 'answered' ? 'success' : rq.status === 'partly answered' ? 'info' : 'default'}
+                  label={rq.status}
+                  className='mis-auto'
+                />
+              </div>
+              <Typography variant='body2'>{rq.q}</Typography>
+              <LinkButton href={rq.href} size='small' variant='tonal' className='self-start'>
+                {rq.status === 'pending' ? 'See what it will involve' : 'See the answer'}
+              </LinkButton>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
 
       <div className='grid grid-cols-1 lg:grid-cols-2 gap-6 mbe-6'>
         <Card>

@@ -18,11 +18,11 @@ import '@assets/iconify-icons/generated-icons.css'
 
 export const metadata = {
   title: {
-    default: 'Federated Learning with Non-IID Data — results explorer',
+    default: 'Federated Learning with Non-IID Data — research results',
     template: '%s'
   },
   description:
-    'Browsable results supplementing an MSc dissertation on privacy-preserving federated learning under non-IID data: 72 recorded runs across four aggregation strategies, five partition protocols and two datasets.'
+    'The complete record of Abdullahi Yusuf\u2019s MSc research into privacy-preserving federated learning with non-IID data: every experiment, result, chart and file, all available to view and download.'
 }
 
 const RootLayout = async (props: ChildrenType) => {

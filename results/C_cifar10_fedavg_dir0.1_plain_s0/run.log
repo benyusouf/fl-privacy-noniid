@@ -1,0 +1,24 @@
+
+======================================================================
+C_cifar10_fedavg_dir0.1_plain_s0  started 2026-08-16 22:46:42
+config: experiments/phase_c/C_cifar10_fedavg_dir0.1_plain_s0.yaml
+======================================================================
+[C_cifar10_fedavg_dir0.1_plain_s0] model params: 189,130 | train 20000 test 5000
+[C_cifar10_fedavg_dir0.1_plain_s0] partition dirichlet | HD mean=0.6282 max=0.8269 | sizes[88,3591]
+[C_cifar10_fedavg_dir0.1_plain_s0] strategy=fedavg
+  round   1  test_acc=0.1512  client_acc_var=0.01844
+  round   2  test_acc=0.1836  client_acc_var=0.02248
+  round   3  test_acc=0.1850  client_acc_var=0.02899
+  round   4  test_acc=0.2066  client_acc_var=0.02739
+  round   5  test_acc=0.2276  client_acc_var=0.02996
+  round   6  test_acc=0.2324  client_acc_var=0.03316
+  round   7  test_acc=0.2546  client_acc_var=0.02925
+  round   8  test_acc=0.2650  client_acc_var=0.02629
+  round   9  test_acc=0.2774  client_acc_var=0.02379
+  round  10  test_acc=0.2776  client_acc_var=0.02755
+  round  11  test_acc=0.2844  client_acc_var=0.02605
+  round  12  test_acc=0.2878  client_acc_var=0.02634
+  round  13  test_acc=0.3080  client_acc_var=0.01737
+  round  14  test_acc=0.3060  client_acc_var=0.01950
+  round  15  test_acc=0.3158  client_acc_var=0.02232
+  round  16  test_acc=0.2922  client_acc_var=0.02684

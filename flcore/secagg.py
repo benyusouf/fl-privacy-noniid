@@ -66,33 +66,68 @@ def auto_scale(updates: list[dict], factor: float = 20.0) -> float:
 
 
 def secure_aggregate(updates: list[dict], base_seed: int = 0,
-                     scale: float | None = None) -> tuple[dict, dict]:
+                     scale: float | None = None,
+                     weights: list[int] | None = None) -> tuple[dict, dict]:
     """Full protocol over a list of client updates.
 
-    Returns (mean_aggregate, timing_dict). The mean equals the plaintext mean
-    up to floating-point error, which the accompanying test asserts.
-    `scale=None` sets the mask magnitude automatically via auto_scale().
+    Returns (aggregate, timing_dict). The aggregate equals what plaintext
+    aggregation would have produced, to floating-point error, which the
+    accompanying test asserts. `scale=None` sets the mask magnitude
+    automatically via auto_scale().
+
+    WEIGHTING. FedAvg does not average client updates evenly; it weights each
+    by the number of samples that client holds. Masking a plain mean and
+    calling it FedAvg would quietly change the result, and the whole point of
+    Phase C is that masking CANNOT change the result. So each client scales its
+    own contribution by w_i / sum(w) BEFORE masking, and the server simply sums
+    the masked values. The masks still cancel, because they are independent of
+    the scaling, and the sum the server recovers is the weighted mean it would
+    have computed in the clear.
+
+    That is also how weighting is handled in practice: the server never sees
+    w_i separately from x_i, only their product, which is exactly the point.
+
+    TIMING is processor time, not elapsed time. Section 3.10.3 defines the
+    overhead that way, and Section 3.11 records why: elapsed seconds keep
+    accruing while the machine sleeps, which made 68 Phase A wall-clock figures
+    unusable. Elapsed time is returned alongside so the gap stays visible, but
+    the ratio Phase C reports is built on the processor figure.
     """
     n = len(updates)
     if scale is None:
         scale = auto_scale(updates)
-    t0 = time.perf_counter()
-    masked = [mask_update(u, i, n, base_seed, scale) for i, u in enumerate(updates)]
-    t_mask = time.perf_counter() - t0
+    if weights is None:
+        weights = [1] * n
+    total_w = float(sum(weights))
+    share = [w / total_w for w in weights]
 
-    t1 = time.perf_counter()
-    total = {k: np.zeros_like(v) for k, v in masked[0].items()}
+    p0, w0 = time.process_time(), time.perf_counter()
+    scaled = [{k: v.astype(np.float64) * s
+               for k, v in u.items() if v.dtype.kind == "f"}
+              for u, s in zip(updates, share)]
+    masked = [mask_update(u, i, n, base_seed, scale) for i, u in enumerate(scaled)]
+    p_mask = time.process_time() - p0
+    w_mask = time.perf_counter() - w0
+
+    p1, w1 = time.process_time(), time.perf_counter()
+    agg = {k: np.zeros_like(v) for k, v in masked[0].items()}
     for m in masked:
-        for k in total:
-            total[k] += m[k]
-    mean = {k: (v / n) for k, v in total.items()}
-    t_agg = time.perf_counter() - t1
+        for k in agg:
+            agg[k] += m[k]
+    p_agg = time.process_time() - p1
+    w_agg = time.perf_counter() - w1
 
-    return mean, {
-        "mask_seconds": round(t_mask, 4),
-        "aggregate_seconds": round(t_agg, 4),
-        "mask_seconds_per_client": round(t_mask / max(1, n), 4),
+    return agg, {
+        "mask_processor_seconds": round(p_mask, 5),
+        "aggregate_processor_seconds": round(p_agg, 5),
+        "mask_elapsed_seconds": round(w_mask, 5),
+        "aggregate_elapsed_seconds": round(w_agg, 5),
+        "mask_processor_seconds_per_client": round(p_mask / max(1, n), 5),
         "num_pairs": n * (n - 1) // 2,
+        # Analytic, like the communication figures of D52: nothing is
+        # transmitted here. Each of the n(n-1)/2 pairs exchanges one value in
+        # each direction to establish its shared secret.
+        "key_agreement_messages": n * (n - 1),
     }
 
 

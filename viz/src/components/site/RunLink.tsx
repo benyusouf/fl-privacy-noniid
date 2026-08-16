@@ -16,8 +16,8 @@ type Props = {
  * A run name that goes somewhere.
  *
  * Every run has its own page, so a run name is always a link — in the explorer,
- * in the comparator table, in the privacy view. That makes a run citable: an
- * examiner can be pointed at one URL rather than at a filter combination.
+ * in the comparator table, in the privacy view. That makes a run citable: it can
+ * be linked to directly rather than reproduced by setting filters.
  */
 const RunLink = ({ name, plain = false }: Props) => {
   if (plain) return <code className='text-xs'>{name}</code>

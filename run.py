@@ -223,6 +223,13 @@ def main(cfg_path):
         print(f"[{name}] DP-SGD on: target eps={dp_cfg['target_epsilon']} "
               f"delta={dp_cfg['delta']} C={dp_cfg['max_grad_norm']}")
 
+    # Secure aggregation (Phase C). Absent or disabled -> plaintext aggregation.
+    secagg_cfg = cfg.get("secagg") or None
+    if secagg_cfg and not secagg_cfg.get("enabled", True):
+        secagg_cfg = None
+    if secagg_cfg:
+        print(f"[{name}] secure aggregation on: pairwise masking")
+
     print(f"[{name}] strategy={strategy}"
           + (f" (FedAvgM: beta={server_momentum}, server_lr={server_lr})"
              if server_momentum else ""))
@@ -234,7 +241,7 @@ def main(cfg_path):
         lr=float(cfg["lr"]), seed=seed, on_round=on_round,
         start_round=start_round, init_params=init_params,
         strategy=strategy, strategy_cfg=scfg, server_momentum=server_momentum,
-        server_lr=server_lr, dp_cfg=dp_cfg,
+        server_lr=server_lr, dp_cfg=dp_cfg, secagg_cfg=secagg_cfg,
     )
     elapsed = time.time() - t_start
     print(f"[{name}] wall-clock: {elapsed/60:.1f} min "

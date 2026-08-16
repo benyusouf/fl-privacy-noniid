@@ -69,6 +69,7 @@ def run_federated(
     server_momentum: float = 0.0,   # beta in Hsu et al. (2019); >0 enables FedAvgM
     server_lr: float = 0.5,         # NOT in Hsu et al.; see server_momentum_step
     dp_cfg: dict | None = None,     # sample-level DP-SGD; None = unprotected
+    secagg_cfg: dict | None = None, # pairwise masking; None = plaintext aggregation
 ):
     """Core FL round loop. Returns (final_params, history list of dict rows).
 
@@ -97,6 +98,12 @@ def run_federated(
     scfg = dict(strategy_cfg or {})
     scfg.setdefault("local_epochs", local_epochs)
     scfg.setdefault("lr", lr)
+
+    secagg_on = bool(secagg_cfg) and bool(secagg_cfg.get("enabled", True))
+    if secagg_on:
+        print(f"    secure aggregation ON: pairwise masking over "
+              f"{len(client_train)} clients, "
+              f"{len(client_train) * (len(client_train) - 1) // 2} pairs per round")
 
     dp_on = bool(dp_cfg)
     dp_sigmas: list[float] = []
@@ -148,7 +155,31 @@ def run_federated(
             client_params.append(p)
             weights.append(len(yc))
 
-        aggregated = fedavg_aggregate(client_params, weights)
+        # Pairwise masking (Section 3.8.5).
+        #
+        # Each client scales its own contribution by its share of the total
+        # sample count BEFORE masking, so the sum the server recovers is the
+        # weighted mean FedAvg would have computed in the clear. Masking an
+        # unweighted mean would silently change every result, which is the one
+        # thing Phase C exists to rule out.
+        #
+        # Non-float entries are not masked - there is nothing to hide in an
+        # integer buffer and adding Gaussian noise to one would corrupt it - so
+        # they are taken from the plaintext aggregate.
+        if secagg_on:
+            from flcore.secagg import secure_aggregate
+            plain = fedavg_aggregate(client_params, weights)
+            masked, sec_t = secure_aggregate(
+                client_params, base_seed=seed + 1000 * r, weights=weights)
+            aggregated = {k: (masked[k].astype(v.dtype) if k in masked else v)
+                          for k, v in plain.items()}
+            sec_mask_s = sec_t["mask_processor_seconds"]
+            sec_agg_s = sec_t["aggregate_processor_seconds"]
+            sec_msgs = sec_t["key_agreement_messages"]
+        else:
+            aggregated = fedavg_aggregate(client_params, weights)
+            sec_mask_s = sec_agg_s = 0.0
+            sec_msgs = 0
 
         if strategy == "scaffold" and new_states:
             from flcore.strategies import scaffold_server_update
@@ -194,6 +225,12 @@ def run_federated(
             "bytes_up": bytes_model + bytes_state,
             "bytes_model": bytes_model,
             "bytes_state": bytes_state,
+            # Phase C. Zero on an unmasked run, which is what makes the paired
+            # ratio in Section 3.10.3 computable from the CSVs alone. Processor
+            # time, not elapsed - see secure_aggregate and Section 3.11.
+            "secagg_mask_s": round(sec_mask_s, 5),
+            "secagg_agg_s": round(sec_agg_s, 5),
+            "secagg_msgs": sec_msgs,
         }
         history.append(row)
         if on_round:
