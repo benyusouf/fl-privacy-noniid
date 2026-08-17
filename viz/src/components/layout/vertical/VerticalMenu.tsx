@@ -79,6 +79,9 @@ const VerticalMenu = ({ scrollMenu }: Props) => {
           <MenuItem href='/privacy' icon={<i className='tabler-lock' />}>
             Cost of privacy (RQ2)
           </MenuItem>
+          <MenuItem href='/secagg' icon={<i className='tabler-shield-check' />}>
+            Secure aggregation (RQ2)
+          </MenuItem>
           <MenuItem href='/runs' icon={<i className='tabler-table' />}>
             Run explorer
           </MenuItem>

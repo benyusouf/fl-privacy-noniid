@@ -328,6 +328,143 @@ export const clientNoise = (run: Run) => {
 export const eps = (v: number) => (Number.isInteger(v) ? String(v) : v.toFixed(4))
 
 // ---------------------------------------------------------------------------
+// Phase C — secure aggregation
+//
+// Each masked run is paired with a plain run at the same configuration, and the
+// plain run in turn reproduces a Phase A run exactly. Everything here is
+// computed from the recorded curves rather than restated, so the page cannot
+// drift from the files.
+// ---------------------------------------------------------------------------
+
+export const secaggRuns = allRuns.filter(r => r.secagg !== null)
+export const maskedRuns = allRuns.filter(r => r.secagg?.enabled)
+
+export type SecaggPair = {
+  strategy: Strategy | null
+  strategyLabel: string
+  masked: Run
+  plain: Run
+  /** The Phase A run the plain arm reproduces. */
+  twin: Run | null
+
+  /** Accuracy difference at round 1, in points. Zero means the aggregate is exact. */
+  round1DiffPts: number | null
+  /** Largest difference at any round after the first, in points. */
+  maxWanderPts: number
+  finalDiffPts: number | null
+
+  /** Largest difference between the plain arm and its Phase A twin, in points. */
+  twinMaxDiffPts: number | null
+
+  bytesPlain: number | null
+  bytesMasked: number | null
+  /** Payload ratio. Masking does not change the shape of an update, so 1.0000. */
+  bytesRatio: number | null
+
+  maskSeconds: number
+  aggregateSeconds: number
+  /** Processor seconds per round attributable to masking. */
+  totalSeconds: number
+
+  keyAgreementRecorded: number
+  keyAgreementProtocol: number
+
+  /** Elapsed seconds per round, kept only to show that it cannot carry a claim. */
+  elapsedMasked: number | null
+  elapsedPlain: number | null
+}
+
+const accSeries = (run: Run) => {
+  const i = run.curve.cols.indexOf('test_acc')
+
+  return i === -1 ? [] : run.curve.rows.map(row => (typeof row[i] === 'number' ? (row[i] as number) : null))
+}
+
+const bytesPerRound = (run: Run) => {
+  const i = run.curve.cols.indexOf('bytes_up')
+
+  return i === -1 || !run.curve.rows.length ? null : (run.curve.rows[0][i] as number)
+}
+
+/** Aligned |difference| in accuracy points between two runs, round by round. */
+const diffSeries = (a: Run, b: Run) => {
+  const x = accSeries(a)
+  const y = accSeries(b)
+  const n = Math.min(x.length, y.length)
+  const out: number[] = []
+
+  for (let i = 0; i < n; i++) {
+    if (x[i] === null || y[i] === null) continue
+    out.push(Math.abs((x[i] as number) - (y[i] as number)) * 100)
+  }
+
+  return out
+}
+
+export const secaggPairs = (): SecaggPair[] =>
+  maskedRuns
+    .map(masked => {
+      const plain = masked.secagg?.pair ? runByName(masked.secagg.pair) : null
+
+      if (!plain) return null
+
+      const twin = plain.secagg?.equals ? runByName(plain.secagg.equals) : null
+      const diffs = diffSeries(masked, plain)
+      const twinDiffs = twin ? diffSeries(plain, twin) : []
+
+      const bp = bytesPerRound(plain)
+      const bm = bytesPerRound(masked)
+
+      return {
+        strategy: masked.strategy,
+        strategyLabel: masked.strategyLabel,
+        masked,
+        plain,
+        twin,
+        round1DiffPts: diffs.length ? diffs[0] : null,
+        maxWanderPts: diffs.length > 1 ? Math.max(...diffs.slice(1)) : 0,
+        finalDiffPts: diffs.length ? diffs[diffs.length - 1] : null,
+        twinMaxDiffPts: twinDiffs.length ? Math.max(...twinDiffs) : null,
+        bytesPlain: bp,
+        bytesMasked: bm,
+        bytesRatio: bp && bm ? bm / bp : null,
+        maskSeconds: masked.secagg!.maskProcessorSecondsPerRound,
+        aggregateSeconds: masked.secagg!.aggregateProcessorSecondsPerRound,
+        totalSeconds: masked.secagg!.maskProcessorSecondsPerRound + masked.secagg!.aggregateProcessorSecondsPerRound,
+        keyAgreementRecorded: masked.secagg!.keyAgreementMessagesPerRound,
+        keyAgreementProtocol: masked.secagg!.keyAgreementMessagesProtocol,
+        elapsedMasked: masked.secondsPerRound,
+        elapsedPlain: plain.secondsPerRound
+      }
+    })
+    .filter((p): p is SecaggPair => p !== null)
+    .sort((a, b) => (a.bytesPlain ?? 0) - (b.bytesPlain ?? 0))
+
+/**
+ * Does the cost of masking track the size of what is masked?
+ *
+ * SCAFFOLD is in the phase to give the cost a second point on the payload
+ * scale — it transmits a control variate alongside the update, so its payload
+ * is twice FedAvg's.
+ */
+export const secaggScaling = () => {
+  const pairs = secaggPairs()
+
+  if (pairs.length < 2) return null
+
+  const lo = pairs[0]
+  const hi = pairs[pairs.length - 1]
+
+  return {
+    lo,
+    hi,
+    payloadRatio: lo.bytesPlain && hi.bytesPlain ? hi.bytesPlain / lo.bytesPlain : null,
+    maskRatio: lo.maskSeconds ? hi.maskSeconds / lo.maskSeconds : null,
+    aggregateRatio: lo.aggregateSeconds ? hi.aggregateSeconds / lo.aggregateSeconds : null
+  }
+}
+
+// ---------------------------------------------------------------------------
 // Filtering for the run explorer
 // ---------------------------------------------------------------------------
 

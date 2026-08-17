@@ -23,6 +23,39 @@ export type DpClient = {
   sigma_needed_for_target: number | null
 }
 
+/** Secure aggregation, on Phase C runs and null before them. */
+export type Secagg = {
+  /**
+   * false marks the PLAIN member of a pair, not an unavailable mechanism. Its
+   * costs are zero by construction, which is what makes the paired ratio
+   * computable without joining anything.
+   */
+  enabled: boolean
+
+  /** Processor seconds, not elapsed. The distinction is load-bearing here. */
+  maskProcessorSecondsPerRound: number
+  aggregateProcessorSecondsPerRound: number
+
+  /**
+   * What the simulation recorded: one key agreement per masked object, so 420
+   * for SCAFFOLD against FedAvg's 210.
+   */
+  keyAgreementMessagesPerRound: number
+
+  /**
+   * What a deployment carries: n(n−1) = 210 regardless of strategy, both mask
+   * sets derived from one pairwise secret through a key-derivation function.
+   * The computation genuinely doubles for SCAFFOLD; the traffic need not.
+   */
+  keyAgreementMessagesProtocol: number
+
+  /** Masked run → its plain pair. */
+  pair: string | null
+
+  /** Plain run → the Phase A run it reproduces exactly. */
+  equals: string | null
+}
+
 export type Dp = {
   granularity: 'sample-level'
   /** The label on the directory — what was asked for. */
@@ -123,6 +156,9 @@ export type Run = {
 
   /** Present on Phase B runs, null elsewhere. Its presence means "protected". */
   dp: Dp | null
+
+  /** Present on Phase C runs and every federated run after them. */
+  secagg: Secagg | null
 
   /**
    * For a Phase B run, the name of the Phase A run it is measured against —

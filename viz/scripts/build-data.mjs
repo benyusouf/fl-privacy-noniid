@@ -387,6 +387,64 @@ const collect = () => {
       comparator: config.comparator ?? null,
 
       /*
+       * Secure aggregation, present on every federated run from Phase C on.
+       * `enabled` false means the run is a PLAIN pair member, not that masking
+       * was unavailable, and its per-round costs are zero by construction -
+       * which is what makes the paired ratio computable without joining
+       * anything.
+       *
+       * The costs are PROCESSOR seconds, not elapsed. Phase C produced the
+       * cleanest illustration in the study of why that matters: the masked
+       * SCAFFOLD arm recorded 41.9 elapsed seconds per round against its plain
+       * pair's 42.6, so in wall clock the arm doing more work looks faster,
+       * while processor time shows it costing 0.67 s/round more (D80).
+       *
+       * `pair` names the plain run a masked run is measured against; `equals`
+       * names the Phase A run a plain run should reproduce exactly.
+       */
+      secagg: (() => {
+        const cols = curve.cols
+        const mi = cols.indexOf('secagg_mask_s')
+        const ai = cols.indexOf('secagg_agg_s')
+        const gi = cols.indexOf('secagg_msgs')
+
+        if (mi === -1) return null
+
+        const mean = i =>
+          i === -1 || curve.rows.length === 0
+            ? null
+            : curve.rows.reduce((a, r) => a + (typeof r[i] === 'number' ? r[i] : 0), 0) / curve.rows.length
+
+        return {
+          enabled: Boolean(config.secagg?.enabled),
+          maskProcessorSecondsPerRound: mean(mi),
+          aggregateProcessorSecondsPerRound: mean(ai),
+          /*
+           * TWO FIGURES, AND THE SITE SHOWS BOTH (D81).
+           *
+           * `Recorded` is what the simulation did: one key agreement per masked
+           * object, so SCAFFOLD - which masks the model and the control variate
+           * - records twice what FedAvg does.
+           *
+           * `Protocol` is what a deployment would need: one pairwise secret,
+           * with both mask sets derived from it through a key-derivation
+           * function. n(n-1) messages however many objects are masked.
+           *
+           * Neither is wrong. Showing only the first overstates the traffic a
+           * real system would carry; showing only the second puts a number on
+           * the page that appears in none of the files the site publishes.
+           */
+          keyAgreementMessagesPerRound:
+            gi === -1 || curve.rows.length === 0 ? null : curve.rows[0][gi],
+          keyAgreementMessagesProtocol: config.num_clients
+            ? config.num_clients * (config.num_clients - 1)
+            : null,
+          pair: config.pair ?? null,
+          equals: config.equals ?? null
+        }
+      })(),
+
+      /*
        * Which record of the run survives. Phase A and the first Phase B predate
        * run.py capturing its own output, so they carry a reconstruction rather
        * than a transcript, and the site must not present the two as equivalent.

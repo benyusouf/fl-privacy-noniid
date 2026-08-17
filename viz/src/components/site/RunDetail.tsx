@@ -170,6 +170,74 @@ const RunDetail = ({ run, embedded = false }: Props) => {
           </div>
         )}
 
+        {run.secagg && (
+          <div>
+            <Typography variant='subtitle2' className='mbe-2'>
+              Secure aggregation
+            </Typography>
+            <TableContainer>
+              <Table size='small'>
+                <TableBody>
+                  <TableRow>
+                    <TableCell>Masking</TableCell>
+                    <TableCell align='right'>
+                      {run.secagg.enabled ? 'enabled' : 'plain control — costs are zero by construction'}
+                    </TableCell>
+                  </TableRow>
+                  {run.secagg.enabled && (
+                    <>
+                      <TableRow>
+                        <TableCell>
+                          Masking / aggregation
+                          <Typography variant='caption' color='text.secondary' className='block'>
+                            processor seconds per round, not elapsed
+                          </Typography>
+                        </TableCell>
+                        <TableCell align='right'>
+                          {run.secagg.maskProcessorSecondsPerRound.toFixed(4)} /{' '}
+                          {run.secagg.aggregateProcessorSecondsPerRound.toFixed(4)}
+                        </TableCell>
+                      </TableRow>
+                      <TableRow>
+                        <TableCell>
+                          Key agreement per round
+                          <Typography variant='caption' color='text.secondary' className='block'>
+                            recorded by this implementation / protocol figure n(n−1)
+                          </Typography>
+                        </TableCell>
+                        <TableCell align='right'>
+                          {run.secagg.keyAgreementMessagesPerRound} / {run.secagg.keyAgreementMessagesProtocol}
+                        </TableCell>
+                      </TableRow>
+                    </>
+                  )}
+                  {run.secagg.pair && (
+                    <TableRow>
+                      <TableCell>Plain pair</TableCell>
+                      <TableCell align='right'>
+                        <RunLink name={run.secagg.pair} />
+                      </TableCell>
+                    </TableRow>
+                  )}
+                  {run.secagg.equals && (
+                    <TableRow>
+                      <TableCell>
+                        Reproduces
+                        <Typography variant='caption' color='text.secondary' className='block'>
+                          the Phase A run this control run matches exactly
+                        </Typography>
+                      </TableCell>
+                      <TableCell align='right'>
+                        <RunLink name={run.secagg.equals} />
+                      </TableCell>
+                    </TableRow>
+                  )}
+                </TableBody>
+              </Table>
+            </TableContainer>
+          </div>
+        )}
+
         <div className='grid grid-cols-1 lg:grid-cols-2 gap-6'>
           <div>
             <Typography variant='subtitle2' className='mbe-2'>

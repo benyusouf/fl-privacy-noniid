@@ -37,8 +37,8 @@ const RQS = [
   },
   {
     id: 'RQ2',
-    phase: 'Phase B answered · Phase C pending',
-    status: 'partly answered',
+    phase: 'Phases B and C',
+    status: 'answered',
     icon: 'tabler-lock',
     color: 'success' as const,
     q: 'What accuracy and communication cost do differential privacy and secure aggregation add, and how do those costs interact with heterogeneity?',
@@ -89,8 +89,16 @@ const CAPABILITIES = [
     action: 'Open the privacy results'
   },
   {
-    icon: 'tabler-table',
+    icon: 'tabler-shield-check',
     color: 'info' as const,
+    title: 'See what secure aggregation costs',
+    body: 'Masking measured against unmasked pairs — free in accuracy and bandwidth, paid for in computation — and why masking the update alone leaves SCAFFOLD exposed.',
+    href: '/secagg',
+    action: 'Open the secure aggregation results'
+  },
+  {
+    icon: 'tabler-table',
+    color: 'secondary' as const,
     title: 'Explore every run',
     body: 'Filter and compare all recorded runs, then open any one of them for its full record: curves, partition, configuration and files.',
     href: '/runs',
@@ -106,7 +114,7 @@ const CAPABILITIES = [
   },
   {
     icon: 'tabler-table-export',
-    color: 'secondary' as const,
+    color: 'info' as const,
     title: 'Take the data behind any chart',
     body: 'Every chart and table has a download giving the exact rows it was drawn from, with the runs they came from named in the file.',
     href: '/rq1',

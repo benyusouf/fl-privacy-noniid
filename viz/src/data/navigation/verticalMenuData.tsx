@@ -13,6 +13,7 @@ const verticalMenuData = (): VerticalMenuDataType[] => [
     children: [
       { label: 'Heterogeneity (RQ1)', href: '/rq1', icon: 'tabler-chart-dots' },
       { label: 'Cost of privacy (RQ2)', href: '/privacy', icon: 'tabler-lock' },
+      { label: 'Secure aggregation (RQ2)', href: '/secagg', icon: 'tabler-shield-check' },
       { label: 'Run explorer', href: '/runs', icon: 'tabler-table' },
       { label: 'Phases A–E', href: '/phases', icon: 'tabler-list-check' },
       { label: 'Data and records', href: '/downloads', icon: 'tabler-download' }

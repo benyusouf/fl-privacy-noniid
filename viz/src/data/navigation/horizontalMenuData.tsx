@@ -5,6 +5,7 @@ const horizontalMenuData = (): HorizontalMenuDataType[] => [
   { label: 'Overview', href: '/', icon: 'tabler-smart-home' },
   { label: 'Heterogeneity', href: '/rq1', icon: 'tabler-chart-dots' },
   { label: 'Cost of privacy', href: '/privacy', icon: 'tabler-lock' },
+  { label: 'Secure aggregation', href: '/secagg', icon: 'tabler-shield-check' },
   { label: 'Run explorer', href: '/runs', icon: 'tabler-table' },
   { label: 'Phases', href: '/phases', icon: 'tabler-list-check' },
   { label: 'Data', href: '/downloads', icon: 'tabler-download' },

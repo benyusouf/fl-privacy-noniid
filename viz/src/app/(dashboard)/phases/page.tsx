@@ -84,8 +84,10 @@ const PHASES: Phase[] = [
     varies: 'Masking scheme and its parameters, against a plain control at the same configuration.',
     fixed: 'The Phase A training configuration.',
     answers:
-      'What secure aggregation adds in communication cost, and whether it composes with differential privacy without further accuracy loss.',
-    note: 'Runs record masking and aggregation time per round alongside the usual metrics, so the overhead is measured rather than assumed.'
+      'What secure aggregation costs in accuracy, bandwidth and computation, measured against unmasked pairs at the same configuration.',
+    note: 'Each masked run is paired with a plain run, and each plain run reproduces its Phase A original exactly. The phase also produced a security finding: masking the update alone leaves SCAFFOLD fully exposed.',
+    href: '/secagg',
+    hrefLabel: 'See the secure aggregation results'
   },
   {
     id: 'D',

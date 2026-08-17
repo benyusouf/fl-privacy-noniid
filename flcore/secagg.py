@@ -127,7 +127,17 @@ def secure_aggregate(updates: list[dict], base_seed: int = 0,
         # Analytic, like the communication figures of D52: nothing is
         # transmitted here. Each of the n(n-1)/2 pairs exchanges one value in
         # each direction to establish its shared secret.
+        #
+        # TWO FIGURES, BECAUSE THEY DIFFER AND BOTH ARE TRUE. This call performs
+        # ONE key agreement, so it contributes n(n-1) messages. A run that masks
+        # two objects - SCAFFOLD masks the model and the control variate - calls
+        # this twice and so records twice that, which is what the simulation did.
+        # A real deployment would agree ONE pairwise secret and derive both mask
+        # sets from it with a key-derivation function, leaving the traffic at
+        # n(n-1) however many objects are masked. The masking COMPUTATION
+        # genuinely doubles; the TRAFFIC need not. See D80, D81.
         "key_agreement_messages": n * (n - 1),
+        "key_agreement_messages_protocol": n * (n - 1),
     }
 
 

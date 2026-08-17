@@ -18,11 +18,11 @@
       "rounds": 60,
       "round1_identical": true,
       "round1_difference": 0.0,
-      "max_wander_points": 1.92,
-      "final_difference_points": 0.9,
-      "mask_processor_seconds_per_round": 0.33373,
-      "aggregate_processor_seconds_per_round": 0.00116,
-      "key_agreement_messages_per_round": 210,
+      "max_wander_points": 2.46,
+      "final_difference_points": 1.14,
+      "mask_processor_seconds_per_round": 0.66728,
+      "aggregate_processor_seconds_per_round": 0.00218,
+      "key_agreement_messages_per_round": 420,
       "bytes_per_round_plain": 22695600.0,
       "bytes_per_round_masked": 22695600.0
     }
