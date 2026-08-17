@@ -185,7 +185,38 @@ def run_federated(
             from flcore.strategies import scaffold_server_update
             if global_c is None:
                 global_c = {k: np.zeros_like(v) for k, v in global_params.items()}
-            global_c = scaffold_server_update(new_states, global_c, len(client_train))
+
+            if secagg_on:
+                # THE CONTROL VARIATE MUST BE MASKED TOO, OR MASKING THE MODEL
+                # BUYS NOTHING (D79).
+                #
+                # SCAFFOLD transmits c_i alongside the update, and
+                #     c_i_new = c_i - c + (w_global - w_local) / (steps * lr)
+                # in which the server knows every term but w_local: it received
+                # c_i last round, computed c itself, broadcast w_global, and
+                # steps and lr are public. Inverting recovers w_local exactly -
+                # measured at 6.94e-18 - so a server that sees c_i in the clear
+                # reconstructs the very update the masking was hiding.
+                #
+                # scaffold_server_update reduces to the MEAN of the c_i, which
+                # is a linear aggregate, so masking them recovers that mean
+                # while concealing every individual variate. Masks are drawn
+                # from a different base seed than the model's, so the two sets
+                # are independent.
+                from flcore.secagg import secure_aggregate
+                c_list = [st["c_i"] for st in new_states if st and "c_i" in st]
+                if c_list:
+                    masked_c, c_t = secure_aggregate(
+                        c_list, base_seed=seed + 1000 * r + 500_000)
+                    global_c = {k: (masked_c[k].astype(v.dtype)
+                                    if k in masked_c else v)
+                                for k, v in global_c.items()}
+                    sec_mask_s += c_t["mask_processor_seconds"]
+                    sec_agg_s += c_t["aggregate_processor_seconds"]
+                    sec_msgs += c_t["key_agreement_messages"]
+            else:
+                global_c = scaffold_server_update(
+                    new_states, global_c, len(client_train))
 
         if server_momentum > 0:
             from flcore.strategies import server_momentum_step

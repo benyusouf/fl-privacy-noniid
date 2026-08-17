@@ -1,12 +1,10 @@
 // MUI Imports
-import Card from '@mui/material/Card'
-import CardContent from '@mui/material/CardContent'
-import CardHeader from '@mui/material/CardHeader'
 import Chip from '@mui/material/Chip'
 import Typography from '@mui/material/Typography'
 
 // Component Imports
 import PageHeader from '@/components/site/PageHeader'
+import SectionCard from '@/components/site/SectionCard'
 import StatCard from '@/components/site/StatCard'
 
 // Lib Imports
@@ -40,26 +38,33 @@ const Page = () => {
           label='Configurations at one seed'
           value={`${single} of ${single + multi}`}
           hint='no variance estimate available'
+          icon='tabler-repeat-off'
+          color='error'
         />
         <StatCard
           label='Widest seed range'
           value={widest ? `${(widest.spread * 100).toFixed(2)} pts` : '—'}
           hint={widest ? `${widest.strategyLabel}, ${widest.partitionLabel}` : undefined}
+          icon='tabler-arrows-vertical'
+          color='warning'
         />
         <StatCard
           label='Timing spread'
           value={timing ? `${timing.ratio.toFixed(1)}×` : '—'}
           hint={timing ? `${timing.min.toFixed(1)}–${timing.max.toFixed(1)} s/round across ${timing.n} runs` : undefined}
+          icon='tabler-clock-off'
+          color='error'
         />
       </div>
 
       <div className='flex flex-col gap-6'>
-        <Card>
-          <CardHeader
-            title='Most configurations were run once'
-            action={<Chip size='small' variant='tonal' color='error' label='affects every comparison' />}
-          />
-          <CardContent className='flex flex-col gap-3'>
+        <SectionCard
+          icon='tabler-repeat-off'
+          color='error'
+          title='Most configurations were run once'
+          action={<Chip size='small' variant='tonal' color='error' label='affects every comparison' />}
+          prose
+        >
             <Typography>
               Only the CIFAR-10 Dirichlet block, its centralized baseline and FedAvgM were run at three seeds. The
               other {single} configurations have one seed each, and a single run gives no estimate of its own
@@ -72,19 +77,24 @@ const Page = () => {
               inside seed noise.
             </Typography>
             <Typography variant='body2' color='text.secondary'>
+              Some of those single-seed configurations are single-seed by design rather than by budget: Phase B and
+              Phase C reuse the Phase A grid at seed 0 so that a mechanism is the only thing that changes. The
+              consequence is the same either way — neither carries a variance estimate of its own.
+            </Typography>
+            <Typography variant='body2' color='text.secondary'>
               Consequently: no difference between strategies reported on this site should be read as significant
               unless three seeds support it, and most do not. The results establish the <em>shape</em> of the
               relationship between heterogeneity and accuracy far more securely than any ranking of methods.
             </Typography>
-          </CardContent>
-        </Card>
+        </SectionCard>
 
-        <Card>
-          <CardHeader
-            title='Wall-clock timings are not measurements'
-            action={<Chip size='small' variant='tonal' color='error' label='never plotted' />}
-          />
-          <CardContent className='flex flex-col gap-3'>
+        <SectionCard
+          icon='tabler-clock-off'
+          color='error'
+          title='Wall-clock timings are not measurements'
+          action={<Chip size='small' variant='tonal' color='error' label='never plotted' />}
+          prose
+        >
             <Typography>
               Timings were recorded for {timing?.n ?? 0} runs and range from {timing?.min.toFixed(1)} to{' '}
               {timing?.max.toFixed(1)} seconds per round — a factor of {timing?.ratio.toFixed(1)}. Identical
@@ -100,12 +110,9 @@ const Page = () => {
               Timings are shown per run in the explorer, labelled as unreliable, and are not plotted anywhere on this
               site. Nothing in the study&apos;s conclusions rests on them.
             </Typography>
-          </CardContent>
-        </Card>
+        </SectionCard>
 
-        <Card>
-          <CardHeader title='Communication cost is analytic, and does not separate the strategies' />
-          <CardContent className='flex flex-col gap-3'>
+        <SectionCard icon='tabler-arrows-exchange' color='warning' title='Communication cost is analytic, and does not separate the strategies' prose>
             <Typography>
               No bytes cross a network in this study. Uplink cost is computed from parameter and client counts, which
               makes it a property of the protocol rather than an observation, and means it captures none of what
@@ -117,12 +124,9 @@ const Page = () => {
               do not reflect SCAFFOLD&apos;s control-variate overhead. The site reports them as recorded rather than
               correcting them, which means communication cost currently distinguishes nothing.
             </Typography>
-          </CardContent>
-        </Card>
+        </SectionCard>
 
-        <Card>
-          <CardHeader title='MOON runs under a configuration its authors did not use' />
-          <CardContent className='flex flex-col gap-3'>
+        <SectionCard icon='tabler-settings-exclamation' color='warning' title='MOON runs under a configuration its authors did not use' prose>
             <Typography>
               The contrastive weight is 1.0 where the original work reports 5 as best for CIFAR-10; there is no
               projection head; and neither the authors&apos; momentum nor their weight decay is applied.
@@ -132,12 +136,9 @@ const Page = () => {
               about MOON as published, and a finding that MOON does not outperform FedAvg in these runs should not be
               generalised.
             </Typography>
-          </CardContent>
-        </Card>
+        </SectionCard>
 
-        <Card>
-          <CardHeader title='Scale, and what it caps' />
-          <CardContent className='flex flex-col gap-3'>
+        <SectionCard icon='tabler-cpu' color='info' title='Scale, and what it caps' prose>
             <Typography>
               Everything runs on CPU with subsampled datasets and a small convolutional model. The centralized
               baseline reaches roughly 50% on CIFAR-10 — far below what is achievable on the full dataset with a
@@ -149,26 +150,22 @@ const Page = () => {
               observed here would persist at full scale, where a higher-capacity model might absorb heterogeneity
               that this one cannot.
             </Typography>
-          </CardContent>
-        </Card>
+        </SectionCard>
 
-        <Card>
-          <CardHeader title='One phase of five' />
-          <CardContent className='flex flex-col gap-3'>
+        <SectionCard icon='tabler-list-check' color='info' title='Two phases of five, and part of a third' prose>
             <Typography>
-              Only Phase A has been executed. RQ2, RQ3 and RQ4 — the privacy questions that motivate the study — have
-              no results yet. The privacy pipeline is implemented, but implemented is not measured.
+              Phase A and Phase B are complete and Phase C is under way. RQ3 and RQ4 — privacy granularity, budget
+              scheduling and gradient inversion — have no results at all, and RQ2 is only half answered until secure
+              aggregation finishes.
             </Typography>
             <Typography variant='body2' color='text.secondary'>
-              Any statement on this site about differential privacy, secure aggregation or gradient inversion
-              describes a design, not a finding.
+              Any statement on this site about differential-privacy granularity, adaptive budget spending or gradient
+              inversion describes a design, not a finding. The privacy pipeline is implemented, but implemented is not
+              measured.
             </Typography>
-          </CardContent>
-        </Card>
+        </SectionCard>
 
-        <Card>
-          <CardHeader title='Two datasets, one modality' />
-          <CardContent className='flex flex-col gap-3'>
+        <SectionCard icon='tabler-photo' color='secondary' title='Two datasets, one modality' prose>
             <Typography>
               CIFAR-10 provides comparability with the literature and PathMNIST provides a healthcare setting where
               the privacy motivation is real. Both are image classification with small inputs and balanced-ish global
@@ -179,12 +176,9 @@ const Page = () => {
               distribution is itself heavily imbalanced — which is common in exactly the clinical applications the
               healthcare framing invokes.
             </Typography>
-          </CardContent>
-        </Card>
+        </SectionCard>
 
-        <Card>
-          <CardHeader title='Full participation, and few clients' />
-          <CardContent className='flex flex-col gap-3'>
+        <SectionCard icon='tabler-users' color='secondary' title='Full participation, and few clients' prose>
             <Typography>
               Every client participates in every round, and there are fifteen of them. That is a reasonable model of
               cross-silo federation and a poor model of cross-device federation, where thousands of clients are
@@ -195,8 +189,7 @@ const Page = () => {
               Fifteen clients also makes silo-level differential privacy unusually demanding, since each client is a
               large fraction of the federation.
             </Typography>
-          </CardContent>
-        </Card>
+        </SectionCard>
       </div>
     </div>
   )

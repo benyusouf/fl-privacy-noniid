@@ -1,7 +1,4 @@
 // MUI Imports
-import Card from '@mui/material/Card'
-import CardContent from '@mui/material/CardContent'
-import CardHeader from '@mui/material/CardHeader'
 import Table from '@mui/material/Table'
 import TableBody from '@mui/material/TableBody'
 import TableCell from '@mui/material/TableCell'
@@ -13,6 +10,7 @@ import Typography from '@mui/material/Typography'
 // Component Imports
 import PageHeader from '@/components/site/PageHeader'
 import Caveat from '@/components/site/Caveat'
+import SectionCard from '@/components/site/SectionCard'
 
 // Lib Imports
 import { allRuns, bytes, federatedRuns } from '@/lib/results'
@@ -46,9 +44,7 @@ const Page = () => {
       />
 
       <div className='flex flex-col gap-6'>
-        <Card>
-          <CardHeader title='Setting' subheader='Cross-silo, full participation' />
-          <CardContent className='flex flex-col gap-3'>
+        <SectionCard icon='tabler-topology-star-3' color='primary' title='Setting' subtitle='Cross-silo, full participation'>
             <Typography>
               A cross-silo federation of {cfg?.num_clients ?? 15} institutional clients with full participation in
               every round — the regime where clients are a small number of organisations rather than a large number of
@@ -59,12 +55,9 @@ const Page = () => {
               Everything runs in a single process on CPU. There is no network, no device, and no real deployment: this
               is a simulation, and quantities that would be measured in a deployment are computed analytically here.
             </Typography>
-          </CardContent>
-        </Card>
+        </SectionCard>
 
-        <Card>
-          <CardHeader title='Training configuration' subheader='Held fixed across all of Phase A' />
-          <CardContent>
+        <SectionCard icon='tabler-settings' color='info' title='Training configuration' subtitle='Held fixed across all of Phase A'>
             <TableContainer>
               <Table size='small'>
                 <TableBody>
@@ -119,12 +112,9 @@ const Page = () => {
               comparisons between methods are unaffected; the absolute numbers are not comparable to published
               CIFAR-10 results.
             </Typography>
-          </CardContent>
-        </Card>
+        </SectionCard>
 
-        <Card>
-          <CardHeader title='Partition protocols' subheader='Five protocols, reported by measured distance' />
-          <CardContent>
+        <SectionCard icon='tabler-chart-pie' color='secondary' title='Partition protocols' subtitle='Five protocols, reported by measured distance'>
             <TableContainer>
               <Table size='small'>
                 <TableHead>
@@ -149,12 +139,9 @@ const Page = () => {
               Measured values vary with seed; the figures here are the means across the runs on this site. Each
               run&apos;s own partition report is shown in the run explorer.
             </Typography>
-          </CardContent>
-        </Card>
+        </SectionCard>
 
-        <Card>
-          <CardHeader title='Implementation' subheader='Written directly, not assembled from a framework' />
-          <CardContent className='flex flex-col gap-3'>
+        <SectionCard icon='tabler-code' color='success' title='Implementation' subtitle='Written directly, not assembled from a framework'>
             <Typography>
               The round loop, the four aggregation strategies, the partitioning, the differential-privacy path and the
               masking are all implemented directly in this repository. Flower was evaluated and rejected: it ships
@@ -165,12 +152,9 @@ const Page = () => {
               No federated-learning framework is used anywhere in the pipeline. Any description of this work as
               built on Flower, FedML or similar is incorrect.
             </Caveat>
-          </CardContent>
-        </Card>
+        </SectionCard>
 
-        <Card>
-          <CardHeader title='Communication cost' subheader='An analytic quantity, not a measurement' />
-          <CardContent className='flex flex-col gap-3'>
+        <SectionCard icon='tabler-arrows-exchange' color='warning' title='Communication cost' subtitle='An analytic quantity, not a measurement'>
             <Typography>
               Nothing is transmitted anywhere — this is a single process. Uplink cost is computed as parameters × 4
               bytes × clients, giving {bytes(ref?.bytesUpPerRound ?? null)} per round for the model used here. It
@@ -183,12 +167,9 @@ const Page = () => {
               figures as recorded rather than applying a correction, so that what is shown here matches the CSV files
               in the repository. The discrepancy is unresolved and is flagged rather than smoothed over.
             </Caveat>
-          </CardContent>
-        </Card>
+        </SectionCard>
 
-        <Card>
-          <CardHeader title='Threat model' />
-          <CardContent className='flex flex-col gap-3'>
+        <SectionCard icon='tabler-shield-lock' color='error' title='Threat model'>
             <Typography>
               The server is treated as <strong>honest-but-curious</strong>: it follows the protocol correctly but will
               try to learn what it can from what it receives. This is the standard assumption for cross-silo
@@ -200,12 +181,9 @@ const Page = () => {
               clients send each round — rather than compromise of a client, poisoning of the aggregate, or collusion
               between clients. Byzantine robustness is outside the scope of this study.
             </Typography>
-          </CardContent>
-        </Card>
+        </SectionCard>
 
-        <Card>
-          <CardHeader title='Recording' subheader={`${allRuns.length} runs on this site`} />
-          <CardContent className='flex flex-col gap-3'>
+        <SectionCard icon='tabler-database' color='primary' title='Recording' subtitle={`${allRuns.length} runs on this site`}>
             <Typography variant='body2'>
               Each run directory records its metrics per round, the partition it was given, the configuration it
               actually executed with, and a wall-clock timing. The configuration file is the authoritative record:
@@ -216,8 +194,7 @@ const Page = () => {
               excluded from this site, as are the synthetic smoke-test fixture and an attack probe with no recorded
               configuration.
             </Typography>
-          </CardContent>
-        </Card>
+        </SectionCard>
       </div>
     </div>
   )

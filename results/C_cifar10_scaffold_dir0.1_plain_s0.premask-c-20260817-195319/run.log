@@ -1,6 +1,6 @@
 
 ======================================================================
-C_cifar10_scaffold_dir0.1_plain_s0  started 2026-08-17 19:53:20
+C_cifar10_scaffold_dir0.1_plain_s0  started 2026-08-17 00:10:26
 config: experiments/phase_c/C_cifar10_scaffold_dir0.1_plain_s0.yaml
 ======================================================================
 [C_cifar10_scaffold_dir0.1_plain_s0] model params: 189,130 | train 20000 test 5000
@@ -43,3 +43,28 @@ config: experiments/phase_c/C_cifar10_scaffold_dir0.1_plain_s0.yaml
   round  35  test_acc=0.2890  client_acc_var=0.03330
   round  36  test_acc=0.3038  client_acc_var=0.03284
   round  37  test_acc=0.2984  client_acc_var=0.03278
+  round  38  test_acc=0.2834  client_acc_var=0.03095
+  round  39  test_acc=0.2998  client_acc_var=0.02636
+  round  40  test_acc=0.2656  client_acc_var=0.03753
+  round  41  test_acc=0.2892  client_acc_var=0.03181
+  round  42  test_acc=0.2952  client_acc_var=0.02950
+  round  43  test_acc=0.3060  client_acc_var=0.02384
+  round  44  test_acc=0.3212  client_acc_var=0.02017
+  round  45  test_acc=0.2822  client_acc_var=0.03528
+  round  46  test_acc=0.2872  client_acc_var=0.04490
+  round  47  test_acc=0.2928  client_acc_var=0.03939
+  round  48  test_acc=0.3038  client_acc_var=0.02870
+  round  49  test_acc=0.3220  client_acc_var=0.01849
+  round  50  test_acc=0.2946  client_acc_var=0.02653
+  round  51  test_acc=0.3056  client_acc_var=0.03009
+  round  52  test_acc=0.3016  client_acc_var=0.03053
+  round  53  test_acc=0.3006  client_acc_var=0.02446
+  round  54  test_acc=0.3070  client_acc_var=0.02959
+  round  55  test_acc=0.3346  client_acc_var=0.00529
+  round  56  test_acc=0.2938  client_acc_var=0.03335
+  round  57  test_acc=0.3030  client_acc_var=0.03526
+  round  58  test_acc=0.3080  client_acc_var=0.02017
+  round  59  test_acc=0.3022  client_acc_var=0.03195
+  round  60  test_acc=0.3100  client_acc_var=0.03822
+[C_cifar10_scaffold_dir0.1_plain_s0] wall-clock: 42.7 min (42.7 s/round)
+[C_cifar10_scaffold_dir0.1_plain_s0] done -> /Users/abdul/Documents/MSc. Project/fl-privacy-noniid/results/C_cifar10_scaffold_dir0.1_plain_s0

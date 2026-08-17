@@ -140,3 +140,168 @@ config: experiments/phase_c/C_cifar10_fedavg_dir0.1_secagg_s0.yaml
   round  60  test_acc=0.4322  client_acc_var=0.00709
 [C_cifar10_fedavg_dir0.1_secagg_s0] wall-clock: 41.9 min (41.9 s/round)
 [C_cifar10_fedavg_dir0.1_secagg_s0] done -> /Users/abdul/Documents/MSc. Project/fl-privacy-noniid/results/C_cifar10_fedavg_dir0.1_secagg_s0
+
+======================================================================
+C_cifar10_scaffold_dir0.1_plain_s0  started 2026-08-17 00:10:26
+config: experiments/phase_c/C_cifar10_scaffold_dir0.1_plain_s0.yaml
+======================================================================
+[C_cifar10_scaffold_dir0.1_plain_s0] model params: 189,130 | train 20000 test 5000
+[C_cifar10_scaffold_dir0.1_plain_s0] partition dirichlet | HD mean=0.6282 max=0.8269 | sizes[88,3591]
+[C_cifar10_scaffold_dir0.1_plain_s0] strategy=scaffold
+  round   1  test_acc=0.1512  client_acc_var=0.01844
+  round   2  test_acc=0.1682  client_acc_var=0.03131
+  round   3  test_acc=0.1844  client_acc_var=0.02870
+  round   4  test_acc=0.1930  client_acc_var=0.03143
+  round   5  test_acc=0.2202  client_acc_var=0.03133
+  round   6  test_acc=0.2184  client_acc_var=0.03253
+  round   7  test_acc=0.2416  client_acc_var=0.02783
+  round   8  test_acc=0.2418  client_acc_var=0.02881
+  round   9  test_acc=0.2602  client_acc_var=0.01865
+  round  10  test_acc=0.2412  client_acc_var=0.02746
+  round  11  test_acc=0.2466  client_acc_var=0.03066
+  round  12  test_acc=0.2486  client_acc_var=0.03235
+  round  13  test_acc=0.2628  client_acc_var=0.03184
+  round  14  test_acc=0.2650  client_acc_var=0.03221
+  round  15  test_acc=0.2654  client_acc_var=0.03863
+  round  16  test_acc=0.2502  client_acc_var=0.03489
+  round  17  test_acc=0.2664  client_acc_var=0.02752
+  round  18  test_acc=0.2792  client_acc_var=0.03075
+  round  19  test_acc=0.2830  client_acc_var=0.02629
+  round  20  test_acc=0.2776  client_acc_var=0.02918
+  round  21  test_acc=0.2712  client_acc_var=0.02893
+  round  22  test_acc=0.2506  client_acc_var=0.04098
+  round  23  test_acc=0.2746  client_acc_var=0.04270
+  round  24  test_acc=0.2816  client_acc_var=0.02860
+  round  25  test_acc=0.2978  client_acc_var=0.02005
+  round  26  test_acc=0.2842  client_acc_var=0.03045
+  round  27  test_acc=0.2904  client_acc_var=0.03254
+  round  28  test_acc=0.2930  client_acc_var=0.03027
+  round  29  test_acc=0.2994  client_acc_var=0.02745
+  round  30  test_acc=0.2880  client_acc_var=0.03589
+  round  31  test_acc=0.2894  client_acc_var=0.03227
+  round  32  test_acc=0.2864  client_acc_var=0.03651
+  round  33  test_acc=0.2824  client_acc_var=0.03136
+  round  34  test_acc=0.2960  client_acc_var=0.01733
+  round  35  test_acc=0.2890  client_acc_var=0.03330
+  round  36  test_acc=0.3038  client_acc_var=0.03284
+  round  37  test_acc=0.2984  client_acc_var=0.03278
+  round  38  test_acc=0.2834  client_acc_var=0.03095
+  round  39  test_acc=0.2998  client_acc_var=0.02636
+  round  40  test_acc=0.2656  client_acc_var=0.03753
+  round  41  test_acc=0.2892  client_acc_var=0.03181
+  round  42  test_acc=0.2952  client_acc_var=0.02950
+  round  43  test_acc=0.3060  client_acc_var=0.02384
+  round  44  test_acc=0.3212  client_acc_var=0.02017
+  round  45  test_acc=0.2822  client_acc_var=0.03528
+  round  46  test_acc=0.2872  client_acc_var=0.04490
+  round  47  test_acc=0.2928  client_acc_var=0.03939
+  round  48  test_acc=0.3038  client_acc_var=0.02870
+  round  49  test_acc=0.3220  client_acc_var=0.01849
+  round  50  test_acc=0.2946  client_acc_var=0.02653
+  round  51  test_acc=0.3056  client_acc_var=0.03009
+  round  52  test_acc=0.3016  client_acc_var=0.03053
+  round  53  test_acc=0.3006  client_acc_var=0.02446
+  round  54  test_acc=0.3070  client_acc_var=0.02959
+  round  55  test_acc=0.3346  client_acc_var=0.00529
+  round  56  test_acc=0.2938  client_acc_var=0.03335
+  round  57  test_acc=0.3030  client_acc_var=0.03526
+  round  58  test_acc=0.3080  client_acc_var=0.02017
+  round  59  test_acc=0.3022  client_acc_var=0.03195
+  round  60  test_acc=0.3100  client_acc_var=0.03822
+[C_cifar10_scaffold_dir0.1_plain_s0] wall-clock: 42.7 min (42.7 s/round)
+[C_cifar10_scaffold_dir0.1_plain_s0] done -> /Users/abdul/Documents/MSc. Project/fl-privacy-noniid/results/C_cifar10_scaffold_dir0.1_plain_s0
+
+======================================================================
+C_cifar10_scaffold_dir0.1_secagg_s0  started 2026-08-17 00:53:18
+config: experiments/phase_c/C_cifar10_scaffold_dir0.1_secagg_s0.yaml
+======================================================================
+[C_cifar10_scaffold_dir0.1_secagg_s0] model params: 189,130 | train 20000 test 5000
+[C_cifar10_scaffold_dir0.1_secagg_s0] partition dirichlet | HD mean=0.6282 max=0.8269 | sizes[88,3591]
+[C_cifar10_scaffold_dir0.1_secagg_s0] secure aggregation on: pairwise masking
+[C_cifar10_scaffold_dir0.1_secagg_s0] strategy=scaffold
+    secure aggregation ON: pairwise masking over 15 clients, 105 pairs per round
+  round   1  test_acc=0.1512  client_acc_var=0.01844
+  round   2  test_acc=0.1676  client_acc_var=0.03160
+  round   3  test_acc=0.1844  client_acc_var=0.03056
+  round   4  test_acc=0.1946  client_acc_var=0.03074
+  round   5  test_acc=0.2168  client_acc_var=0.03294
+  round   6  test_acc=0.2186  client_acc_var=0.03339
+  round   7  test_acc=0.2444  client_acc_var=0.02746
+  round   8  test_acc=0.2356  client_acc_var=0.03139
+  round   9  test_acc=0.2620  client_acc_var=0.01695
+  round  10  test_acc=0.2326  client_acc_var=0.03085
+  round  11  test_acc=0.2504  client_acc_var=0.02897
+  round  12  test_acc=0.2502  client_acc_var=0.03148
+  round  13  test_acc=0.2618  client_acc_var=0.02865
+  round  14  test_acc=0.2618  client_acc_var=0.02987
+  round  15  test_acc=0.2600  client_acc_var=0.03747
+  round  16  test_acc=0.2338  client_acc_var=0.03783
+  round  17  test_acc=0.2686  client_acc_var=0.02634
+  round  18  test_acc=0.2724  client_acc_var=0.03013
+  round  19  test_acc=0.2860  client_acc_var=0.02733
+  round  20  test_acc=0.2814  client_acc_var=0.02814
+  round  21  test_acc=0.2788  client_acc_var=0.02267
+  round  22  test_acc=0.2544  client_acc_var=0.03641
+  round  23  test_acc=0.2728  client_acc_var=0.04128
+  round  24  test_acc=0.2820  client_acc_var=0.02628
+  round  25  test_acc=0.2992  client_acc_var=0.02349
+  round  26  test_acc=0.2838  client_acc_var=0.02945
+  round  27  test_acc=0.2782  client_acc_var=0.03440
+  round  28  test_acc=0.2954  client_acc_var=0.03283
+  round  29  test_acc=0.2814  client_acc_var=0.03699
+  round  30  test_acc=0.2902  client_acc_var=0.03470
+  round  31  test_acc=0.2998  client_acc_var=0.02802
+  round  32  test_acc=0.2788  client_acc_var=0.03445
+  round  33  test_acc=0.2940  client_acc_var=0.02227
+  round  34  test_acc=0.3106  client_acc_var=0.01389
+  round  35  test_acc=0.2992  client_acc_var=0.02302
+  round  36  test_acc=0.2934  client_acc_var=0.03871
+  round  37  test_acc=0.2810  client_acc_var=0.04167
+  round  38  test_acc=0.2848  client_acc_var=0.03298
+  round  39  test_acc=0.2876  client_acc_var=0.03080
+  round  40  test_acc=0.2700  client_acc_var=0.03233
+  round  41  test_acc=0.3084  client_acc_var=0.03000
+  round  42  test_acc=0.3000  client_acc_var=0.03088
+  round  43  test_acc=0.3008  client_acc_var=0.02442
+  round  44  test_acc=0.3090  client_acc_var=0.02174
+  round  45  test_acc=0.2858  client_acc_var=0.03225
+  round  46  test_acc=0.2962  client_acc_var=0.03918
+  round  47  test_acc=0.3064  client_acc_var=0.02490
+  round  48  test_acc=0.3064  client_acc_var=0.02763
+  round  49  test_acc=0.3152  client_acc_var=0.02045
+  round  50  test_acc=0.2924  client_acc_var=0.02730
+  round  51  test_acc=0.3110  client_acc_var=0.02851
+  round  52  test_acc=0.2990  client_acc_var=0.02896
+  round  53  test_acc=0.3010  client_acc_var=0.03787
+  round  54  test_acc=0.3054  client_acc_var=0.03376
+  round  55  test_acc=0.3214  client_acc_var=0.01879
+  round  56  test_acc=0.2938  client_acc_var=0.03146
+  round  57  test_acc=0.3158  client_acc_var=0.03447
+  round  58  test_acc=0.3150  client_acc_var=0.02391
+  round  59  test_acc=0.3204  client_acc_var=0.02538
+  round  60  test_acc=0.3190  client_acc_var=0.02806
+[C_cifar10_scaffold_dir0.1_secagg_s0] wall-clock: 41.7 min (41.7 s/round)
+[C_cifar10_scaffold_dir0.1_secagg_s0] done -> /Users/abdul/Documents/MSc. Project/fl-privacy-noniid/results/C_cifar10_scaffold_dir0.1_secagg_s0
+PHASE C - SECURE AGGREGATION OVERHEAD
+
+fedavg  (60 rounds)
+  round 1, masked vs plain: 0.00e+00  IDENTICAL - the aggregate is exact
+  later rounds: max wander 0.70 points, final 0.20 points
+  masking, processor seconds per round: 0.3396 mask + 0.0012 aggregate
+  plain arm records 0.0000 (must be zero)
+  key-agreement messages per round: 210
+  bytes per round: plain 11,347,800.0  masked 11,347,800.0  ratio 1.0000   (unchanged, as Section 3.8.5 predicts)
+  plain arm vs Phase A twin: max difference 0.00e+00
+
+scaffold  (60 rounds)
+  round 1, masked vs plain: 0.00e+00  IDENTICAL - the aggregate is exact
+  later rounds: max wander 1.92 points, final 0.90 points
+  masking, processor seconds per round: 0.3337 mask + 0.0012 aggregate
+  plain arm records 0.0000 (must be zero)
+  key-agreement messages per round: 210
+  bytes per round: plain 22,695,600.0  masked 22,695,600.0  ratio 1.0000   (unchanged, as Section 3.8.5 predicts)
+  plain arm vs Phase A twin: max difference 0.00e+00
+
+written -> results/C_summary/overhead.json
+
+PASS

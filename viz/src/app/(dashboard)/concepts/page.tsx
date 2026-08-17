@@ -1,7 +1,4 @@
 // MUI Imports
-import Card from '@mui/material/Card'
-import CardContent from '@mui/material/CardContent'
-import CardHeader from '@mui/material/CardHeader'
 import Typography from '@mui/material/Typography'
 import Chip from '@mui/material/Chip'
 
@@ -9,6 +6,7 @@ import Chip from '@mui/material/Chip'
 import LinkButton from '@/components/site/LinkButton'
 import PageHeader from '@/components/site/PageHeader'
 import Caveat from '@/components/site/Caveat'
+import SectionCard from '@/components/site/SectionCard'
 
 export const metadata = {
   title: 'Concepts — FL with non-IID data',
@@ -25,9 +23,7 @@ const Page = () => (
     />
 
     <div className='flex flex-col gap-6'>
-      <Card>
-        <CardHeader title='Non-IID data, and the four ways it goes wrong' />
-        <CardContent className='flex flex-col gap-3'>
+      <SectionCard icon='tabler-chart-pie' color='primary' title='Non-IID data, and the four ways it goes wrong'>
           <Typography>
             Federated learning assumes data stays where it was collected. That assumption has a consequence: each
             client&apos;s data reflects wherever it came from, so the clients do not hold independent, identically
@@ -55,15 +51,14 @@ const Page = () => (
             pathological split is severe — which is why heterogeneity is reported as a measured quantity rather than by
             the name of the protocol.
           </Typography>
-        </CardContent>
-      </Card>
+      </SectionCard>
 
-      <Card>
-        <CardHeader
-          title='Hellinger distance'
-          subheader='The measured quantity that heterogeneity is reported as'
-        />
-        <CardContent className='flex flex-col gap-3'>
+      <SectionCard
+        icon='tabler-ruler-measure'
+        color='info'
+        title='Hellinger distance'
+        subtitle='The measured quantity that heterogeneity is reported as'
+      >
           <Typography>
             The Hellinger distance between two probability distributions is a number in [0, 1]: zero when they are
             identical, one when they share no support. Here it is computed between each client&apos;s label
@@ -89,12 +84,9 @@ const Page = () => (
           <LinkButton href='/rq1' size='small' variant='tonal' className='self-start'>
             See accuracy plotted against it
           </LinkButton>
-        </CardContent>
-      </Card>
+      </SectionCard>
 
-      <Card>
-        <CardHeader title='The four aggregation strategies' />
-        <CardContent className='flex flex-col gap-4'>
+      <SectionCard icon='tabler-git-merge' color='secondary' title='The four aggregation strategies'>
           <div>
             <Typography variant='subtitle2'>FedAvg</Typography>
             <Typography variant='body2'>
@@ -139,12 +131,9 @@ const Page = () => (
               rather than as a competitor to the other three.
             </Typography>
           </div>
-        </CardContent>
-      </Card>
+      </SectionCard>
 
-      <Card>
-        <CardHeader title='Differential privacy and ε' />
-        <CardContent className='flex flex-col gap-3'>
+      <SectionCard icon='tabler-lock' color='success' title='Differential privacy and ε'>
           <Typography>
             Differential privacy bounds how much any single record can influence what is released. The bound is ε:
             smaller means stronger privacy and, in practice, more noise added and more accuracy lost. In federated
@@ -158,12 +147,9 @@ const Page = () => (
           <Caveat severity='info' title='No results yet'>
             Phases B and D have not been run. Nothing on this site reports an accuracy cost for differential privacy.
           </Caveat>
-        </CardContent>
-      </Card>
+      </SectionCard>
 
-      <Card>
-        <CardHeader title='Secure aggregation' />
-        <CardContent className='flex flex-col gap-3'>
+      <SectionCard icon='tabler-shield-check' color='info' title='Secure aggregation'>
           <Typography>
             Differential privacy limits what can be inferred from the aggregate. Secure aggregation addresses a
             different exposure: it stops the server from seeing any individual update at all. Clients add pairwise
@@ -174,12 +160,9 @@ const Page = () => (
             server, and differential privacy bounds what the revealed sum leaks. The cost of masking is paid in
             communication rather than accuracy.
           </Typography>
-        </CardContent>
-      </Card>
+      </SectionCard>
 
-      <Card>
-        <CardHeader title='Gradient inversion, and why higher PSNR is worse' />
-        <CardContent className='flex flex-col gap-3'>
+      <SectionCard icon='tabler-shield-lock' color='error' title='Gradient inversion, and why higher PSNR is worse'>
           <Typography>
             A gradient inversion attack starts from what a client transmits and optimises a synthetic input until its
             gradient matches. If it succeeds, the transmitted update was not the privacy-preserving abstraction it was
@@ -202,8 +185,7 @@ const Page = () => (
           <Caveat severity='info' title='No results yet'>
             Phase E has not been run. No reconstruction or PSNR figures appear on this site.
           </Caveat>
-        </CardContent>
-      </Card>
+      </SectionCard>
     </div>
   </div>
 )
