@@ -171,11 +171,63 @@ def main(cfg_path):
     # resume?
     start_round, init_params, prior = 0, None, []
     ckpt = _checkpoint_path(outdir)
+    def _mechanism(c):
+        """The settings that decide WHAT is being measured, not how far it got."""
+        dp = dict(c.get("dp") or {})
+        return {
+            "dp_enabled": bool(dp) and bool(dp.get("enabled", True)),
+            "granularity": str(dp.get("granularity", "sample")) if dp else None,
+            "schedule": str(dp.get("schedule")) if dp.get("schedule") else None,
+            "target_epsilon": float(dp["target_epsilon"]) if dp.get("target_epsilon") is not None else None,
+            "max_grad_norm": float(dp["max_grad_norm"]) if dp.get("max_grad_norm") is not None else None,
+            "secagg": bool((c.get("secagg") or {}).get("enabled", False)),
+            "uniform_averaging": bool(c.get("uniform_averaging", False)),
+            "strategy": str(c.get("strategy", "fedavg")).lower(),
+            "rounds": int(c.get("rounds", 0)),
+        }
+
     if os.path.exists(ckpt) and not cfg.get("fresh", False):
         data = np.load(ckpt, allow_pickle=True)
         ckpt_round = int(data["round"])
         strat = str(cfg.get("strategy", "fedavg")).lower()
-        if strat in STATEFUL and ckpt_round > 0:
+
+        # REFUSE TO RESUME A RUN THAT MEASURED SOMETHING ELSE.
+        #
+        # A checkpoint records how far a run got, not what it was doing. When
+        # Phase D added `granularity` and `schedule`, six runs executed as plain
+        # sample-level DP under directories that claimed client-level and
+        # time-adaptive; the configs were then corrected and re-launched, and
+        # every one of them resumed from its completed checkpoint and did ZERO
+        # rounds, leaving the wrong numbers in place and reporting success.
+        #
+        # So the mechanism recorded in config_used.json is compared with the
+        # mechanism now being asked for, and any difference archives the old
+        # outputs and restarts from round 0 - the same treatment D48 gives a
+        # stateful arm that cannot safely resume.
+        prev_path = os.path.join(outdir, "config_used.json")
+        drift = []
+        if os.path.exists(prev_path):
+            try:
+                prev = _mechanism(json.load(open(prev_path)))
+                now = _mechanism(cfg)
+                drift = [f"{k}: {prev[k]!r} -> {now[k]!r}"
+                         for k in now if prev.get(k) != now[k]]
+            except Exception as exc:
+                drift = [f"could not read the previous config ({exc})"]
+
+        if drift:
+            stamp = time.strftime("%Y%m%d-%H%M%S")
+            for fname in ("checkpoint.npz", "metrics.csv", "run.log",
+                          "config_used.json"):
+                src = os.path.join(outdir, fname)
+                if os.path.exists(src):
+                    os.rename(src, os.path.join(outdir, f"{fname}.mechanism-{stamp}"))
+            print(f"[{name}] MECHANISM CHANGED since the recorded run; restarting "
+                  f"from round 0 rather than resuming:")
+            for d in drift:
+                print(f"    {d}")
+            print(f"  Previous outputs renamed with suffix .mechanism-{stamp}.")
+        elif strat in STATEFUL and ckpt_round > 0:
             stamp = time.strftime("%Y%m%d-%H%M%S")
             for fname in ("checkpoint.npz", "metrics.csv"):
                 src = os.path.join(outdir, fname)
@@ -217,10 +269,32 @@ def main(cfg_path):
     if dp_cfg and not dp_cfg.get("enabled", True):
         dp_cfg = None
     if dp_cfg:
-        dp_cfg = {"target_epsilon": float(dp_cfg["target_epsilon"]),
-                  "delta": float(dp_cfg.get("delta", 1e-5)),
-                  "max_grad_norm": float(dp_cfg.get("max_grad_norm", 1.0))}
-        print(f"[{name}] DP-SGD on: target eps={dp_cfg['target_epsilon']} "
+        # PASS THE WHOLE BLOCK THROUGH. An earlier version rebuilt this dict
+        # from three named keys, which was right when three were all that
+        # existed and silently wrong the moment Phase D added `granularity` and
+        # `schedule`: six runs executed as plain sample-level DP while their
+        # directories claimed client-level and time-adaptive, and nothing in the
+        # output said so. Copy first, coerce the numeric fields, keep the rest.
+        dp_cfg = dict(dp_cfg)
+        dp_cfg["target_epsilon"] = float(dp_cfg["target_epsilon"])
+        dp_cfg["delta"] = float(dp_cfg.get("delta", 1e-5))
+        dp_cfg["max_grad_norm"] = float(dp_cfg.get("max_grad_norm", 1.0))
+        dp_cfg.pop("enabled", None)
+
+        gran = str(dp_cfg.get("granularity", "sample"))
+        sched = dp_cfg.get("schedule")
+        if gran not in ("sample", "client"):
+            raise SystemExit(f"unknown dp granularity {gran!r}; "
+                             "expected 'sample' or 'client'")
+        if sched is not None and str(sched) not in ("constant", "decreasing",
+                                                    "increasing"):
+            raise SystemExit(f"unknown dp schedule {sched!r}")
+
+        # Say out loud what is about to run, so a mismatch between the label on
+        # the directory and the mechanism inside it is visible in the log.
+        print(f"[{name}] DP ON | granularity={gran} | "
+              f"schedule={sched or 'constant'} | "
+              f"target eps={dp_cfg['target_epsilon']} "
               f"delta={dp_cfg['delta']} C={dp_cfg['max_grad_norm']}")
 
     # Secure aggregation (Phase C). Absent or disabled -> plaintext aggregation.
@@ -242,6 +316,8 @@ def main(cfg_path):
         start_round=start_round, init_params=init_params,
         strategy=strategy, strategy_cfg=scfg, server_momentum=server_momentum,
         server_lr=server_lr, dp_cfg=dp_cfg, secagg_cfg=secagg_cfg,
+        uniform_averaging=bool(cfg.get("uniform_averaging", False)),
+        record_dir=outdir,
     )
     elapsed = time.time() - t_start
     print(f"[{name}] wall-clock: {elapsed/60:.1f} min "

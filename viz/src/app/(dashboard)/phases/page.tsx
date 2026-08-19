@@ -96,10 +96,14 @@ const PHASES: Phase[] = [
     icon: 'tabler-adjustments',
     color: 'warning',
     planned: 8,
-    varies: 'DP granularity (sample / user / silo level) and time-adaptive budget spending schedules.',
-    fixed: 'Total privacy budget, so that schedules are compared at equal ε.',
+    varies: 'DP granularity — sample-level against client-level — and time-adaptive budget spending, at ε ∈ {8, 4, 1}.',
+    fixed:
+      'One cell throughout: CIFAR-10, FedAvg, Dirichlet α = 0.1, seed 0. Only the mechanism changes, so every difference is attributable to it.',
     answers:
-      'Which granularity is viable at cross-silo scale with 15 clients, and whether spending the budget unevenly across rounds beats spending it uniformly.'
+      'Which granularity is viable at cross-silo scale with 15 clients, and whether spending the budget unevenly across rounds beats spending it uniformly. Both answers are negative.',
+    note: 'Nine runs recorded, eight counted: a diagnostic control isolating the cost of uniform averaging is excluded from the totals by §3.11. Two further arms are controls that reproduce their Phase A and Phase B originals exactly.',
+    href: '/granularity',
+    hrefLabel: 'See what the guarantee protects'
   },
   {
     id: 'E',

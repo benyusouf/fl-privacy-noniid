@@ -194,6 +194,12 @@ const Page = () => {
               excluded from this site, as are the synthetic smoke-test fixture and an attack probe with no recorded
               configuration.
             </Typography>
+            <Typography variant='body2' color='text.secondary'>
+              Recorded and counted are not the same thing. Section 3.11 excludes calibration and diagnostic activity
+              from the study&apos;s run totals, so a diagnostic run — one made to interpret another run rather than to
+              produce a result — is published and browsable here but does not add to a phase count. This site shows
+              both numbers rather than quietly picking one.
+            </Typography>
         </SectionCard>
       </div>
     </div>

@@ -70,7 +70,13 @@ def yaml_dump(d, indent=0):
             lines.append(f"{pad}{k}:")
             lines.append(yaml_dump(v, indent + 1))
         else:
-            lines.append(f"{pad}{k}: {v}")
+            # Quote anything containing ": " - YAML reads it as a nested mapping
+            # and fails with "mapping values are not allowed here". The Phase D
+            # diagnostic carried "(D83): " in its note and crashed on it.
+            text = str(v)
+            if ": " in text or text.startswith(("[", "{", "*", "&", "!")):
+                text = '"' + text.replace('"', "'") + '"'
+            lines.append(f"{pad}{k}: {text}")
     return "\n".join(l for l in lines if l)
 
 

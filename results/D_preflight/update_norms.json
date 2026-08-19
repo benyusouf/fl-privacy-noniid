@@ -1,0 +1,37 @@
+{
+  "median_update_norm": 0.3573981523513794,
+  "recommended_C": 0.3573981523513794,
+  "aggregate_update_norm": 0.17066872119903564,
+  "rounds_sampled": 3,
+  "client_rounds": 45,
+  "budgets": [
+    {
+      "epsilon": 8,
+      "sigma": 4.9406,
+      "realised_epsilon": 7.9976,
+      "noise_std_per_coordinate": 0.117718,
+      "noise_vector_norm": 51.194,
+      "signal_norm": 0.17067,
+      "noise_to_signal": 300.0
+    },
+    {
+      "epsilon": 4,
+      "sigma": 8.9722,
+      "realised_epsilon": 3.9971,
+      "noise_std_per_coordinate": 0.213776,
+      "noise_vector_norm": 92.969,
+      "signal_norm": 0.17067,
+      "noise_to_signal": 544.7
+    },
+    {
+      "epsilon": 1,
+      "sigma": 31.0828,
+      "realised_epsilon": 1.009,
+      "noise_std_per_coordinate": 0.740596,
+      "noise_vector_norm": 322.078,
+      "signal_norm": 0.17067,
+      "noise_to_signal": 1887.2
+    }
+  ],
+  "note": "Measured on CIFAR-10 alpha=0.1 FedAvg at the Phase A regime. C is the median client update norm. Noise on the mean is sigma*C/N with N=15, and the accounting takes no subsampling amplification because participation is full."
+}

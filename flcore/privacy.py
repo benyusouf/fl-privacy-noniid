@@ -223,3 +223,70 @@ def adaptive_noise_schedule(total_rounds: int, base_sigma: float,
     target = total_rounds / (base_sigma ** 2)
     scale = np.sqrt(np.sum(1.0 / sigmas ** 2) / target)
     return (sigmas * scale).tolist()
+
+
+def epsilon_of_schedule(sigmas: list[float], sample_rate: float,
+                        steps_per_round: int, delta: float = 1e-5) -> float:
+    """Realised epsilon for a per-round noise schedule.
+
+    Section 3.8.4 requires this. A schedule is normalised on sum(1/sigma_t^2),
+    which is the quantity driving Renyi composition, but normalising on a proxy
+    does not guarantee landing on the budget the proxy was chosen to match. So
+    the accountant is asked directly, over the actual sequence of noise levels,
+    before any figure is reported.
+    """
+    from opacus.accountants import RDPAccountant
+
+    acct = RDPAccountant()
+    acct.history = [(float(s), float(sample_rate), int(steps_per_round))
+                    for s in sigmas]
+    return float(acct.get_epsilon(delta=delta))
+
+
+def calibrate_schedule_for_epsilon(target_epsilon: float, shape: list[float],
+                                   sample_rate: float, steps_per_round: int,
+                                   delta: float = 1e-5, tol: float = 0.005,
+                                   hi_cap: float = 4096.0) -> list[float]:
+    """Scale a noise SHAPE so the schedule spends exactly `target_epsilon`.
+
+    WHY THIS REPLACES THE PROXY NORMALISATION
+    -----------------------------------------
+    adaptive_noise_schedule normalises on sum(1/sigma_t^2), the quantity that
+    drives Renyi composition. That is the natural choice and it is what Kiani et
+    al. (2025) motivate, but it is a PROXY: under subsampled Gaussian
+    composition, epsilon is not determined by that sum alone. Matching it
+    therefore does not match the budget, and measurement showed the error is
+    systematic and grows with the budget - realised 1.0100, 4.0366 and 8.1959
+    against targets of 1, 4 and 8, an overspend of up to 2.4 per cent (D87).
+
+    An arm that overspends has more budget than the constant arm it is compared
+    with, so any advantage it shows is partly bought. This function removes the
+    question by asking the accountant directly: hold the SHAPE of the schedule
+    fixed and binary-search the scale until the realised epsilon lands on the
+    target. The shape still carries the time-adaptive idea; only its magnitude
+    is set by measurement rather than by proxy.
+
+    `shape` is a list of relative multipliers, one per round, as returned by
+    adaptive_noise_schedule(rounds, 1.0, ...).
+    """
+    lo, hi = 0.05, 30.0
+    while epsilon_of_schedule([hi * m for m in shape], sample_rate,
+                              steps_per_round, delta) > target_epsilon:
+        lo, hi = hi, hi * 2
+        if hi > hi_cap:
+            raise ValueError(
+                f"cannot reach epsilon={target_epsilon} at sample_rate="
+                f"{sample_rate:.4f} over {len(shape)} rounds even at scale "
+                f"{hi_cap}")
+
+    for _ in range(80):
+        mid = (lo + hi) / 2
+        eps = epsilon_of_schedule([mid * m for m in shape], sample_rate,
+                                  steps_per_round, delta)
+        if abs(eps - target_epsilon) < tol:
+            return [mid * m for m in shape]
+        if eps > target_epsilon:
+            lo = mid
+        else:
+            hi = mid
+    return [hi * m for m in shape]

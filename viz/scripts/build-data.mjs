@@ -96,7 +96,16 @@ const parseCsv = text => {
 
       const n = Number(v)
 
-      return Number.isFinite(n) ? n : v
+      /*
+       * Non-finite values are emitted as null, not as the string they came in
+       * as. A "nan" left in place types as string, flows into charts as a
+       * non-number, and reads downstream as "no value" anyway — but it also
+       * silently changes the column's type. Counting them instead keeps the
+       * curve numeric and makes the condition visible: client-level DP at
+       * epsilon = 1 records a NaN loss from round 29 on, which is the model
+       * breaking down numerically and is worth seeing rather than hiding.
+       */
+      return Number.isFinite(n) ? n : null
     })
   )
 
@@ -135,10 +144,50 @@ const readJson = p => JSON.parse(readFileSync(p, 'utf8'))
 
 const unknownPartitions = new Set()
 
+/*
+ * Markers that sit between the phase letter and the dataset.
+ *
+ * A diagnostic is a run made to make another run interpretable — Phase D's
+ * uniform-averaging control, for instance. Section 3.11 excludes them from the
+ * study's run totals, so they are recorded and shown but not counted.
+ */
+const NAME_MARKERS = { diag: 'diagnostic' }
+
+const unknownMarkers = new Set()
+
 const decodeName = (name, config) => {
   const parts = name.split('_')
   const phase = parts[0]
-  const dataset = parts[1]
+
+  /*
+   * Resolve the dataset against the known set rather than trusting position.
+   *
+   * Most runs are <phase>_<dataset>_..., but a specially-named one such as
+   * D_diag_cifar10_fedavg_dir0.1_uniform_s0 puts a marker first. Taking
+   * parts[1] blindly decodes its dataset as "diag" and invents a dataset facet
+   * that should not exist. Shifting indices by one would fix this run and break
+   * on the next marker, so the dataset is looked up instead and anything ahead
+   * of it is treated as a marker.
+   */
+  let cursor = 1
+  const markers = []
+
+  while (cursor < parts.length && !(parts[cursor] in DATASET_LABELS)) {
+    if (parts[cursor] in NAME_MARKERS) {
+      markers.push(NAME_MARKERS[parts[cursor]])
+    } else {
+      unknownMarkers.add(`${name}: "${parts[cursor]}" is neither a known dataset nor a known marker`)
+      break
+    }
+    cursor++
+  }
+
+  const dataset = parts[cursor]
+  const diagnostic = markers.includes('diagnostic')
+
+  // Everything after the dataset keeps its original relative order.
+  parts.splice(1, cursor - 1)
+
   const seedMatch = name.match(/_s(\d+)$/)
   const seed = seedMatch ? Number(seedMatch[1]) : null
 
@@ -194,6 +243,8 @@ const decodeName = (name, config) => {
     partition,
     /** The experimental arm within a partition: eps1, plain, secagg, ... */
     arm,
+    /** A run made to interpret another run. Recorded and shown, never counted. */
+    diagnostic,
     isFedAvgM,
     mode: isCentralized ? 'centralized' : 'federated'
   }
@@ -257,7 +308,22 @@ const collect = () => {
     const config = readJson(configPath)
     const dpCalPath = join(dir, 'dp_calibration.json')
     const dpCal = existsSync(dpCalPath) ? readJson(dpCalPath) : null
-    const curve = parseCsv(readFileSync(metricsPath, 'utf8'))
+    const metricsText = readFileSync(metricsPath, 'utf8')
+    const curve = parseCsv(metricsText)
+
+    /*
+     * Cells the CSV recorded as nan or inf, now null in the curve above.
+     *
+     * Counting them keeps the condition visible rather than hiding it behind a
+     * gap in a line: client-level DP at epsilon = 1 records a NaN loss from
+     * round 29 onward, which is the model breaking down numerically under a
+     * noise vector far larger than the update it is added to.
+     */
+    const nonFiniteCells = metricsText
+      .trim()
+      .split(/\r?\n/)
+      .slice(1)
+      .reduce((acc, line) => acc + line.split(',').filter(c => /^\s*[-+]?(nan|inf|infinity)\s*$/i.test(c)).length, 0)
     const meta = decodeName(name, config)
 
     // Accuracy summary — selections from recorded values, never adjustments.
@@ -384,6 +450,20 @@ const collect = () => {
         : null,
 
       /** The Phase A run this one is measured against, where the config names it. */
+      /*
+       * Client-level DP requires a UNIFORM mean, because its sensitivity bound
+       * of C/N is the sensitivity of a uniform mean to one client. Every other
+       * arm averages by sample count. Without this field the diagnostic control
+       * is indistinguishable from the unprotected run in the data, and the two
+       * costs — the noise, and the re-weighting the mechanism demands — stay
+       * permanently confounded.
+       */
+      uniformAveraging: config.uniform_averaging === true,
+
+      /** Section 3.11 excludes diagnostics from the study's run totals. */
+      counted: !meta.diagnostic,
+      diagnostic: meta.diagnostic,
+
       comparator: config.comparator ?? null,
 
       /*
@@ -452,6 +532,7 @@ const collect = () => {
       hasLog: existsSync(join(dir, 'run.log')),
       hasProvenance: existsSync(join(dir, 'provenance.txt')),
 
+      nonFiniteCells,
       config,
       curve
     })
@@ -464,7 +545,7 @@ const { runs, excluded } = collect()
 
 // Integrity checks. These are assertions about the emitted bundle, not about the
 // experiment — they catch a broken conversion, not a broken result.
-const problems = [...unknownPartitions]
+const problems = [...unknownPartitions, ...unknownMarkers]
 
 for (const r of runs) {
   if (r.finalAcc === null) problems.push(`${r.name}: no test_acc column`)

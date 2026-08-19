@@ -1,0 +1,70 @@
+
+======================================================================
+D_diag_cifar10_fedavg_dir0.1_uniform_s0  started 2026-08-18 20:05:41
+config: experiments/phase_d/D_diag_cifar10_fedavg_dir0.1_uniform_s0.yaml
+======================================================================
+[D_diag_cifar10_fedavg_dir0.1_uniform_s0] model params: 189,130 | train 20000 test 5000
+[D_diag_cifar10_fedavg_dir0.1_uniform_s0] partition dirichlet | HD mean=0.6282 max=0.8269 | sizes[88,3591]
+[D_diag_cifar10_fedavg_dir0.1_uniform_s0] strategy=fedavg
+  round   1  test_acc=0.1102  client_acc_var=0.02897
+  round   2  test_acc=0.1456  client_acc_var=0.03238
+  round   3  test_acc=0.1550  client_acc_var=0.03556
+  round   4  test_acc=0.1722  client_acc_var=0.03795
+  round   5  test_acc=0.1862  client_acc_var=0.03951
+  round   6  test_acc=0.1878  client_acc_var=0.03840
+  round   7  test_acc=0.1956  client_acc_var=0.03614
+  round   8  test_acc=0.2176  client_acc_var=0.03787
+  round   9  test_acc=0.2328  client_acc_var=0.03511
+  round  10  test_acc=0.2242  client_acc_var=0.03886
+  round  11  test_acc=0.2464  client_acc_var=0.03610
+  round  12  test_acc=0.2504  client_acc_var=0.03393
+  round  13  test_acc=0.2614  client_acc_var=0.03226
+  round  14  test_acc=0.2560  client_acc_var=0.03333
+  round  15  test_acc=0.2788  client_acc_var=0.03216
+  round  16  test_acc=0.2532  client_acc_var=0.03710
+  round  17  test_acc=0.2772  client_acc_var=0.03356
+  round  18  test_acc=0.2794  client_acc_var=0.03456
+  round  19  test_acc=0.2760  client_acc_var=0.03266
+  round  20  test_acc=0.2872  client_acc_var=0.03234
+  round  21  test_acc=0.2894  client_acc_var=0.02651
+  round  22  test_acc=0.2862  client_acc_var=0.03257
+  round  23  test_acc=0.2828  client_acc_var=0.03656
+  round  24  test_acc=0.2908  client_acc_var=0.03190
+  round  25  test_acc=0.3012  client_acc_var=0.03254
+  round  26  test_acc=0.2978  client_acc_var=0.03057
+  round  27  test_acc=0.3154  client_acc_var=0.02438
+  round  28  test_acc=0.3044  client_acc_var=0.02899
+  round  29  test_acc=0.3130  client_acc_var=0.02619
+  round  30  test_acc=0.3080  client_acc_var=0.02894
+  round  31  test_acc=0.3154  client_acc_var=0.02980
+  round  32  test_acc=0.3172  client_acc_var=0.02754
+  round  33  test_acc=0.3306  client_acc_var=0.02627
+  round  34  test_acc=0.3334  client_acc_var=0.02309
+  round  35  test_acc=0.3254  client_acc_var=0.02662
+  round  36  test_acc=0.3364  client_acc_var=0.02365
+  round  37  test_acc=0.3404  client_acc_var=0.02373
+  round  38  test_acc=0.3326  client_acc_var=0.02584
+  round  39  test_acc=0.3398  client_acc_var=0.02464
+  round  40  test_acc=0.3296  client_acc_var=0.02836
+  round  41  test_acc=0.3424  client_acc_var=0.02544
+  round  42  test_acc=0.3526  client_acc_var=0.02378
+  round  43  test_acc=0.3658  client_acc_var=0.01362
+  round  44  test_acc=0.3610  client_acc_var=0.01961
+  round  45  test_acc=0.3412  client_acc_var=0.03041
+  round  46  test_acc=0.3426  client_acc_var=0.03008
+  round  47  test_acc=0.3552  client_acc_var=0.02413
+  round  48  test_acc=0.3646  client_acc_var=0.02273
+  round  49  test_acc=0.3602  client_acc_var=0.02308
+  round  50  test_acc=0.3486  client_acc_var=0.02570
+  round  51  test_acc=0.3608  client_acc_var=0.02584
+  round  52  test_acc=0.3598  client_acc_var=0.02464
+  round  53  test_acc=0.3638  client_acc_var=0.02582
+  round  54  test_acc=0.3670  client_acc_var=0.02357
+  round  55  test_acc=0.3738  client_acc_var=0.01630
+  round  56  test_acc=0.3620  client_acc_var=0.02427
+  round  57  test_acc=0.3754  client_acc_var=0.02126
+  round  58  test_acc=0.3742  client_acc_var=0.02028
+  round  59  test_acc=0.3814  client_acc_var=0.01984
+  round  60  test_acc=0.3888  client_acc_var=0.01792
+[D_diag_cifar10_fedavg_dir0.1_uniform_s0] wall-clock: 41.3 min (41.3 s/round)
+[D_diag_cifar10_fedavg_dir0.1_uniform_s0] done -> /Users/abdul/Documents/MSc. Project/fl-privacy-noniid/results/D_diag_cifar10_fedavg_dir0.1_uniform_s0

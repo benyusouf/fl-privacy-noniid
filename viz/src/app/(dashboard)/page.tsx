@@ -13,7 +13,7 @@ import StatCard from '@/components/site/StatCard'
 import CustomAvatar from '@core/components/mui/Avatar'
 
 // Lib Imports
-import { allRuns, bundle, centralizedRuns, federatedRuns, protectedRuns, seedGroups } from '@/lib/results'
+import { allRuns, bundle, centralizedRuns, countedRuns, federatedRuns, protectedRuns, seedGroups } from '@/lib/results'
 import { archiveUrl, downloads } from '@/lib/downloads'
 
 // Config Imports
@@ -47,11 +47,11 @@ const RQS = [
   {
     id: 'RQ3',
     phase: 'Phase D',
-    status: 'pending',
-    icon: 'tabler-adjustments',
+    status: 'answered',
+    icon: 'tabler-building-bank',
     color: 'warning' as const,
     q: 'Which differential-privacy granularity is viable at cross-silo scale, and does time-adaptive budget spending help?',
-    href: '/phases'
+    href: '/granularity'
   },
   {
     id: 'RQ4',
@@ -95,6 +95,14 @@ const CAPABILITIES = [
     body: 'Masking measured against unmasked pairs — free in accuracy and bandwidth, paid for in computation — and why masking the update alone leaves SCAFFOLD exposed.',
     href: '/secagg',
     action: 'Open the secure aggregation results'
+  },
+  {
+    icon: 'tabler-building-bank',
+    color: 'warning' as const,
+    title: 'See what the guarantee protects',
+    body: 'Protecting one institution rather than one record, and whether spending the privacy budget unevenly helps. The strongest negative result in the study.',
+    href: '/granularity',
+    action: 'Open the granularity results'
   },
   {
     icon: 'tabler-table',
@@ -149,7 +157,7 @@ const Page = () => {
         <StatCard
           label='Runs recorded'
           value={String(allRuns.length)}
-          hint='of the 120 the design calls for'
+          hint={`${countedRuns.length} counted; ${allRuns.length - countedRuns.length} diagnostic`}
           icon='tabler-database'
           color='primary'
         />
@@ -163,7 +171,7 @@ const Page = () => {
         <StatCard
           label='Under differential privacy'
           value={String(protectedRuns.length)}
-          hint='sample-level, ε ∈ {8, 4, 1}'
+          hint='sample-level, client-level and time-adaptive'
           icon='tabler-lock'
           color='success'
         />

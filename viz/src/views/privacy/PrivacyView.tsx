@@ -212,13 +212,13 @@ const PrivacyView = () => {
                 size='small'
                 variant='tonal'
                 color='secondary'
-                label={`σ ratio ${noise.sigmaRatio.toFixed(2)}× at ε = ${noiseEpsilon}`}
+                label={`σ ratio ${noise.sigmaRatio?.toFixed(2) ?? '—'}× at ε = ${noiseEpsilon}`}
               />
               <Chip size='small' variant='tonal' color='warning' label={`highest sampling ratio q = ${noise.maxQ.toFixed(3)}`} />
               <Chip
                 size='small'
                 variant='tonal'
-                label={`smallest silo: ${noise.smallest.n} samples, σ = ${noise.smallest.sigma.toFixed(2)} at ε = ${noiseEpsilon}`}
+                label={`smallest silo: ${noise.smallest.n} samples, σ = ${(noise.smallest.sigma ?? noise.smallest.sigmaMax ?? 0).toFixed(2)} at ε = ${noiseEpsilon}`}
               />
             </div>
           )}

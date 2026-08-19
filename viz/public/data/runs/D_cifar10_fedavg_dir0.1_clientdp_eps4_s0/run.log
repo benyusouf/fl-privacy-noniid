@@ -1,0 +1,73 @@
+
+======================================================================
+D_cifar10_fedavg_dir0.1_clientdp_eps4_s0  started 2026-08-18 16:56:56
+config: experiments/phase_d/D_cifar10_fedavg_dir0.1_clientdp_eps4_s0.yaml
+======================================================================
+[D_cifar10_fedavg_dir0.1_clientdp_eps4_s0] model params: 189,130 | train 20000 test 5000
+[D_cifar10_fedavg_dir0.1_clientdp_eps4_s0] partition dirichlet | HD mean=0.6282 max=0.8269 | sizes[88,3591]
+[D_cifar10_fedavg_dir0.1_clientdp_eps4_s0] DP ON | granularity=client | schedule=constant | target eps=4.0 delta=1e-05 C=0.357398
+[D_cifar10_fedavg_dir0.1_clientdp_eps4_s0] strategy=fedavg
+    client-level DP: C=0.3574 sigma=8.9722 -> eps=3.997 over 60 rounds at sampling rate 1.0
+    noise std on the mean = sigma*C/N = 0.21378; averaging is UNIFORM
+  round   1  test_acc=0.1044  client_acc_var=0.01100
+  round   2  test_acc=0.1072  client_acc_var=0.06092
+  round   3  test_acc=0.1014  client_acc_var=0.02042
+  round   4  test_acc=0.1000  client_acc_var=0.07017
+  round   5  test_acc=0.0980  client_acc_var=0.01840
+  round   6  test_acc=0.1138  client_acc_var=0.01205
+  round   7  test_acc=0.1210  client_acc_var=0.02832
+  round   8  test_acc=0.1002  client_acc_var=0.04488
+  round   9  test_acc=0.1006  client_acc_var=0.04224
+  round  10  test_acc=0.0980  client_acc_var=0.01804
+  round  11  test_acc=0.1034  client_acc_var=0.02674
+  round  12  test_acc=0.1010  client_acc_var=0.04790
+  round  13  test_acc=0.0920  client_acc_var=0.01245
+  round  14  test_acc=0.1020  client_acc_var=0.01035
+  round  15  test_acc=0.1006  client_acc_var=0.01048
+  round  16  test_acc=0.1036  client_acc_var=0.00579
+  round  17  test_acc=0.1312  client_acc_var=0.00895
+  round  18  test_acc=0.1138  client_acc_var=0.00728
+  round  19  test_acc=0.1058  client_acc_var=0.02945
+  round  20  test_acc=0.1008  client_acc_var=0.03008
+  round  21  test_acc=0.1086  client_acc_var=0.02714
+  round  22  test_acc=0.1026  client_acc_var=0.02460
+  round  23  test_acc=0.1138  client_acc_var=0.03518
+  round  24  test_acc=0.0962  client_acc_var=0.00894
+  round  25  test_acc=0.1040  client_acc_var=0.02010
+  round  26  test_acc=0.1176  client_acc_var=0.01565
+  round  27  test_acc=0.1144  client_acc_var=0.01423
+  round  28  test_acc=0.1320  client_acc_var=0.01362
+  round  29  test_acc=0.1156  client_acc_var=0.01730
+  round  30  test_acc=0.1302  client_acc_var=0.01932
+  round  31  test_acc=0.1004  client_acc_var=0.04504
+  round  32  test_acc=0.1110  client_acc_var=0.00752
+  round  33  test_acc=0.1002  client_acc_var=0.02030
+  round  34  test_acc=0.1012  client_acc_var=0.02004
+  round  35  test_acc=0.1034  client_acc_var=0.04441
+  round  36  test_acc=0.0864  client_acc_var=0.00541
+  round  37  test_acc=0.0752  client_acc_var=0.00641
+  round  38  test_acc=0.0946  client_acc_var=0.00929
+  round  39  test_acc=0.0990  client_acc_var=0.01366
+  round  40  test_acc=0.0924  client_acc_var=0.01224
+  round  41  test_acc=0.1078  client_acc_var=0.01093
+  round  42  test_acc=0.1008  client_acc_var=0.01044
+  round  43  test_acc=0.1098  client_acc_var=0.02771
+  round  44  test_acc=0.0902  client_acc_var=0.01206
+  round  45  test_acc=0.1004  client_acc_var=0.06873
+  round  46  test_acc=0.1000  client_acc_var=0.06035
+  round  47  test_acc=0.1332  client_acc_var=0.01233
+  round  48  test_acc=0.0916  client_acc_var=0.01251
+  round  49  test_acc=0.1008  client_acc_var=0.04337
+  round  50  test_acc=0.1146  client_acc_var=0.00558
+  round  51  test_acc=0.1178  client_acc_var=0.02234
+  round  52  test_acc=0.1078  client_acc_var=0.05110
+  round  53  test_acc=0.1032  client_acc_var=0.06826
+  round  54  test_acc=0.1082  client_acc_var=0.02303
+  round  55  test_acc=0.1012  client_acc_var=0.01052
+  round  56  test_acc=0.0890  client_acc_var=0.00785
+  round  57  test_acc=0.0938  client_acc_var=0.01547
+  round  58  test_acc=0.0920  client_acc_var=0.00812
+  round  59  test_acc=0.0954  client_acc_var=0.02545
+  round  60  test_acc=0.0838  client_acc_var=0.01380
+[D_cifar10_fedavg_dir0.1_clientdp_eps4_s0] wall-clock: 41.4 min (41.4 s/round)
+[D_cifar10_fedavg_dir0.1_clientdp_eps4_s0] done -> /Users/abdul/Documents/MSc. Project/fl-privacy-noniid/results/D_cifar10_fedavg_dir0.1_clientdp_eps4_s0

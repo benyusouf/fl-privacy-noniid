@@ -63,6 +63,14 @@ const RunDetail = ({ run, embedded = false }: Props) => {
           </Caveat>
         )}
 
+        {run.nonFiniteCells > 0 && (
+          <Caveat severity='error' title='This run recorded non-finite values'>
+            {run.nonFiniteCells} cells in this run&apos;s metrics are nan or inf and are published as gaps rather than
+            as numbers. A metric that stops being a number means the optimisation broke down, not that the value was
+            missing.
+          </Caveat>
+        )}
+
         {hasUnrepresentativeFinal(run) && !endedBelowChance(run) && (
           <Caveat title='The final value is not a settled result'>
             This run ends more than five points from the mean of its own last ten {run.stepUnit}s, because the accuracy

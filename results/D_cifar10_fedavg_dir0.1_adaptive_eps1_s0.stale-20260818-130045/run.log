@@ -1,0 +1,118 @@
+
+======================================================================
+D_cifar10_fedavg_dir0.1_adaptive_eps1_s0  started 2026-08-18 06:18:58
+config: experiments/phase_d/D_cifar10_fedavg_dir0.1_adaptive_eps1_s0.yaml
+======================================================================
+[D_cifar10_fedavg_dir0.1_adaptive_eps1_s0] model params: 189,130 | train 20000 test 5000
+[D_cifar10_fedavg_dir0.1_adaptive_eps1_s0] partition dirichlet | HD mean=0.6282 max=0.8269 | sizes[88,3591]
+[D_cifar10_fedavg_dir0.1_adaptive_eps1_s0] DP-SGD on: target eps=1.0 delta=1e-05 C=1.0
+[D_cifar10_fedavg_dir0.1_adaptive_eps1_s0] strategy=fedavg
+    DP client  0: n=  494 q=0.1296 steps=   960 sigma=16.3102 -> eps=1.000
+    DP client  1: n=   88 q=0.7273 steps=   240 sigma=46.0078 -> eps=0.991
+    DP client  2: n= 2251 q=0.0284 steps=  4320 sigma=7.6090 -> eps=1.002
+    DP client  3: n=  296 q=0.2162 steps=   600 sigma=21.6469 -> eps=0.992
+    DP client  4: n= 1073 q=0.0596 steps=  2040 sigma=10.9734 -> eps=0.999
+    DP client  5: n=  161 q=0.3975 steps=   360 sigma=30.6164 -> eps=0.999
+    DP client  6: n= 2501 q=0.0256 steps=  4800 sigma=7.2609 -> eps=0.996
+    DP client  7: n=  756 q=0.0847 steps=  1440 sigma=13.0617 -> eps=1.000
+    DP client  8: n= 2667 q=0.0240 steps=  5040 sigma=6.9129 -> eps=1.007
+    DP client  9: n= 1336 q=0.0479 steps=  2520 sigma=9.8133 -> eps=0.998
+    DP client 10: n=  714 q=0.0896 steps=  1440 sigma=13.7578 -> eps=1.005
+    DP client 11: n= 2868 q=0.0223 steps=  5400 sigma=6.6809 -> eps=1.003
+    DP client 12: n=  240 q=0.2667 steps=   480 sigma=23.5031 -> eps=1.010
+    DP client 13: n=  964 q=0.0664 steps=  1920 sigma=11.9016 -> eps=0.993
+    DP client 14: n= 3591 q=0.0178 steps=  6840 sigma=5.9848 -> eps=1.008
+  round   1  test_acc=0.1026  client_acc_var=0.00986
+  round   2  test_acc=0.1038  client_acc_var=0.02100
+  round   3  test_acc=0.1086  client_acc_var=0.01673
+  round   4  test_acc=0.1230  client_acc_var=0.01579
+  round   5  test_acc=0.1256  client_acc_var=0.01168
+  round   6  test_acc=0.1292  client_acc_var=0.00814
+  round   7  test_acc=0.1314  client_acc_var=0.01387
+  round   8  test_acc=0.1256  client_acc_var=0.00977
+  round   9  test_acc=0.1096  client_acc_var=0.01456
+  round  10  test_acc=0.1124  client_acc_var=0.01783
+  round  11  test_acc=0.1296  client_acc_var=0.01895
+  round  12  test_acc=0.1224  client_acc_var=0.03507
+  round  13  test_acc=0.1120  client_acc_var=0.03127
+  round  14  test_acc=0.1278  client_acc_var=0.01432
+  round  15  test_acc=0.1132  client_acc_var=0.03307
+  round  16  test_acc=0.1376  client_acc_var=0.00835
+  round  17  test_acc=0.1374  client_acc_var=0.04049
+  round  18  test_acc=0.1180  client_acc_var=0.05144
+  round  19  test_acc=0.1266  client_acc_var=0.02224
+  round  20  test_acc=0.1550  client_acc_var=0.00584
+  round  21  test_acc=0.1516  client_acc_var=0.01133
+  round  22  test_acc=0.1576  client_acc_var=0.02466
+  round  23  test_acc=0.1294  client_acc_var=0.02550
+  round  24  test_acc=0.1496  client_acc_var=0.02103
+  round  25  test_acc=0.1676  client_acc_var=0.00640
+  round  26  test_acc=0.1740  client_acc_var=0.01577
+  round  27  test_acc=0.1864  client_acc_var=0.01092
+  round  28  test_acc=0.1764  client_acc_var=0.01484
+  round  29  test_acc=0.1764  client_acc_var=0.01402
+  round  30  test_acc=0.1718  client_acc_var=0.00628
+  round  31  test_acc=0.1792  client_acc_var=0.00539
+  round  32  test_acc=0.1622  client_acc_var=0.01269
+  round  33  test_acc=0.1754  client_acc_var=0.02347
+  round  34  test_acc=0.2020  client_acc_var=0.00750
+  round  35  test_acc=0.1654  client_acc_var=0.03540
+  round  36  test_acc=0.1666  client_acc_var=0.03869
+  round  37  test_acc=0.1806  client_acc_var=0.00911
+  round  38  test_acc=0.2038  client_acc_var=0.00658
+  round  39  test_acc=0.2070  client_acc_var=0.01252
+  round  40  test_acc=0.1958  client_acc_var=0.01139
+  round  41  test_acc=0.2112  client_acc_var=0.00753
+  round  42  test_acc=0.2176  client_acc_var=0.00637
+  round  43  test_acc=0.2184  client_acc_var=0.00612
+  round  44  test_acc=0.2096  client_acc_var=0.01706
+  round  45  test_acc=0.1998  client_acc_var=0.01127
+  round  46  test_acc=0.2058  client_acc_var=0.01892
+  round  47  test_acc=0.2094  client_acc_var=0.02565
+  round  48  test_acc=0.2186  client_acc_var=0.02074
+  round  49  test_acc=0.2198  client_acc_var=0.01954
+  round  50  test_acc=0.2244  client_acc_var=0.01281
+  round  51  test_acc=0.2136  client_acc_var=0.01990
+  round  52  test_acc=0.2186  client_acc_var=0.01251
+  round  53  test_acc=0.2166  client_acc_var=0.01012
+  round  54  test_acc=0.2042  client_acc_var=0.01255
+  round  55  test_acc=0.2068  client_acc_var=0.00904
+  round  56  test_acc=0.2256  client_acc_var=0.00919
+  round  57  test_acc=0.2354  client_acc_var=0.00886
+  round  58  test_acc=0.2298  client_acc_var=0.01241
+  round  59  test_acc=0.2224  client_acc_var=0.00925
+  round  60  test_acc=0.2362  client_acc_var=0.00779
+[D_cifar10_fedavg_dir0.1_adaptive_eps1_s0] wall-clock: 64.7 min (64.7 s/round)
+[D_cifar10_fedavg_dir0.1_adaptive_eps1_s0] done -> /Users/abdul/Documents/MSc. Project/fl-privacy-noniid/results/D_cifar10_fedavg_dir0.1_adaptive_eps1_s0
+
+======================================================================
+D_cifar10_fedavg_dir0.1_adaptive_eps1_s0  started 2026-08-18 11:07:56
+config: experiments/phase_d/D_cifar10_fedavg_dir0.1_adaptive_eps1_s0.yaml
+======================================================================
+[D_cifar10_fedavg_dir0.1_adaptive_eps1_s0] model params: 189,130 | train 20000 test 5000
+[D_cifar10_fedavg_dir0.1_adaptive_eps1_s0] partition dirichlet | HD mean=0.6282 max=0.8269 | sizes[88,3591]
+[D_cifar10_fedavg_dir0.1_adaptive_eps1_s0] resuming from round 60
+[D_cifar10_fedavg_dir0.1_adaptive_eps1_s0] DP ON | granularity=sample | schedule=decreasing | target eps=1.0 delta=1e-05 C=1.0
+[D_cifar10_fedavg_dir0.1_adaptive_eps1_s0] strategy=fedavg
+    DP client  0: n=  494 q=0.1296 steps=   960 sigma=16.3102 -> eps=1.000
+    DP client  1: n=   88 q=0.7273 steps=   240 sigma=46.0078 -> eps=0.991
+    DP client  2: n= 2251 q=0.0284 steps=  4320 sigma=7.6090 -> eps=1.002
+    DP client  3: n=  296 q=0.2162 steps=   600 sigma=21.6469 -> eps=0.992
+    DP client  4: n= 1073 q=0.0596 steps=  2040 sigma=10.9734 -> eps=0.999
+    DP client  5: n=  161 q=0.3975 steps=   360 sigma=30.6164 -> eps=0.999
+    DP client  6: n= 2501 q=0.0256 steps=  4800 sigma=7.2609 -> eps=0.996
+    DP client  7: n=  756 q=0.0847 steps=  1440 sigma=13.0617 -> eps=1.000
+    DP client  8: n= 2667 q=0.0240 steps=  5040 sigma=6.9129 -> eps=1.007
+    DP client  9: n= 1336 q=0.0479 steps=  2520 sigma=9.8133 -> eps=0.998
+    DP client 10: n=  714 q=0.0896 steps=  1440 sigma=13.7578 -> eps=1.005
+    DP client 11: n= 2868 q=0.0223 steps=  5400 sigma=6.6809 -> eps=1.003
+    DP client 12: n=  240 q=0.2667 steps=   480 sigma=23.5031 -> eps=1.010
+    DP client 13: n=  964 q=0.0664 steps=  1920 sigma=11.9016 -> eps=0.993
+    DP client 14: n= 3591 q=0.0178 steps=  6840 sigma=5.9848 -> eps=1.008
+    time-adaptive schedule 'decreasing': multiplier 0.817 to 1.226
+      client  0: realised eps=1.0002 against a target of 1.0
+      client  1: realised eps=0.9907 against a target of 1.0
+      client  2: realised eps=1.0024 against a target of 1.0
+      client 14: realised eps=1.0089 against a target of 1.0
+[D_cifar10_fedavg_dir0.1_adaptive_eps1_s0] wall-clock: 0.2 min (9.3 s/round)
+[D_cifar10_fedavg_dir0.1_adaptive_eps1_s0] done -> /Users/abdul/Documents/MSc. Project/fl-privacy-noniid/results/D_cifar10_fedavg_dir0.1_adaptive_eps1_s0

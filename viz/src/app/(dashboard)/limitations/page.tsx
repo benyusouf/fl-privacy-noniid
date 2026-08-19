@@ -152,15 +152,14 @@ const Page = () => {
             </Typography>
         </SectionCard>
 
-        <SectionCard icon='tabler-list-check' color='info' title='Three phases of five' prose>
+        <SectionCard icon='tabler-list-check' color='info' title='Four phases of five' prose>
             <Typography>
-              Phases A, B and C are complete, which answers RQ1 and RQ2 in full. RQ3 and RQ4 — privacy granularity,
-              budget scheduling and gradient inversion — have no results at all.
+              Phases A through D are complete, which answers RQ1, RQ2 and RQ3. Only RQ4 — whether gradient inversion
+              can recover training data, and whether the pipeline stops it — has no results at all.
             </Typography>
             <Typography variant='body2' color='text.secondary'>
-              Any statement on this site about differential-privacy granularity, adaptive budget spending or gradient
-              inversion describes a design, not a finding. Those pipelines are implemented, but implemented is not
-              measured.
+              Any statement on this site about gradient inversion describes a design, not a finding. The attack
+              pipeline is implemented, but implemented is not measured.
             </Typography>
         </SectionCard>
 

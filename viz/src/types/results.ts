@@ -13,14 +13,33 @@ export type DpClient = {
   client: number
   /** Samples held by this client. */
   n: number
-  /** Sampling ratio, batch / n. Subsampling amplification weakens as this rises. */
+  /**
+   * Sampling ratio, batch / n. Subsampling amplification weakens as this rises,
+   * and is 1.0 under client-level accounting — every client participates every
+   * round, so there is no amplification at all.
+   */
   q: number
   /** Noised steps across all rounds. */
-  steps: number
-  sigma: number
-  realised_epsilon: number
-  saturated: boolean
-  sigma_needed_for_target: number | null
+  steps?: number
+
+  /**
+   * NULL on a time-adaptive run, and that is not a defect: noise moves every
+   * round, so no single value exists. Anything rendering a sigma must branch on
+   * `schedule` and fall back to the sigmaMin–sigmaMax range.
+   */
+  sigma: number | null
+  sigmaMin?: number
+  sigmaMax?: number
+
+  realisedEpsilon?: number
+  /** Phase B spelling, kept so earlier runs still type. */
+  realised_epsilon?: number
+
+  /** True when this client's noise follows a per-round schedule. */
+  schedule?: boolean
+
+  saturated?: boolean
+  sigma_needed_for_target?: number | null
 }
 
 /** Secure aggregation, on Phase C runs and null before them. */
@@ -56,8 +75,20 @@ export type Secagg = {
   equals: string | null
 }
 
+/**
+ * What the guarantee protects.
+ *
+ * Sample-level protects one record; client-level protects one institution. They
+ * are not comparable strengths at the same nominal epsilon, which is the whole
+ * point of Phase D.
+ */
+export type DpGranularity = 'sample-level' | 'client-level' | 'sample-level, time-adaptive'
+
 export type Dp = {
-  granularity: 'sample-level'
+  granularity: DpGranularity
+
+  /** One sentence describing the mechanism. Safe to render verbatim. */
+  mechanism?: string
   /** The label on the directory — what was asked for. */
   targetEpsilon: 1 | 4 | 8
   /**
@@ -72,9 +103,33 @@ export type Dp = {
   maxGradNorm: number
   sigmaMin: number
   sigmaMax: number
-  /** sigmaMax / sigmaMin. A result about unequal burden, not a detail. */
+  /**
+   * sigmaMax / sigmaMin.
+   *
+   * Its meaning changes with granularity. Under sample-level it is a RESULT:
+   * calibration is per client, so the smallest silo carries the most noise and
+   * the ratio grows with skew. Under client-level it is exactly 1.0 BY
+   * CONSTRUCTION — one sigma covers the whole federation — and that 1.0 must
+   * never be presented as a finding about heterogeneity.
+   */
   sigmaRatio: number
   clients: DpClient[]
+
+  // --- client-level only ---
+  /** σ·C/N — the figure the entire result turns on. */
+  noiseStdOnMean?: number
+  numClients?: number
+  /** 1.0 under full participation, which is why there is no amplification. */
+  samplingRate?: number
+  uniformAveraging?: true
+  whyNoAmplification?: string
+
+  // --- time-adaptive only ---
+  scheduleFile?: string
+  /** Sixty multipliers, before per-client scaling. */
+  scheduleShape?: number[]
+  scheduleShapeMin?: number
+  scheduleShapeMax?: number
 }
 export type Strategy = 'fedavg' | 'fedprox' | 'scaffold' | 'moon'
 export type Partition = 'dir100' | 'dir1.0' | 'dir0.1' | 'quantity' | 'path1'
@@ -161,6 +216,19 @@ export type Run = {
   secagg: Secagg | null
 
   /**
+   * True when the server averages client updates uniformly rather than by
+   * sample count. Client-level DP requires it, because its sensitivity bound of
+   * C/N is the sensitivity of a uniform mean to one client.
+   */
+  uniformAveraging: boolean
+
+  /** A run made to interpret another run, rather than to produce a result. */
+  diagnostic: boolean
+
+  /** Section 3.11 excludes diagnostics from the study's run totals. */
+  counted: boolean
+
+  /**
    * For a Phase B run, the name of the Phase A run it is measured against —
    * identical in every respect but the mechanism. Never reconstruct this by
    * string surgery on the run name.
@@ -176,6 +244,13 @@ export type Run = {
    * says so in its own header.
    */
   hasProvenance: boolean
+
+  /**
+   * Cells the source CSV recorded as nan or inf, emitted as null in the curve.
+   * Non-zero means the run broke down numerically somewhere, which is a finding
+   * rather than a parsing artefact.
+   */
+  nonFiniteCells: number
 
   config: Record<string, unknown>
   curve: Curve

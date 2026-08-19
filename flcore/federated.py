@@ -17,6 +17,7 @@ from __future__ import annotations
 
 import copy
 import math
+import os
 import numpy as np
 
 
@@ -70,6 +71,8 @@ def run_federated(
     server_lr: float = 0.5,         # NOT in Hsu et al.; see server_momentum_step
     dp_cfg: dict | None = None,     # sample-level DP-SGD; None = unprotected
     secagg_cfg: dict | None = None, # pairwise masking; None = plaintext aggregation
+    uniform_averaging: bool = False, # equal client weights; see D83
+    record_dir: str | None = None,  # where to write dp_schedule.json (D88)
 ):
     """Core FL round loop. Returns (final_params, history list of dict rows).
 
@@ -107,7 +110,39 @@ def run_federated(
 
     dp_on = bool(dp_cfg)
     dp_sigmas: list[float] = []
-    if dp_on:
+    dp_schedule: list[float] = []          # per-round shape, time-adaptive only
+    dp_client_schedules: list[list[float]] = []   # per-client, per-round sigma
+    client_dp = dp_on and str(dp_cfg.get("granularity", "sample")) == "client"
+
+    if client_dp:
+        # CLIENT-LEVEL DP (Section 3.8.3, Table 3.6).
+        #
+        # The protected unit is a whole institution, so the accountant sees one
+        # release per ROUND and the sampling rate is 1.0 - every client takes
+        # part in every round, and full participation buys no amplification at
+        # all. Sixty rounds at q=1 is what drives sigma so high here.
+        #
+        # AVERAGING IS UNIFORM, NOT WEIGHTED, and this is a real departure from
+        # FedAvg that Chapter 4 must declare. The noise std of sigma*C/N that
+        # Table 3.6 specifies is the sensitivity of a UNIFORM mean to one
+        # client. Under sample-weighted averaging the largest client at
+        # alpha=0.1 carries 18 per cent of the weight against a uniform 6.7,
+        # so the true sensitivity would be 2.7x larger and the noise with it.
+        # An uncounted diagnostic run measures what the re-weighting alone
+        # costs, so the noise can be separated from it (D82).
+        from flcore.privacy import calibrate_noise_for_epsilon, accountant_epsilon
+        target = float(dp_cfg["target_epsilon"])
+        delta = float(dp_cfg.get("delta", 1e-5))
+        clip_c = float(dp_cfg["max_grad_norm"])
+        sigma_c = calibrate_noise_for_epsilon(target, 1.0, rounds, delta)
+        got = accountant_epsilon(sigma_c, 1.0, rounds, delta)
+        n_cl = len(client_train)
+        print(f"    client-level DP: C={clip_c:.4f} sigma={sigma_c:.4f} -> "
+              f"eps={got:.3f} over {rounds} rounds at sampling rate 1.0")
+        print(f"    noise std on the mean = sigma*C/N = "
+              f"{sigma_c * clip_c / n_cl:.5f}; averaging is UNIFORM")
+
+    elif dp_on:
         from flcore.privacy import calibrate_noise_for_epsilon, accountant_epsilon
         target = float(dp_cfg["target_epsilon"])
         delta = float(dp_cfg.get("delta", 1e-5))
@@ -124,9 +159,86 @@ def run_federated(
                   f"sigma={sig:.4f} -> eps={got:.3f}")
         scfg["dp_max_grad_norm"] = float(dp_cfg.get("max_grad_norm", 1.0))
 
-    use_strategy = dp_on or strategy != "fedavg"
+        mode = dp_cfg.get("schedule")
+        if mode:
+            # TIME-ADAPTIVE SPENDING (Section 3.8.4). The schedule is normalised
+            # on sum(1/sigma_t^2), the quantity driving Renyi composition, so
+            # the total spend matches a constant schedule. Normalising on a
+            # proxy does not guarantee landing on the budget, so the realised
+            # epsilon is recomputed from the actual sequence before anything is
+            # reported - which is what 3.8.4 demands.
+            # The SHAPE comes from the schedule; the SCALE comes from the
+            # accountant. Normalising on sum(1/sigma^2) alone overspends by up
+            # to 2.4 per cent, which would hand the adaptive arm more budget
+            # than the constant arm it is compared with (D87).
+            from flcore.privacy import (adaptive_noise_schedule,
+                                        calibrate_schedule_for_epsilon,
+                                        epsilon_of_schedule)
+            dp_schedule = adaptive_noise_schedule(
+                rounds, 1.0, mode=str(mode),
+                strength=float(dp_cfg.get("schedule_strength", 0.5)))
+            print(f"    time-adaptive schedule '{mode}': shape "
+                  f"{min(dp_schedule):.3f} to {max(dp_schedule):.3f}, "
+                  f"scale calibrated per client against the accountant")
+            dp_client_schedules, sched_record = [], []
+            for cid in range(len(client_train)):
+                n_c = len(client_train[cid][0])
+                q = min(1.0, bs / max(1, n_c))
+                spr = int(np.ceil(n_c / bs)) * local_epochs
+                seq = calibrate_schedule_for_epsilon(target, dp_schedule, q, spr,
+                                                     delta)
+                dp_client_schedules.append(seq)
+                real = epsilon_of_schedule(seq, q, spr, delta)
+                sched_record.append(
+                    {"client": cid, "n": int(n_c), "q": round(q, 6),
+                     "steps_per_round": spr,
+                     "sigma": [round(s, 6) for s in seq],
+                     "sigma_min": round(min(seq), 6),
+                     "sigma_max": round(max(seq), 6),
+                     "realised_epsilon": round(real, 6)})
+                if cid < 3 or cid == len(client_train) - 1:
+                    print(f"      client {cid:2d}: sigma {min(seq):.3f}-"
+                          f"{max(seq):.3f} -> realised eps={real:.4f} "
+                          f"against a target of {target}")
+
+            # WRITE THE SCHEDULE DOWN. Printing it was all this did, and only
+            # four of fifteen clients were printed. With nothing on disk,
+            # verify_phase_d.py had to rebuild the schedule to price it, kept
+            # the old proxy normalisation when this code moved off it, and
+            # failed three correct runs against a schedule none of them used
+            # (D88). Section 3.8.4 makes the realised epsilon a precondition
+            # for reporting the adaptive arms, and a precondition has to leave
+            # a record.
+            if record_dir:
+                import json as _json
+                worst = max(sched_record,
+                            key=lambda c: abs(c["realised_epsilon"] - target))
+                with open(os.path.join(record_dir, "dp_schedule.json"), "w") as f:
+                    _json.dump(
+                        {"target_epsilon": target, "delta": delta,
+                         "mode": str(mode),
+                         "strength": float(dp_cfg.get("schedule_strength", 0.5)),
+                         "rounds": rounds, "batch_size": bs,
+                         "local_epochs": local_epochs,
+                         "shape": [round(s, 6) for s in dp_schedule],
+                         "clients": sched_record,
+                         "epsilon_worst": worst["realised_epsilon"],
+                         "deviation_worst": round(
+                             abs(worst["realised_epsilon"] - target), 6),
+                         "verified_against_run_log": [c["client"] for c in
+                                                      sched_record],
+                         "note": ("Written by run_federated as the run "
+                                  "happened. Scale set by the accountant per "
+                                  "client, not by the sum(1/sigma^2) proxy "
+                                  "(D87, D88).")}, f, indent=2)
+
+    # Client-level DP leaves LOCAL training untouched. The protected unit is the
+    # whole update, clipped and noised once at the server, so routing clients
+    # through DP-SGD as well would apply two mechanisms and account for one.
+    sample_dp = dp_on and not client_dp
+    use_strategy = sample_dp or strategy != "fedavg"
     local_fn = None
-    if dp_on:
+    if sample_dp:
         from flcore.dp_local import get_dp_strategy
         local_fn = get_dp_strategy(strategy)
     elif use_strategy:
@@ -141,8 +253,9 @@ def run_federated(
         for cid, (Xc, yc) in enumerate(client_train):
             if use_strategy:
                 cfg_c = dict(scfg); cfg_c["seed"] = seed + 1000 * r + cid
-                if dp_on:
-                    cfg_c["dp_sigma"] = dp_sigmas[cid]
+                if dp_on and not client_dp:
+                    cfg_c["dp_sigma"] = (dp_client_schedules[cid][r]
+                                         if dp_schedule else dp_sigmas[cid])
                 st = client_state[cid]
                 if strategy == "scaffold" and global_c is not None:
                     st = dict(st or {}); st["c"] = global_c
@@ -153,7 +266,33 @@ def run_federated(
                 p = local_train(model, Xc, yc, global_params, local_epochs, lr,
                                 seed=seed + 1000 * r + cid)
             client_params.append(p)
-            weights.append(len(yc))
+            # Client-level DP needs a UNIFORM mean for its sensitivity bound of
+            # C/N to hold, and the uncounted diagnostic run isolates what that
+            # re-weighting costs on its own (D83).
+            weights.append(1 if (uniform_averaging or client_dp) else len(yc))
+
+        if client_dp:
+            # Clip each client's UPDATE, average uniformly, noise the mean.
+            #
+            # The delta is what carries the client's contribution; clipping raw
+            # parameters to a norm of 0.36 would erase the model rather than
+            # bound a contribution.
+            from flcore.privacy import clip_update, add_gaussian_noise
+            n_cl = len(client_params)
+            deltas = [{k: p[k] - global_params[k]
+                       for k in p if p[k].dtype.kind == "f"} for p in client_params]
+            clipped = [clip_update(d, clip_c)[0] for d in deltas]
+            norms = [clip_update(d, clip_c)[1] for d in deltas]
+            mean_delta = {k: sum(c[k] for c in clipped) / n_cl
+                          for k in clipped[0]}
+            noised = add_gaussian_noise(mean_delta, sigma_c, clip_c, n_cl,
+                                        seed=seed + 1000 * r)
+            aggregated = {k: (global_params[k] + noised[k].astype(global_params[k].dtype)
+                              if k in noised else v)
+                          for k, v in global_params.items()}
+            clipped_frac = sum(1 for x in norms if x > clip_c) / max(1, n_cl)
+            sec_mask_s = sec_agg_s = 0.0
+            sec_msgs = 0
 
         # Pairwise masking (Section 3.8.5).
         #
@@ -166,7 +305,7 @@ def run_federated(
         # Non-float entries are not masked - there is nothing to hide in an
         # integer buffer and adding Gaussian noise to one would corrupt it - so
         # they are taken from the plaintext aggregate.
-        if secagg_on:
+        elif secagg_on:
             from flcore.secagg import secure_aggregate
             plain = fedavg_aggregate(client_params, weights)
             masked, sec_t = secure_aggregate(

@@ -36,6 +36,13 @@ export const protectedRuns = allRuns.filter(r => r.dp !== null)
 
 export const phaseRuns = (phase: string) => allRuns.filter(r => r.phase === phase)
 
+/**
+ * Runs that count toward the study's totals. Section 3.11 excludes calibration
+ * and diagnostic activity, so a diagnostic is recorded, published and shown —
+ * but not counted.
+ */
+export const countedRuns = allRuns.filter(r => r.counted)
+
 export const EPSILONS = [8, 4, 1] as const
 
 // ---------------------------------------------------------------------------
@@ -312,12 +319,16 @@ export const clientNoise = (run: Run) => {
 
   const clients = [...run.dp.clients].sort((a, b) => a.n - b.n)
   const sizes = clients.map(c => c.n)
-  const sigmas = clients.map(c => c.sigma)
+
+  // A scheduled client carries no scalar sigma; use the top of its range so the
+  // ratio still means "most noise against least".
+  const sigmas = clients.map(c => c.sigma ?? c.sigmaMax ?? 0).filter(v => v > 0)
 
   return {
     clients,
+    scheduled: clients.some(c => c.schedule),
     sizeRatio: Math.max(...sizes) / Math.min(...sizes),
-    sigmaRatio: Math.max(...sigmas) / Math.min(...sigmas),
+    sigmaRatio: sigmas.length ? Math.max(...sigmas) / Math.min(...sigmas) : null,
     maxQ: Math.max(...clients.map(c => c.q)),
     smallest: clients[0],
     largest: clients[clients.length - 1],
@@ -463,6 +474,146 @@ export const secaggScaling = () => {
     aggregateRatio: lo.aggregateSeconds ? hi.aggregateSeconds / lo.aggregateSeconds : null
   }
 }
+
+// ---------------------------------------------------------------------------
+// Phase D — what the guarantee protects
+//
+// Every arm shares one cell: CIFAR-10, FedAvg, Dirichlet 0.1, seed 0. Only the
+// mechanism changes, so differences between them are attributable to the
+// mechanism and nothing else.
+// ---------------------------------------------------------------------------
+
+export const phaseDRuns = allRuns.filter(r => r.phase === 'D')
+
+export type GranularityArm = {
+  key: string
+  label: string
+  /** Short description of what the guarantee protects, or that there is none. */
+  protects: string
+  run: Run | null
+  epsilon: number | null
+  finalAcc: number | null
+  bestAcc: number | null
+  bestStep: number | null
+  secondsPerRound: number | null
+  /** Delivered epsilon, once the calibration backfill has been run. */
+  deliveredEpsilon: number | null
+  granularity: string | null
+}
+
+const dArm = (arm: string) => phaseDRuns.find(r => r.arm === arm) ?? null
+
+const armOf = (key: string, label: string, protects: string, arm: string, epsilon: number | null): GranularityArm => {
+  const run = dArm(arm)
+
+  return {
+    key,
+    label,
+    protects,
+    run,
+    epsilon,
+    finalAcc: run?.finalAcc ?? null,
+    bestAcc: run?.bestAcc ?? null,
+    bestStep: run?.bestStep ?? null,
+    secondsPerRound: run?.secondsPerRound ?? null,
+    deliveredEpsilon: run?.dp?.deliveredEpsilon ?? null,
+    granularity: run?.dp?.granularity ?? null
+  }
+}
+
+/** The client-level ladder — the arms that show the mechanism failing at every budget. */
+export const clientLevelArms = () => [
+  armOf('client1', 'Client-level, ε = 1', 'one institution', 'clientdp_eps1', 1),
+  armOf('client4', 'Client-level, ε = 4', 'one institution', 'clientdp_eps4', 4),
+  armOf('client8', 'Client-level, ε = 8', 'one institution', 'clientdp_eps8', 8)
+]
+
+export const adaptiveArms = () => [
+  armOf('adapt1', 'Time-adaptive, ε = 1', 'one record', 'adaptive_eps1', 1),
+  armOf('adapt4', 'Time-adaptive, ε = 4', 'one record', 'adaptive_eps4', 4),
+  armOf('adapt8', 'Time-adaptive, ε = 8', 'one record', 'adaptive_eps8', 8)
+]
+
+export const sampleLevelArm = () => armOf('sample1', 'Sample-level, ε = 1', 'one record', 'sampledp_eps1', 1)
+export const unprotectedArm = () => armOf('none', 'No privacy mechanism', 'nothing', 'none', null)
+export const uniformDiagnosticArm = () =>
+  armOf('uniform', 'Unprotected, uniform averaging', 'nothing', 'uniform', null)
+
+/**
+ * The granularity gap at equal budget: same ε, same everything else, differing
+ * only in what the guarantee protects — one record against one institution.
+ */
+export const granularityGap = () => {
+  const sample = sampleLevelArm()
+  const client = clientLevelArms()[0]
+
+  if (sample.finalAcc === null || client.finalAcc === null) return null
+
+  return {
+    sample,
+    client,
+    gapPts: (sample.finalAcc - client.finalAcc) * 100
+  }
+}
+
+/**
+ * Client-level DP requires a uniform mean, so its runs differ from their
+ * comparators in two ways at once. The diagnostic isolates the re-weighting,
+ * which is the only way the noise cost and the averaging cost can be separated.
+ */
+export const uniformAveragingCost = () => {
+  const weighted = unprotectedArm()
+  const uniform = uniformDiagnosticArm()
+  const client = clientLevelArms()[0]
+
+  if (weighted.finalAcc === null || uniform.finalAcc === null) return null
+
+  const reweighting = (weighted.finalAcc - uniform.finalAcc) * 100
+  const total = client.finalAcc === null ? null : (weighted.finalAcc - client.finalAcc) * 100
+
+  return {
+    weighted,
+    uniform,
+    client,
+    reweightingPts: reweighting,
+    totalPts: total,
+    noisePts: total === null ? null : total - reweighting
+  }
+}
+
+/**
+ * Compute cost by mechanism, averaged across the budgets each mechanism was run
+ * at — client-level and time-adaptive have three each, sample-level one.
+ *
+ * This is a ratio between runs made back to back on one machine, which is the
+ * only circumstance in which elapsed time carries any information here. It is
+ * never plotted, and it is labelled as a ratio wherever it appears.
+ */
+export const granularityCompute = () => {
+  const base = unprotectedArm()
+
+  if (base.secondsPerRound === null) return null
+
+  const group = (label: string, protects: string, arms: GranularityArm[]) => {
+    const secs = arms.map(a => a.secondsPerRound).filter((x): x is number => x !== null)
+
+    if (!secs.length) return null
+
+    const s = mean(secs)
+
+    return { label, protects, secondsPerRound: s, ratio: s / base.secondsPerRound!, budgets: secs.length }
+  }
+
+  return [
+    { label: base.label, protects: base.protects, secondsPerRound: base.secondsPerRound, ratio: 1, budgets: 1 },
+    group('Client-level DP', 'one institution', clientLevelArms()),
+    group('Sample-level DP', 'one record', [sampleLevelArm()]),
+    group('Time-adaptive DP', 'one record', adaptiveArms())
+  ].filter((x): x is NonNullable<typeof x> => x !== null)
+}
+
+/** True once the calibration backfill has populated dp on the Phase D runs. */
+export const phaseDCalibrated = () => phaseDRuns.some(r => r.arm !== 'none' && r.arm !== 'uniform' && r.dp !== null)
 
 // ---------------------------------------------------------------------------
 // Filtering for the run explorer

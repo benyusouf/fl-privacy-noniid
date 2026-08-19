@@ -49,7 +49,17 @@ const ClientNoiseChart = ({ run }: Props) => {
   }
 
   const { clients } = noise
-  const sigmaMax = (extent(clients.map(c => c.sigma)) ?? [0, 1])[1]
+
+  /*
+   * A time-adaptive run has no scalar sigma per client — noise moves every
+   * round — so `sigma` is null there by design. Fall back to the client's own
+   * sigmaMin/sigmaMax range, and draw the bar as that span rather than as a
+   * single height. Reading `sigma` unguarded would render null into the DOM.
+   */
+  const scheduled = clients.some(c => c.schedule)
+  const lo = (c: (typeof clients)[number]) => c.sigma ?? c.sigmaMin ?? 0
+  const hi = (c: (typeof clients)[number]) => c.sigma ?? c.sigmaMax ?? 0
+  const sigmaMax = (extent(clients.map(hi)) ?? [0, 1])[1]
   const sizeMax = (extent(clients.map(c => c.n)) ?? [0, 1])[1]
 
   return (
@@ -98,12 +108,23 @@ const ClientNoiseChart = ({ run }: Props) => {
                 <g key={c.client}>
                   <rect
                     x={band.start(i) + sub.offset(0)}
-                    y={y(c.sigma)}
+                    y={y(hi(c))}
                     width={sub.width}
-                    height={Math.max(area.y1 - y(c.sigma), 0)}
+                    height={Math.max(area.y1 - y(hi(c)), 0)}
                     fill={SIGMA_COLOUR}
                     opacity={hover === null || hover === i ? 1 : 0.45}
                   />
+                  {c.schedule && (
+                    // the floor of the schedule, so the bar reads as a range
+                    <rect
+                      x={band.start(i) + sub.offset(0)}
+                      y={y(lo(c))}
+                      width={sub.width}
+                      height={Math.max(area.y1 - y(lo(c)), 0)}
+                      fill={SIGMA_COLOUR}
+                      opacity={0.4}
+                    />
+                  )}
                   <rect
                     x={band.start(i) + sub.offset(1)}
                     y={sy(c.n)}
@@ -127,14 +148,25 @@ const ClientNoiseChart = ({ run }: Props) => {
               {hover !== null && clients[hover] && (
                 <SvgTooltip
                   x={band.center(hover)}
-                  y={y(clients[hover].sigma)}
+                  y={y(hi(clients[hover]))}
                   bounds={area}
                   lines={[
                     { text: `client ${clients[hover].client}`, bold: true },
                     { text: `${clients[hover].n.toLocaleString()} samples`, colour: SIZE_COLOUR },
-                    { text: `σ = ${clients[hover].sigma.toFixed(2)}`, colour: SIGMA_COLOUR },
+                    {
+                      text: clients[hover].schedule
+                        ? `σ = ${lo(clients[hover]).toFixed(2)}–${hi(clients[hover]).toFixed(2)} over the run`
+                        : `σ = ${(clients[hover].sigma ?? 0).toFixed(2)}`,
+                      colour: SIGMA_COLOUR
+                    },
                     { text: `q = ${clients[hover].q.toFixed(3)}` },
-                    { text: `realised ε = ${clients[hover].realised_epsilon.toFixed(4)}` }
+                    {
+                      text: `realised ε = ${(
+                        clients[hover].realisedEpsilon ??
+                        clients[hover].realised_epsilon ??
+                        0
+                      ).toFixed(4)}`
+                    }
                   ]}
                 />
               )}
@@ -145,7 +177,11 @@ const ClientNoiseChart = ({ run }: Props) => {
 
       <ChartLegend
         items={[
-          { label: 'noise multiplier σ', colour: SIGMA_COLOUR, note: '(left axis)' },
+          {
+            label: scheduled ? 'noise multiplier σ, range over the run' : 'noise multiplier σ',
+            colour: SIGMA_COLOUR,
+            note: '(left axis)'
+          },
           { label: 'samples held', colour: SIZE_COLOUR, note: '(right axis)' }
         ]}
       />

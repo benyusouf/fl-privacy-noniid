@@ -90,6 +90,9 @@ const HorizontalMenu = () => {
         <MenuItem href='/secagg' icon={<i className='tabler-shield-check' />}>
           Secure aggregation
         </MenuItem>
+        <MenuItem href='/granularity' icon={<i className='tabler-building-bank' />}>
+          What privacy protects
+        </MenuItem>
         <MenuItem href='/runs' icon={<i className='tabler-table' />}>
           Run explorer
         </MenuItem>

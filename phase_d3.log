@@ -1,0 +1,795 @@
+archived D_cifar10_fedavg_dir0.1_adaptive_eps1_s0
+archived D_cifar10_fedavg_dir0.1_adaptive_eps4_s0
+archived D_cifar10_fedavg_dir0.1_adaptive_eps8_s0
+archived D_cifar10_fedavg_dir0.1_clientdp_eps1_s0
+archived D_cifar10_fedavg_dir0.1_clientdp_eps4_s0
+archived D_cifar10_fedavg_dir0.1_clientdp_eps8_s0
+archived D_cifar10_fedavg_dir0.1_none_s0
+archived D_cifar10_fedavg_dir0.1_sampledp_eps1_s0
+archived D_diag_cifar10_fedavg_dir0.1_uniform_s0
+W0818 13:01:03.814000 29198 .venv/lib/python3.14/site-packages/torch/distributed/elastic/multiprocessing/redirects.py:35] NOTE: Redirects are currently not supported in MacOs.
+/Users/abdul/Documents/MSc. Project/fl-privacy-noniid/.venv/lib/python3.14/site-packages/opacus/accountants/analysis/rdp.py:332: UserWarning: Optimal order is the smallest alpha. Please consider expanding the range of alphas to get a tighter privacy bound.
+  warnings.warn(
+/Users/abdul/Documents/MSc. Project/fl-privacy-noniid/.venv/lib/python3.14/site-packages/opacus/accountants/analysis/rdp.py:332: UserWarning: Optimal order is the largest alpha. Please consider expanding the range of alphas to get a tighter privacy bound.
+  warnings.warn(
+/Users/abdul/Documents/MSc. Project/fl-privacy-noniid/flcore/dp_local.py:135: UserWarning: Full backward hook is firing when gradients are computed with respect to module outputs since no inputs require gradients. See https://docs.pytorch.org/docs/main/generated/torch.nn.Module.html#torch.nn.Module.register_full_backward_hook for more details.
+  model.criterion(out, yb).backward()
+
+======================================================================
+D_cifar10_fedavg_dir0.1_adaptive_eps1_s0  started 2026-08-18 13:00:46
+config: experiments/phase_d/D_cifar10_fedavg_dir0.1_adaptive_eps1_s0.yaml
+======================================================================
+[D_cifar10_fedavg_dir0.1_adaptive_eps1_s0] model params: 189,130 | train 20000 test 5000
+[D_cifar10_fedavg_dir0.1_adaptive_eps1_s0] partition dirichlet | HD mean=0.6282 max=0.8269 | sizes[88,3591]
+[D_cifar10_fedavg_dir0.1_adaptive_eps1_s0] DP ON | granularity=sample | schedule=decreasing | target eps=1.0 delta=1e-05 C=1.0
+[D_cifar10_fedavg_dir0.1_adaptive_eps1_s0] strategy=fedavg
+    DP client  0: n=  494 q=0.1296 steps=   960 sigma=16.3102 -> eps=1.000
+    DP client  1: n=   88 q=0.7273 steps=   240 sigma=46.0078 -> eps=0.991
+    DP client  2: n= 2251 q=0.0284 steps=  4320 sigma=7.6090 -> eps=1.002
+    DP client  3: n=  296 q=0.2162 steps=   600 sigma=21.6469 -> eps=0.992
+    DP client  4: n= 1073 q=0.0596 steps=  2040 sigma=10.9734 -> eps=0.999
+    DP client  5: n=  161 q=0.3975 steps=   360 sigma=30.6164 -> eps=0.999
+    DP client  6: n= 2501 q=0.0256 steps=  4800 sigma=7.2609 -> eps=0.996
+    DP client  7: n=  756 q=0.0847 steps=  1440 sigma=13.0617 -> eps=1.000
+    DP client  8: n= 2667 q=0.0240 steps=  5040 sigma=6.9129 -> eps=1.007
+    DP client  9: n= 1336 q=0.0479 steps=  2520 sigma=9.8133 -> eps=0.998
+    DP client 10: n=  714 q=0.0896 steps=  1440 sigma=13.7578 -> eps=1.005
+    DP client 11: n= 2868 q=0.0223 steps=  5400 sigma=6.6809 -> eps=1.003
+    DP client 12: n=  240 q=0.2667 steps=   480 sigma=23.5031 -> eps=1.010
+    DP client 13: n=  964 q=0.0664 steps=  1920 sigma=11.9016 -> eps=0.993
+    DP client 14: n= 3591 q=0.0178 steps=  6840 sigma=5.9848 -> eps=1.008
+    time-adaptive schedule 'decreasing': multiplier 0.817 to 1.226
+      client  0: realised eps=1.0002 against a target of 1.0
+      client  1: realised eps=0.9907 against a target of 1.0
+      client  2: realised eps=1.0024 against a target of 1.0
+      client 14: realised eps=1.0089 against a target of 1.0
+  round   1  test_acc=0.1084  client_acc_var=0.00791
+  round   2  test_acc=0.1020  client_acc_var=0.02055
+  round   3  test_acc=0.1126  client_acc_var=0.01560
+  round   4  test_acc=0.1282  client_acc_var=0.01368
+  round   5  test_acc=0.1212  client_acc_var=0.00897
+  round   6  test_acc=0.1190  client_acc_var=0.00726
+  round   7  test_acc=0.1356  client_acc_var=0.01137
+  round   8  test_acc=0.1306  client_acc_var=0.01122
+  round   9  test_acc=0.1138  client_acc_var=0.01201
+  round  10  test_acc=0.1078  client_acc_var=0.01589
+  round  11  test_acc=0.1322  client_acc_var=0.02239
+  round  12  test_acc=0.1172  client_acc_var=0.04021
+  round  13  test_acc=0.1036  client_acc_var=0.04120
+  round  14  test_acc=0.1174  client_acc_var=0.02963
+  round  15  test_acc=0.1060  client_acc_var=0.04690
+  round  16  test_acc=0.1350  client_acc_var=0.01112
+  round  17  test_acc=0.1238  client_acc_var=0.04614
+  round  18  test_acc=0.1074  client_acc_var=0.05717
+  round  19  test_acc=0.1214  client_acc_var=0.02991
+  round  20  test_acc=0.1498  client_acc_var=0.00656
+  round  21  test_acc=0.1422  client_acc_var=0.01172
+  round  22  test_acc=0.1504  client_acc_var=0.02783
+  round  23  test_acc=0.1266  client_acc_var=0.03328
+  round  24  test_acc=0.1436  client_acc_var=0.02506
+  round  25  test_acc=0.1582  client_acc_var=0.00872
+  round  26  test_acc=0.1634  client_acc_var=0.01394
+  round  27  test_acc=0.1708  client_acc_var=0.01019
+  round  28  test_acc=0.1648  client_acc_var=0.01678
+  round  29  test_acc=0.1680  client_acc_var=0.01409
+  round  30  test_acc=0.1648  client_acc_var=0.00803
+  round  31  test_acc=0.1642  client_acc_var=0.00678
+  round  32  test_acc=0.1546  client_acc_var=0.01325
+  round  33  test_acc=0.1690  client_acc_var=0.02782
+  round  34  test_acc=0.1886  client_acc_var=0.00859
+  round  35  test_acc=0.1600  client_acc_var=0.04048
+  round  36  test_acc=0.1648  client_acc_var=0.03877
+  round  37  test_acc=0.1814  client_acc_var=0.01021
+  round  38  test_acc=0.2054  client_acc_var=0.01030
+  round  39  test_acc=0.2030  client_acc_var=0.01862
+  round  40  test_acc=0.2000  client_acc_var=0.01347
+  round  41  test_acc=0.2154  client_acc_var=0.00746
+  round  42  test_acc=0.2206  client_acc_var=0.00773
+  round  43  test_acc=0.2222  client_acc_var=0.00723
+  round  44  test_acc=0.2100  client_acc_var=0.01951
+  round  45  test_acc=0.2036  client_acc_var=0.01326
+  round  46  test_acc=0.2102  client_acc_var=0.02055
+  round  47  test_acc=0.2108  client_acc_var=0.02499
+  round  48  test_acc=0.2168  client_acc_var=0.02430
+  round  49  test_acc=0.2196  client_acc_var=0.02385
+  round  50  test_acc=0.2186  client_acc_var=0.01440
+  round  51  test_acc=0.2198  client_acc_var=0.02400
+  round  52  test_acc=0.2298  client_acc_var=0.01548
+  round  53  test_acc=0.2188  client_acc_var=0.01329
+  round  54  test_acc=0.2150  client_acc_var=0.01300
+  round  55  test_acc=0.2184  client_acc_var=0.01001
+  round  56  test_acc=0.2274  client_acc_var=0.01034
+  round  57  test_acc=0.2414  client_acc_var=0.01085
+  round  58  test_acc=0.2344  client_acc_var=0.01595
+  round  59  test_acc=0.2268  client_acc_var=0.01118
+  round  60  test_acc=0.2442  client_acc_var=0.01145
+[D_cifar10_fedavg_dir0.1_adaptive_eps1_s0] wall-clock: 64.8 min (64.8 s/round)
+[D_cifar10_fedavg_dir0.1_adaptive_eps1_s0] done -> /Users/abdul/Documents/MSc. Project/fl-privacy-noniid/results/D_cifar10_fedavg_dir0.1_adaptive_eps1_s0
+W0818 14:05:56.340000 64410 .venv/lib/python3.14/site-packages/torch/distributed/elastic/multiprocessing/redirects.py:35] NOTE: Redirects are currently not supported in MacOs.
+/Users/abdul/Documents/MSc. Project/fl-privacy-noniid/.venv/lib/python3.14/site-packages/opacus/accountants/analysis/rdp.py:332: UserWarning: Optimal order is the smallest alpha. Please consider expanding the range of alphas to get a tighter privacy bound.
+  warnings.warn(
+/Users/abdul/Documents/MSc. Project/fl-privacy-noniid/.venv/lib/python3.14/site-packages/opacus/accountants/analysis/rdp.py:332: UserWarning: Optimal order is the largest alpha. Please consider expanding the range of alphas to get a tighter privacy bound.
+  warnings.warn(
+/Users/abdul/Documents/MSc. Project/fl-privacy-noniid/flcore/dp_local.py:135: UserWarning: Full backward hook is firing when gradients are computed with respect to module outputs since no inputs require gradients. See https://docs.pytorch.org/docs/main/generated/torch.nn.Module.html#torch.nn.Module.register_full_backward_hook for more details.
+  model.criterion(out, yb).backward()
+
+======================================================================
+D_cifar10_fedavg_dir0.1_adaptive_eps4_s0  started 2026-08-18 14:05:51
+config: experiments/phase_d/D_cifar10_fedavg_dir0.1_adaptive_eps4_s0.yaml
+======================================================================
+[D_cifar10_fedavg_dir0.1_adaptive_eps4_s0] model params: 189,130 | train 20000 test 5000
+[D_cifar10_fedavg_dir0.1_adaptive_eps4_s0] partition dirichlet | HD mean=0.6282 max=0.8269 | sizes[88,3591]
+[D_cifar10_fedavg_dir0.1_adaptive_eps4_s0] DP ON | granularity=sample | schedule=decreasing | target eps=4.0 delta=1e-05 C=1.0
+[D_cifar10_fedavg_dir0.1_adaptive_eps4_s0] strategy=fedavg
+    DP client  0: n=  494 q=0.1296 steps=   960 sigma=4.7521 -> eps=3.996
+    DP client  1: n=   88 q=0.7273 steps=   240 sigma=13.0617 -> eps=4.007
+    DP client  2: n= 2251 q=0.0284 steps=  4320 sigma=2.3013 -> eps=3.994
+    DP client  3: n=  296 q=0.2162 steps=   600 sigma=6.2168 -> eps=4.006
+    DP client  4: n= 1073 q=0.0596 steps=  2040 sigma=3.2294 -> eps=4.005
+    DP client  5: n=  161 q=0.3975 steps=   360 sigma=8.8271 -> eps=3.991
+    DP client  6: n= 2501 q=0.0256 steps=  4800 sigma=2.1925 -> eps=3.998
+    DP client  7: n=  756 q=0.0847 steps=  1440 sigma=3.8240 -> eps=4.003
+    DP client  8: n= 2667 q=0.0240 steps=  5040 sigma=2.1127 -> eps=4.006
+    DP client  9: n= 1336 q=0.0479 steps=  2520 sigma=2.9031 -> eps=4.001
+    DP client 10: n=  714 q=0.0896 steps=  1440 sigma=4.0415 -> eps=4.000
+    DP client 11: n= 2868 q=0.0223 steps=  5400 sigma=2.0475 -> eps=3.992
+    DP client 12: n=  240 q=0.2667 steps=   480 sigma=6.8549 -> eps=4.001
+    DP client 13: n=  964 q=0.0664 steps=  1920 sigma=3.4759 -> eps=4.002
+    DP client 14: n= 3591 q=0.0178 steps=  6840 sigma=1.8590 -> eps=4.008
+    time-adaptive schedule 'decreasing': multiplier 0.817 to 1.226
+      client  0: realised eps=4.0020 against a target of 4.0
+      client  1: realised eps=4.0080 against a target of 4.0
+      client  2: realised eps=4.0125 against a target of 4.0
+      client 14: realised eps=4.0366 against a target of 4.0
+  round   1  test_acc=0.0948  client_acc_var=0.01430
+  round   2  test_acc=0.1032  client_acc_var=0.02292
+  round   3  test_acc=0.1044  client_acc_var=0.02219
+  round   4  test_acc=0.1076  client_acc_var=0.02142
+  round   5  test_acc=0.1102  client_acc_var=0.02056
+  round   6  test_acc=0.1184  client_acc_var=0.01839
+  round   7  test_acc=0.1152  client_acc_var=0.02084
+  round   8  test_acc=0.1206  client_acc_var=0.01872
+  round   9  test_acc=0.1178  client_acc_var=0.01974
+  round  10  test_acc=0.1220  client_acc_var=0.01996
+  round  11  test_acc=0.1312  client_acc_var=0.01742
+  round  12  test_acc=0.1422  client_acc_var=0.01619
+  round  13  test_acc=0.1374  client_acc_var=0.01769
+  round  14  test_acc=0.1470  client_acc_var=0.01406
+  round  15  test_acc=0.1386  client_acc_var=0.01765
+  round  16  test_acc=0.1540  client_acc_var=0.01345
+  round  17  test_acc=0.1672  client_acc_var=0.01266
+  round  18  test_acc=0.1770  client_acc_var=0.01339
+  round  19  test_acc=0.1866  client_acc_var=0.00868
+  round  20  test_acc=0.1804  client_acc_var=0.01201
+  round  21  test_acc=0.1876  client_acc_var=0.01091
+  round  22  test_acc=0.1990  client_acc_var=0.00827
+  round  23  test_acc=0.1984  client_acc_var=0.00913
+  round  24  test_acc=0.1968  client_acc_var=0.00822
+  round  25  test_acc=0.2048  client_acc_var=0.00939
+  round  26  test_acc=0.2206  client_acc_var=0.00669
+  round  27  test_acc=0.2124  client_acc_var=0.00893
+  round  28  test_acc=0.2170  client_acc_var=0.00880
+  round  29  test_acc=0.2150  client_acc_var=0.00878
+  round  30  test_acc=0.2268  client_acc_var=0.00686
+  round  31  test_acc=0.2236  client_acc_var=0.00860
+  round  32  test_acc=0.2210  client_acc_var=0.00816
+  round  33  test_acc=0.2220  client_acc_var=0.00830
+  round  34  test_acc=0.2268  client_acc_var=0.00841
+  round  35  test_acc=0.2278  client_acc_var=0.00829
+  round  36  test_acc=0.2252  client_acc_var=0.00863
+  round  37  test_acc=0.2198  client_acc_var=0.01019
+  round  38  test_acc=0.2272  client_acc_var=0.00733
+  round  39  test_acc=0.2330  client_acc_var=0.00777
+  round  40  test_acc=0.2302  client_acc_var=0.00810
+  round  41  test_acc=0.2394  client_acc_var=0.00726
+  round  42  test_acc=0.2364  client_acc_var=0.00722
+  round  43  test_acc=0.2344  client_acc_var=0.00883
+  round  44  test_acc=0.2380  client_acc_var=0.00702
+  round  45  test_acc=0.2396  client_acc_var=0.00677
+  round  46  test_acc=0.2338  client_acc_var=0.00668
+  round  47  test_acc=0.2386  client_acc_var=0.00794
+  round  48  test_acc=0.2416  client_acc_var=0.00749
+  round  49  test_acc=0.2412  client_acc_var=0.00834
+  round  50  test_acc=0.2428  client_acc_var=0.00703
+  round  51  test_acc=0.2446  client_acc_var=0.00858
+  round  52  test_acc=0.2480  client_acc_var=0.00657
+  round  53  test_acc=0.2472  client_acc_var=0.00647
+  round  54  test_acc=0.2474  client_acc_var=0.00620
+  round  55  test_acc=0.2460  client_acc_var=0.00689
+  round  56  test_acc=0.2544  client_acc_var=0.00607
+  round  57  test_acc=0.2568  client_acc_var=0.00551
+  round  58  test_acc=0.2550  client_acc_var=0.00668
+  round  59  test_acc=0.2436  client_acc_var=0.00749
+  round  60  test_acc=0.2596  client_acc_var=0.00652
+[D_cifar10_fedavg_dir0.1_adaptive_eps4_s0] wall-clock: 64.9 min (64.9 s/round)
+[D_cifar10_fedavg_dir0.1_adaptive_eps4_s0] done -> /Users/abdul/Documents/MSc. Project/fl-privacy-noniid/results/D_cifar10_fedavg_dir0.1_adaptive_eps4_s0
+W0818 15:10:54.015000 99481 .venv/lib/python3.14/site-packages/torch/distributed/elastic/multiprocessing/redirects.py:35] NOTE: Redirects are currently not supported in MacOs.
+/Users/abdul/Documents/MSc. Project/fl-privacy-noniid/.venv/lib/python3.14/site-packages/opacus/accountants/analysis/rdp.py:332: UserWarning: Optimal order is the smallest alpha. Please consider expanding the range of alphas to get a tighter privacy bound.
+  warnings.warn(
+/Users/abdul/Documents/MSc. Project/fl-privacy-noniid/.venv/lib/python3.14/site-packages/opacus/accountants/analysis/rdp.py:332: UserWarning: Optimal order is the largest alpha. Please consider expanding the range of alphas to get a tighter privacy bound.
+  warnings.warn(
+/Users/abdul/Documents/MSc. Project/fl-privacy-noniid/flcore/dp_local.py:135: UserWarning: Full backward hook is firing when gradients are computed with respect to module outputs since no inputs require gradients. See https://docs.pytorch.org/docs/main/generated/torch.nn.Module.html#torch.nn.Module.register_full_backward_hook for more details.
+  model.criterion(out, yb).backward()
+
+======================================================================
+D_cifar10_fedavg_dir0.1_adaptive_eps8_s0  started 2026-08-18 15:10:48
+config: experiments/phase_d/D_cifar10_fedavg_dir0.1_adaptive_eps8_s0.yaml
+======================================================================
+[D_cifar10_fedavg_dir0.1_adaptive_eps8_s0] model params: 189,130 | train 20000 test 5000
+[D_cifar10_fedavg_dir0.1_adaptive_eps8_s0] partition dirichlet | HD mean=0.6282 max=0.8269 | sizes[88,3591]
+[D_cifar10_fedavg_dir0.1_adaptive_eps8_s0] DP ON | granularity=sample | schedule=decreasing | target eps=8.0 delta=1e-05 C=1.0
+[D_cifar10_fedavg_dir0.1_adaptive_eps8_s0] strategy=fedavg
+    DP client  0: n=  494 q=0.1296 steps=   960 sigma=2.6928 -> eps=7.996
+    DP client  1: n=   88 q=0.7273 steps=   240 sigma=7.2319 -> eps=7.993
+    DP client  2: n= 2251 q=0.0284 steps=  4320 sigma=1.3913 -> eps=8.007
+    DP client  3: n=  296 q=0.2162 steps=   600 sigma=3.4904 -> eps=8.003
+    DP client  4: n= 1073 q=0.0596 steps=  2040 sigma=1.8807 -> eps=8.002
+    DP client  5: n=  161 q=0.3975 steps=   360 sigma=4.8971 -> eps=8.002
+    DP client  6: n= 2501 q=0.0256 steps=  4800 sigma=1.3369 -> eps=8.001
+    DP client  7: n=  756 q=0.0847 steps=  1440 sigma=2.1961 -> eps=8.003
+    DP client  8: n= 2667 q=0.0240 steps=  5040 sigma=1.2970 -> eps=8.008
+    DP client  9: n= 1336 q=0.0479 steps=  2520 sigma=1.7067 -> eps=8.005
+    DP client 10: n=  714 q=0.0896 steps=  1440 sigma=2.3121 -> eps=7.997
+    DP client 11: n= 2868 q=0.0223 steps=  5400 sigma=1.2626 -> eps=7.991
+    DP client 12: n=  240 q=0.2667 steps=   480 sigma=3.8312 -> eps=8.007
+    DP client 13: n=  964 q=0.0664 steps=  1920 sigma=2.0112 -> eps=7.994
+    DP client 14: n= 3591 q=0.0178 steps=  6840 sigma=1.1683 -> eps=8.004
+    time-adaptive schedule 'decreasing': multiplier 0.817 to 1.226
+      client  0: realised eps=8.0274 against a target of 8.0
+      client  1: realised eps=7.9961 against a target of 8.0
+      client  2: realised eps=8.1272 against a target of 8.0
+      client 14: realised eps=8.1959 against a target of 8.0
+  round   1  test_acc=0.0944  client_acc_var=0.01451
+  round   2  test_acc=0.1030  client_acc_var=0.02282
+  round   3  test_acc=0.1058  client_acc_var=0.02256
+  round   4  test_acc=0.1068  client_acc_var=0.02166
+  round   5  test_acc=0.1096  client_acc_var=0.02121
+  round   6  test_acc=0.1156  client_acc_var=0.02015
+  round   7  test_acc=0.1142  client_acc_var=0.02090
+  round   8  test_acc=0.1200  client_acc_var=0.01956
+  round   9  test_acc=0.1172  client_acc_var=0.02009
+  round  10  test_acc=0.1218  client_acc_var=0.02004
+  round  11  test_acc=0.1298  client_acc_var=0.01980
+  round  12  test_acc=0.1444  client_acc_var=0.01847
+  round  13  test_acc=0.1404  client_acc_var=0.01912
+  round  14  test_acc=0.1464  client_acc_var=0.01734
+  round  15  test_acc=0.1416  client_acc_var=0.01841
+  round  16  test_acc=0.1568  client_acc_var=0.01523
+  round  17  test_acc=0.1662  client_acc_var=0.01398
+  round  18  test_acc=0.1756  client_acc_var=0.01461
+  round  19  test_acc=0.1882  client_acc_var=0.01022
+  round  20  test_acc=0.1854  client_acc_var=0.01198
+  round  21  test_acc=0.1908  client_acc_var=0.01081
+  round  22  test_acc=0.2034  client_acc_var=0.00925
+  round  23  test_acc=0.2050  client_acc_var=0.00999
+  round  24  test_acc=0.2042  client_acc_var=0.00864
+  round  25  test_acc=0.2072  client_acc_var=0.00999
+  round  26  test_acc=0.2184  client_acc_var=0.00740
+  round  27  test_acc=0.2134  client_acc_var=0.00963
+  round  28  test_acc=0.2178  client_acc_var=0.00874
+  round  29  test_acc=0.2180  client_acc_var=0.00899
+  round  30  test_acc=0.2256  client_acc_var=0.00803
+  round  31  test_acc=0.2238  client_acc_var=0.00857
+  round  32  test_acc=0.2230  client_acc_var=0.00839
+  round  33  test_acc=0.2260  client_acc_var=0.00836
+  round  34  test_acc=0.2248  client_acc_var=0.00839
+  round  35  test_acc=0.2302  client_acc_var=0.00794
+  round  36  test_acc=0.2296  client_acc_var=0.00846
+  round  37  test_acc=0.2252  client_acc_var=0.00939
+  round  38  test_acc=0.2312  client_acc_var=0.00832
+  round  39  test_acc=0.2342  client_acc_var=0.00816
+  round  40  test_acc=0.2314  client_acc_var=0.00842
+  round  41  test_acc=0.2418  client_acc_var=0.00751
+  round  42  test_acc=0.2358  client_acc_var=0.00796
+  round  43  test_acc=0.2344  client_acc_var=0.00896
+  round  44  test_acc=0.2404  client_acc_var=0.00747
+  round  45  test_acc=0.2390  client_acc_var=0.00781
+  round  46  test_acc=0.2378  client_acc_var=0.00741
+  round  47  test_acc=0.2418  client_acc_var=0.00758
+  round  48  test_acc=0.2414  client_acc_var=0.00789
+  round  49  test_acc=0.2466  client_acc_var=0.00769
+  round  50  test_acc=0.2426  client_acc_var=0.00746
+  round  51  test_acc=0.2488  client_acc_var=0.00822
+  round  52  test_acc=0.2462  client_acc_var=0.00756
+  round  53  test_acc=0.2502  client_acc_var=0.00681
+  round  54  test_acc=0.2462  client_acc_var=0.00709
+  round  55  test_acc=0.2452  client_acc_var=0.00764
+  round  56  test_acc=0.2530  client_acc_var=0.00699
+  round  57  test_acc=0.2560  client_acc_var=0.00681
+  round  58  test_acc=0.2542  client_acc_var=0.00734
+  round  59  test_acc=0.2494  client_acc_var=0.00800
+  round  60  test_acc=0.2550  client_acc_var=0.00743
+[D_cifar10_fedavg_dir0.1_adaptive_eps8_s0] wall-clock: 65.1 min (65.1 s/round)
+[D_cifar10_fedavg_dir0.1_adaptive_eps8_s0] done -> /Users/abdul/Documents/MSc. Project/fl-privacy-noniid/results/D_cifar10_fedavg_dir0.1_adaptive_eps8_s0
+W0818 16:16:05.434000 35584 .venv/lib/python3.14/site-packages/torch/distributed/elastic/multiprocessing/redirects.py:35] NOTE: Redirects are currently not supported in MacOs.
+
+======================================================================
+D_cifar10_fedavg_dir0.1_clientdp_eps1_s0  started 2026-08-18 16:16:00
+config: experiments/phase_d/D_cifar10_fedavg_dir0.1_clientdp_eps1_s0.yaml
+======================================================================
+[D_cifar10_fedavg_dir0.1_clientdp_eps1_s0] model params: 189,130 | train 20000 test 5000
+[D_cifar10_fedavg_dir0.1_clientdp_eps1_s0] partition dirichlet | HD mean=0.6282 max=0.8269 | sizes[88,3591]
+[D_cifar10_fedavg_dir0.1_clientdp_eps1_s0] DP ON | granularity=client | schedule=constant | target eps=1.0 delta=1e-05 C=0.357398
+[D_cifar10_fedavg_dir0.1_clientdp_eps1_s0] strategy=fedavg
+    client-level DP: C=0.3574 sigma=31.0828 -> eps=1.009 over 60 rounds at sampling rate 1.0
+    noise std on the mean = sigma*C/N = 0.74060; averaging is UNIFORM
+  round   1  test_acc=0.0942  client_acc_var=0.02022
+  round   2  test_acc=0.0998  client_acc_var=0.02875
+  round   3  test_acc=0.0962  client_acc_var=0.06235
+  round   4  test_acc=0.1004  client_acc_var=0.02751
+  round   5  test_acc=0.1044  client_acc_var=0.01970
+  round   6  test_acc=0.1038  client_acc_var=0.01984
+  round   7  test_acc=0.0744  client_acc_var=0.01054
+  round   8  test_acc=0.1024  client_acc_var=0.02814
+  round   9  test_acc=0.0998  client_acc_var=0.03014
+  round  10  test_acc=0.0952  client_acc_var=0.03905
+  round  11  test_acc=0.0994  client_acc_var=0.03482
+  round  12  test_acc=0.0922  client_acc_var=0.02612
+  round  13  test_acc=0.1014  client_acc_var=0.04460
+  round  14  test_acc=0.0774  client_acc_var=0.00805
+  round  15  test_acc=0.0998  client_acc_var=0.01073
+  round  16  test_acc=0.0972  client_acc_var=0.01040
+  round  17  test_acc=0.1096  client_acc_var=0.01104
+  round  18  test_acc=0.1000  client_acc_var=0.01099
+  round  19  test_acc=0.1000  client_acc_var=0.03056
+  round  20  test_acc=0.1002  client_acc_var=0.03016
+  round  21  test_acc=0.1040  client_acc_var=0.00919
+  round  22  test_acc=0.1010  client_acc_var=0.01053
+  round  23  test_acc=0.0992  client_acc_var=0.02892
+  round  24  test_acc=0.1000  client_acc_var=0.02089
+  round  25  test_acc=0.1000  client_acc_var=0.02091
+  round  26  test_acc=0.1000  client_acc_var=0.02091
+  round  27  test_acc=0.1000  client_acc_var=0.02091
+  round  28  test_acc=0.1002  client_acc_var=0.02091
+  round  29  test_acc=0.1000  client_acc_var=0.03055
+  round  30  test_acc=0.1000  client_acc_var=0.03055
+  round  31  test_acc=0.1000  client_acc_var=0.03055
+  round  32  test_acc=0.1000  client_acc_var=0.03055
+  round  33  test_acc=0.1000  client_acc_var=0.03055
+  round  34  test_acc=0.1000  client_acc_var=0.03055
+  round  35  test_acc=0.1000  client_acc_var=0.03055
+  round  36  test_acc=0.1000  client_acc_var=0.03055
+  round  37  test_acc=0.1000  client_acc_var=0.03055
+  round  38  test_acc=0.1000  client_acc_var=0.03055
+  round  39  test_acc=0.1000  client_acc_var=0.03055
+  round  40  test_acc=0.1000  client_acc_var=0.03055
+  round  41  test_acc=0.1000  client_acc_var=0.03055
+  round  42  test_acc=0.1000  client_acc_var=0.03055
+  round  43  test_acc=0.1000  client_acc_var=0.03055
+  round  44  test_acc=0.1000  client_acc_var=0.03055
+  round  45  test_acc=0.1000  client_acc_var=0.03055
+  round  46  test_acc=0.1000  client_acc_var=0.03055
+  round  47  test_acc=0.1000  client_acc_var=0.03055
+  round  48  test_acc=0.1000  client_acc_var=0.03055
+  round  49  test_acc=0.1000  client_acc_var=0.03055
+  round  50  test_acc=0.1000  client_acc_var=0.03055
+  round  51  test_acc=0.1000  client_acc_var=0.03055
+  round  52  test_acc=0.1000  client_acc_var=0.03055
+  round  53  test_acc=0.1000  client_acc_var=0.03055
+  round  54  test_acc=0.1000  client_acc_var=0.03055
+  round  55  test_acc=0.1000  client_acc_var=0.03055
+  round  56  test_acc=0.1000  client_acc_var=0.03055
+  round  57  test_acc=0.1000  client_acc_var=0.03055
+  round  58  test_acc=0.1000  client_acc_var=0.03055
+  round  59  test_acc=0.1000  client_acc_var=0.03055
+  round  60  test_acc=0.1000  client_acc_var=0.03055
+[D_cifar10_fedavg_dir0.1_clientdp_eps1_s0] wall-clock: 40.8 min (40.8 s/round)
+[D_cifar10_fedavg_dir0.1_clientdp_eps1_s0] done -> /Users/abdul/Documents/MSc. Project/fl-privacy-noniid/results/D_cifar10_fedavg_dir0.1_clientdp_eps1_s0
+W0818 16:57:02.352000 57708 .venv/lib/python3.14/site-packages/torch/distributed/elastic/multiprocessing/redirects.py:35] NOTE: Redirects are currently not supported in MacOs.
+
+======================================================================
+D_cifar10_fedavg_dir0.1_clientdp_eps4_s0  started 2026-08-18 16:56:56
+config: experiments/phase_d/D_cifar10_fedavg_dir0.1_clientdp_eps4_s0.yaml
+======================================================================
+[D_cifar10_fedavg_dir0.1_clientdp_eps4_s0] model params: 189,130 | train 20000 test 5000
+[D_cifar10_fedavg_dir0.1_clientdp_eps4_s0] partition dirichlet | HD mean=0.6282 max=0.8269 | sizes[88,3591]
+[D_cifar10_fedavg_dir0.1_clientdp_eps4_s0] DP ON | granularity=client | schedule=constant | target eps=4.0 delta=1e-05 C=0.357398
+[D_cifar10_fedavg_dir0.1_clientdp_eps4_s0] strategy=fedavg
+    client-level DP: C=0.3574 sigma=8.9722 -> eps=3.997 over 60 rounds at sampling rate 1.0
+    noise std on the mean = sigma*C/N = 0.21378; averaging is UNIFORM
+  round   1  test_acc=0.1044  client_acc_var=0.01100
+  round   2  test_acc=0.1072  client_acc_var=0.06092
+  round   3  test_acc=0.1014  client_acc_var=0.02042
+  round   4  test_acc=0.1000  client_acc_var=0.07017
+  round   5  test_acc=0.0980  client_acc_var=0.01840
+  round   6  test_acc=0.1138  client_acc_var=0.01205
+  round   7  test_acc=0.1210  client_acc_var=0.02832
+  round   8  test_acc=0.1002  client_acc_var=0.04488
+  round   9  test_acc=0.1006  client_acc_var=0.04224
+  round  10  test_acc=0.0980  client_acc_var=0.01804
+  round  11  test_acc=0.1034  client_acc_var=0.02674
+  round  12  test_acc=0.1010  client_acc_var=0.04790
+  round  13  test_acc=0.0920  client_acc_var=0.01245
+  round  14  test_acc=0.1020  client_acc_var=0.01035
+  round  15  test_acc=0.1006  client_acc_var=0.01048
+  round  16  test_acc=0.1036  client_acc_var=0.00579
+  round  17  test_acc=0.1312  client_acc_var=0.00895
+  round  18  test_acc=0.1138  client_acc_var=0.00728
+  round  19  test_acc=0.1058  client_acc_var=0.02945
+  round  20  test_acc=0.1008  client_acc_var=0.03008
+  round  21  test_acc=0.1086  client_acc_var=0.02714
+  round  22  test_acc=0.1026  client_acc_var=0.02460
+  round  23  test_acc=0.1138  client_acc_var=0.03518
+  round  24  test_acc=0.0962  client_acc_var=0.00894
+  round  25  test_acc=0.1040  client_acc_var=0.02010
+  round  26  test_acc=0.1176  client_acc_var=0.01565
+  round  27  test_acc=0.1144  client_acc_var=0.01423
+  round  28  test_acc=0.1320  client_acc_var=0.01362
+  round  29  test_acc=0.1156  client_acc_var=0.01730
+  round  30  test_acc=0.1302  client_acc_var=0.01932
+  round  31  test_acc=0.1004  client_acc_var=0.04504
+  round  32  test_acc=0.1110  client_acc_var=0.00752
+  round  33  test_acc=0.1002  client_acc_var=0.02030
+  round  34  test_acc=0.1012  client_acc_var=0.02004
+  round  35  test_acc=0.1034  client_acc_var=0.04441
+  round  36  test_acc=0.0864  client_acc_var=0.00541
+  round  37  test_acc=0.0752  client_acc_var=0.00641
+  round  38  test_acc=0.0946  client_acc_var=0.00929
+  round  39  test_acc=0.0990  client_acc_var=0.01366
+  round  40  test_acc=0.0924  client_acc_var=0.01224
+  round  41  test_acc=0.1078  client_acc_var=0.01093
+  round  42  test_acc=0.1008  client_acc_var=0.01044
+  round  43  test_acc=0.1098  client_acc_var=0.02771
+  round  44  test_acc=0.0902  client_acc_var=0.01206
+  round  45  test_acc=0.1004  client_acc_var=0.06873
+  round  46  test_acc=0.1000  client_acc_var=0.06035
+  round  47  test_acc=0.1332  client_acc_var=0.01233
+  round  48  test_acc=0.0916  client_acc_var=0.01251
+  round  49  test_acc=0.1008  client_acc_var=0.04337
+  round  50  test_acc=0.1146  client_acc_var=0.00558
+  round  51  test_acc=0.1178  client_acc_var=0.02234
+  round  52  test_acc=0.1078  client_acc_var=0.05110
+  round  53  test_acc=0.1032  client_acc_var=0.06826
+  round  54  test_acc=0.1082  client_acc_var=0.02303
+  round  55  test_acc=0.1012  client_acc_var=0.01052
+  round  56  test_acc=0.0890  client_acc_var=0.00785
+  round  57  test_acc=0.0938  client_acc_var=0.01547
+  round  58  test_acc=0.0920  client_acc_var=0.00812
+  round  59  test_acc=0.0954  client_acc_var=0.02545
+  round  60  test_acc=0.0838  client_acc_var=0.01380
+[D_cifar10_fedavg_dir0.1_clientdp_eps4_s0] wall-clock: 41.4 min (41.4 s/round)
+[D_cifar10_fedavg_dir0.1_clientdp_eps4_s0] done -> /Users/abdul/Documents/MSc. Project/fl-privacy-noniid/results/D_cifar10_fedavg_dir0.1_clientdp_eps4_s0
+W0818 17:38:29.538000 80373 .venv/lib/python3.14/site-packages/torch/distributed/elastic/multiprocessing/redirects.py:35] NOTE: Redirects are currently not supported in MacOs.
+
+======================================================================
+D_cifar10_fedavg_dir0.1_clientdp_eps8_s0  started 2026-08-18 17:38:24
+config: experiments/phase_d/D_cifar10_fedavg_dir0.1_clientdp_eps8_s0.yaml
+======================================================================
+[D_cifar10_fedavg_dir0.1_clientdp_eps8_s0] model params: 189,130 | train 20000 test 5000
+[D_cifar10_fedavg_dir0.1_clientdp_eps8_s0] partition dirichlet | HD mean=0.6282 max=0.8269 | sizes[88,3591]
+[D_cifar10_fedavg_dir0.1_clientdp_eps8_s0] DP ON | granularity=client | schedule=constant | target eps=8.0 delta=1e-05 C=0.357398
+[D_cifar10_fedavg_dir0.1_clientdp_eps8_s0] strategy=fedavg
+    client-level DP: C=0.3574 sigma=4.9406 -> eps=7.998 over 60 rounds at sampling rate 1.0
+    noise std on the mean = sigma*C/N = 0.11772; averaging is UNIFORM
+  round   1  test_acc=0.0994  client_acc_var=0.02599
+  round   2  test_acc=0.1002  client_acc_var=0.07013
+  round   3  test_acc=0.1000  client_acc_var=0.02094
+  round   4  test_acc=0.0996  client_acc_var=0.07003
+  round   5  test_acc=0.1006  client_acc_var=0.03014
+  round   6  test_acc=0.0994  client_acc_var=0.02859
+  round   7  test_acc=0.1240  client_acc_var=0.02549
+  round   8  test_acc=0.1000  client_acc_var=0.04524
+  round   9  test_acc=0.0938  client_acc_var=0.01351
+  round  10  test_acc=0.1114  client_acc_var=0.00644
+  round  11  test_acc=0.1028  client_acc_var=0.01184
+  round  12  test_acc=0.0998  client_acc_var=0.06736
+  round  13  test_acc=0.0920  client_acc_var=0.00267
+  round  14  test_acc=0.0986  client_acc_var=0.00780
+  round  15  test_acc=0.1026  client_acc_var=0.01004
+  round  16  test_acc=0.0956  client_acc_var=0.00994
+  round  17  test_acc=0.1384  client_acc_var=0.00962
+  round  18  test_acc=0.0838  client_acc_var=0.00900
+  round  19  test_acc=0.0954  client_acc_var=0.02252
+  round  20  test_acc=0.1200  client_acc_var=0.01881
+  round  21  test_acc=0.0978  client_acc_var=0.00459
+  round  22  test_acc=0.1162  client_acc_var=0.03822
+  round  23  test_acc=0.1002  client_acc_var=0.04539
+  round  24  test_acc=0.0982  client_acc_var=0.01614
+  round  25  test_acc=0.1244  client_acc_var=0.01663
+  round  26  test_acc=0.1232  client_acc_var=0.01467
+  round  27  test_acc=0.1078  client_acc_var=0.02341
+  round  28  test_acc=0.0986  client_acc_var=0.00617
+  round  29  test_acc=0.1042  client_acc_var=0.02411
+  round  30  test_acc=0.1140  client_acc_var=0.00451
+  round  31  test_acc=0.1070  client_acc_var=0.03968
+  round  32  test_acc=0.1082  client_acc_var=0.02389
+  round  33  test_acc=0.0986  client_acc_var=0.01002
+  round  34  test_acc=0.1000  client_acc_var=0.02084
+  round  35  test_acc=0.0988  client_acc_var=0.01223
+  round  36  test_acc=0.1198  client_acc_var=0.03148
+  round  37  test_acc=0.0976  client_acc_var=0.01830
+  round  38  test_acc=0.1108  client_acc_var=0.02503
+  round  39  test_acc=0.1242  client_acc_var=0.02169
+  round  40  test_acc=0.1188  client_acc_var=0.01601
+  round  41  test_acc=0.0990  client_acc_var=0.00804
+  round  42  test_acc=0.1050  client_acc_var=0.01802
+  round  43  test_acc=0.1026  client_acc_var=0.02217
+  round  44  test_acc=0.0980  client_acc_var=0.06183
+  round  45  test_acc=0.0996  client_acc_var=0.07013
+  round  46  test_acc=0.1026  client_acc_var=0.03213
+  round  47  test_acc=0.0746  client_acc_var=0.00513
+  round  48  test_acc=0.0932  client_acc_var=0.02851
+  round  49  test_acc=0.1004  client_acc_var=0.00903
+  round  50  test_acc=0.1040  client_acc_var=0.01983
+  round  51  test_acc=0.1046  client_acc_var=0.06337
+  round  52  test_acc=0.1130  client_acc_var=0.03313
+  round  53  test_acc=0.1150  client_acc_var=0.01609
+  round  54  test_acc=0.1106  client_acc_var=0.00478
+  round  55  test_acc=0.1154  client_acc_var=0.00712
+  round  56  test_acc=0.1000  client_acc_var=0.01283
+  round  57  test_acc=0.1066  client_acc_var=0.01250
+  round  58  test_acc=0.0996  client_acc_var=0.00918
+  round  59  test_acc=0.1018  client_acc_var=0.00838
+  round  60  test_acc=0.1112  client_acc_var=0.02593
+[D_cifar10_fedavg_dir0.1_clientdp_eps8_s0] wall-clock: 41.1 min (41.1 s/round)
+[D_cifar10_fedavg_dir0.1_clientdp_eps8_s0] done -> /Users/abdul/Documents/MSc. Project/fl-privacy-noniid/results/D_cifar10_fedavg_dir0.1_clientdp_eps8_s0
+
+======================================================================
+D_cifar10_fedavg_dir0.1_none_s0  started 2026-08-18 18:19:38
+config: experiments/phase_d/D_cifar10_fedavg_dir0.1_none_s0.yaml
+======================================================================
+[D_cifar10_fedavg_dir0.1_none_s0] model params: 189,130 | train 20000 test 5000
+[D_cifar10_fedavg_dir0.1_none_s0] partition dirichlet | HD mean=0.6282 max=0.8269 | sizes[88,3591]
+[D_cifar10_fedavg_dir0.1_none_s0] strategy=fedavg
+  round   1  test_acc=0.1512  client_acc_var=0.01844
+  round   2  test_acc=0.1836  client_acc_var=0.02248
+  round   3  test_acc=0.1850  client_acc_var=0.02899
+  round   4  test_acc=0.2066  client_acc_var=0.02739
+  round   5  test_acc=0.2276  client_acc_var=0.02996
+  round   6  test_acc=0.2324  client_acc_var=0.03316
+  round   7  test_acc=0.2546  client_acc_var=0.02925
+  round   8  test_acc=0.2650  client_acc_var=0.02629
+  round   9  test_acc=0.2774  client_acc_var=0.02379
+  round  10  test_acc=0.2776  client_acc_var=0.02755
+  round  11  test_acc=0.2844  client_acc_var=0.02605
+  round  12  test_acc=0.2878  client_acc_var=0.02634
+  round  13  test_acc=0.3080  client_acc_var=0.01737
+  round  14  test_acc=0.3060  client_acc_var=0.01950
+  round  15  test_acc=0.3158  client_acc_var=0.02232
+  round  16  test_acc=0.2922  client_acc_var=0.02684
+  round  17  test_acc=0.3248  client_acc_var=0.01891
+  round  18  test_acc=0.3210  client_acc_var=0.02160
+  round  19  test_acc=0.3378  client_acc_var=0.01933
+  round  20  test_acc=0.3414  client_acc_var=0.01474
+  round  21  test_acc=0.3404  client_acc_var=0.01590
+  round  22  test_acc=0.3200  client_acc_var=0.02570
+  round  23  test_acc=0.3318  client_acc_var=0.02498
+  round  24  test_acc=0.3402  client_acc_var=0.01917
+  round  25  test_acc=0.3628  client_acc_var=0.01278
+  round  26  test_acc=0.3576  client_acc_var=0.01746
+  round  27  test_acc=0.3634  client_acc_var=0.00916
+  round  28  test_acc=0.3658  client_acc_var=0.01647
+  round  29  test_acc=0.3820  client_acc_var=0.00951
+  round  30  test_acc=0.3704  client_acc_var=0.01237
+  round  31  test_acc=0.3818  client_acc_var=0.01433
+  round  32  test_acc=0.3814  client_acc_var=0.01460
+  round  33  test_acc=0.3604  client_acc_var=0.01677
+  round  34  test_acc=0.3906  client_acc_var=0.01016
+  round  35  test_acc=0.3856  client_acc_var=0.01231
+  round  36  test_acc=0.3888  client_acc_var=0.01055
+  round  37  test_acc=0.3964  client_acc_var=0.00907
+  round  38  test_acc=0.3852  client_acc_var=0.01120
+  round  39  test_acc=0.4096  client_acc_var=0.00615
+  round  40  test_acc=0.3848  client_acc_var=0.01252
+  round  41  test_acc=0.3838  client_acc_var=0.01386
+  round  42  test_acc=0.3992  client_acc_var=0.01253
+  round  43  test_acc=0.4100  client_acc_var=0.00779
+  round  44  test_acc=0.4214  client_acc_var=0.00439
+  round  45  test_acc=0.4092  client_acc_var=0.00970
+  round  46  test_acc=0.3986  client_acc_var=0.01537
+  round  47  test_acc=0.4110  client_acc_var=0.00862
+  round  48  test_acc=0.4202  client_acc_var=0.00640
+  round  49  test_acc=0.4128  client_acc_var=0.00792
+  round  50  test_acc=0.3992  client_acc_var=0.01270
+  round  51  test_acc=0.4270  client_acc_var=0.00717
+  round  52  test_acc=0.4114  client_acc_var=0.00866
+  round  53  test_acc=0.4120  client_acc_var=0.01146
+  round  54  test_acc=0.4184  client_acc_var=0.01069
+  round  55  test_acc=0.4226  client_acc_var=0.00643
+  round  56  test_acc=0.4028  client_acc_var=0.01150
+  round  57  test_acc=0.4202  client_acc_var=0.00981
+  round  58  test_acc=0.4176  client_acc_var=0.00788
+  round  59  test_acc=0.4184  client_acc_var=0.00942
+  round  60  test_acc=0.4342  client_acc_var=0.00640
+[D_cifar10_fedavg_dir0.1_none_s0] wall-clock: 40.9 min (40.9 s/round)
+[D_cifar10_fedavg_dir0.1_none_s0] done -> /Users/abdul/Documents/MSc. Project/fl-privacy-noniid/results/D_cifar10_fedavg_dir0.1_none_s0
+W0818 19:00:45.605000 25122 .venv/lib/python3.14/site-packages/torch/distributed/elastic/multiprocessing/redirects.py:35] NOTE: Redirects are currently not supported in MacOs.
+/Users/abdul/Documents/MSc. Project/fl-privacy-noniid/.venv/lib/python3.14/site-packages/opacus/accountants/analysis/rdp.py:332: UserWarning: Optimal order is the smallest alpha. Please consider expanding the range of alphas to get a tighter privacy bound.
+  warnings.warn(
+/Users/abdul/Documents/MSc. Project/fl-privacy-noniid/.venv/lib/python3.14/site-packages/opacus/accountants/analysis/rdp.py:332: UserWarning: Optimal order is the largest alpha. Please consider expanding the range of alphas to get a tighter privacy bound.
+  warnings.warn(
+/Users/abdul/Documents/MSc. Project/fl-privacy-noniid/flcore/dp_local.py:135: UserWarning: Full backward hook is firing when gradients are computed with respect to module outputs since no inputs require gradients. See https://docs.pytorch.org/docs/main/generated/torch.nn.Module.html#torch.nn.Module.register_full_backward_hook for more details.
+  model.criterion(out, yb).backward()
+
+======================================================================
+D_cifar10_fedavg_dir0.1_sampledp_eps1_s0  started 2026-08-18 19:00:40
+config: experiments/phase_d/D_cifar10_fedavg_dir0.1_sampledp_eps1_s0.yaml
+======================================================================
+[D_cifar10_fedavg_dir0.1_sampledp_eps1_s0] model params: 189,130 | train 20000 test 5000
+[D_cifar10_fedavg_dir0.1_sampledp_eps1_s0] partition dirichlet | HD mean=0.6282 max=0.8269 | sizes[88,3591]
+[D_cifar10_fedavg_dir0.1_sampledp_eps1_s0] DP ON | granularity=sample | schedule=constant | target eps=1.0 delta=1e-05 C=1.0
+[D_cifar10_fedavg_dir0.1_sampledp_eps1_s0] strategy=fedavg
+    DP client  0: n=  494 q=0.1296 steps=   960 sigma=16.3102 -> eps=1.000
+    DP client  1: n=   88 q=0.7273 steps=   240 sigma=46.0078 -> eps=0.991
+    DP client  2: n= 2251 q=0.0284 steps=  4320 sigma=7.6090 -> eps=1.002
+    DP client  3: n=  296 q=0.2162 steps=   600 sigma=21.6469 -> eps=0.992
+    DP client  4: n= 1073 q=0.0596 steps=  2040 sigma=10.9734 -> eps=0.999
+    DP client  5: n=  161 q=0.3975 steps=   360 sigma=30.6164 -> eps=0.999
+    DP client  6: n= 2501 q=0.0256 steps=  4800 sigma=7.2609 -> eps=0.996
+    DP client  7: n=  756 q=0.0847 steps=  1440 sigma=13.0617 -> eps=1.000
+    DP client  8: n= 2667 q=0.0240 steps=  5040 sigma=6.9129 -> eps=1.007
+    DP client  9: n= 1336 q=0.0479 steps=  2520 sigma=9.8133 -> eps=0.998
+    DP client 10: n=  714 q=0.0896 steps=  1440 sigma=13.7578 -> eps=1.005
+    DP client 11: n= 2868 q=0.0223 steps=  5400 sigma=6.6809 -> eps=1.003
+    DP client 12: n=  240 q=0.2667 steps=   480 sigma=23.5031 -> eps=1.010
+    DP client 13: n=  964 q=0.0664 steps=  1920 sigma=11.9016 -> eps=0.993
+    DP client 14: n= 3591 q=0.0178 steps=  6840 sigma=5.9848 -> eps=1.008
+  round   1  test_acc=0.1026  client_acc_var=0.00986
+  round   2  test_acc=0.1038  client_acc_var=0.02100
+  round   3  test_acc=0.1086  client_acc_var=0.01673
+  round   4  test_acc=0.1230  client_acc_var=0.01579
+  round   5  test_acc=0.1256  client_acc_var=0.01168
+  round   6  test_acc=0.1292  client_acc_var=0.00814
+  round   7  test_acc=0.1314  client_acc_var=0.01387
+  round   8  test_acc=0.1256  client_acc_var=0.00977
+  round   9  test_acc=0.1096  client_acc_var=0.01456
+  round  10  test_acc=0.1124  client_acc_var=0.01783
+  round  11  test_acc=0.1296  client_acc_var=0.01895
+  round  12  test_acc=0.1224  client_acc_var=0.03507
+  round  13  test_acc=0.1120  client_acc_var=0.03127
+  round  14  test_acc=0.1278  client_acc_var=0.01432
+  round  15  test_acc=0.1132  client_acc_var=0.03307
+  round  16  test_acc=0.1376  client_acc_var=0.00835
+  round  17  test_acc=0.1374  client_acc_var=0.04049
+  round  18  test_acc=0.1180  client_acc_var=0.05144
+  round  19  test_acc=0.1266  client_acc_var=0.02224
+  round  20  test_acc=0.1550  client_acc_var=0.00584
+  round  21  test_acc=0.1516  client_acc_var=0.01133
+  round  22  test_acc=0.1576  client_acc_var=0.02466
+  round  23  test_acc=0.1294  client_acc_var=0.02550
+  round  24  test_acc=0.1496  client_acc_var=0.02103
+  round  25  test_acc=0.1676  client_acc_var=0.00640
+  round  26  test_acc=0.1740  client_acc_var=0.01577
+  round  27  test_acc=0.1864  client_acc_var=0.01092
+  round  28  test_acc=0.1764  client_acc_var=0.01484
+  round  29  test_acc=0.1764  client_acc_var=0.01402
+  round  30  test_acc=0.1718  client_acc_var=0.00628
+  round  31  test_acc=0.1792  client_acc_var=0.00539
+  round  32  test_acc=0.1622  client_acc_var=0.01269
+  round  33  test_acc=0.1754  client_acc_var=0.02347
+  round  34  test_acc=0.2020  client_acc_var=0.00750
+  round  35  test_acc=0.1654  client_acc_var=0.03540
+  round  36  test_acc=0.1666  client_acc_var=0.03869
+  round  37  test_acc=0.1806  client_acc_var=0.00911
+  round  38  test_acc=0.2038  client_acc_var=0.00658
+  round  39  test_acc=0.2070  client_acc_var=0.01252
+  round  40  test_acc=0.1958  client_acc_var=0.01139
+  round  41  test_acc=0.2112  client_acc_var=0.00753
+  round  42  test_acc=0.2176  client_acc_var=0.00637
+  round  43  test_acc=0.2184  client_acc_var=0.00612
+  round  44  test_acc=0.2096  client_acc_var=0.01706
+  round  45  test_acc=0.1998  client_acc_var=0.01127
+  round  46  test_acc=0.2058  client_acc_var=0.01892
+  round  47  test_acc=0.2094  client_acc_var=0.02565
+  round  48  test_acc=0.2186  client_acc_var=0.02074
+  round  49  test_acc=0.2198  client_acc_var=0.01954
+  round  50  test_acc=0.2244  client_acc_var=0.01281
+  round  51  test_acc=0.2136  client_acc_var=0.01990
+  round  52  test_acc=0.2186  client_acc_var=0.01251
+  round  53  test_acc=0.2166  client_acc_var=0.01012
+  round  54  test_acc=0.2042  client_acc_var=0.01255
+  round  55  test_acc=0.2068  client_acc_var=0.00904
+  round  56  test_acc=0.2256  client_acc_var=0.00919
+  round  57  test_acc=0.2354  client_acc_var=0.00886
+  round  58  test_acc=0.2298  client_acc_var=0.01241
+  round  59  test_acc=0.2224  client_acc_var=0.00925
+  round  60  test_acc=0.2362  client_acc_var=0.00779
+[D_cifar10_fedavg_dir0.1_sampledp_eps1_s0] wall-clock: 64.9 min (64.9 s/round)
+[D_cifar10_fedavg_dir0.1_sampledp_eps1_s0] done -> /Users/abdul/Documents/MSc. Project/fl-privacy-noniid/results/D_cifar10_fedavg_dir0.1_sampledp_eps1_s0
+
+======================================================================
+D_diag_cifar10_fedavg_dir0.1_uniform_s0  started 2026-08-18 20:05:41
+config: experiments/phase_d/D_diag_cifar10_fedavg_dir0.1_uniform_s0.yaml
+======================================================================
+[D_diag_cifar10_fedavg_dir0.1_uniform_s0] model params: 189,130 | train 20000 test 5000
+[D_diag_cifar10_fedavg_dir0.1_uniform_s0] partition dirichlet | HD mean=0.6282 max=0.8269 | sizes[88,3591]
+[D_diag_cifar10_fedavg_dir0.1_uniform_s0] strategy=fedavg
+  round   1  test_acc=0.1102  client_acc_var=0.02897
+  round   2  test_acc=0.1456  client_acc_var=0.03238
+  round   3  test_acc=0.1550  client_acc_var=0.03556
+  round   4  test_acc=0.1722  client_acc_var=0.03795
+  round   5  test_acc=0.1862  client_acc_var=0.03951
+  round   6  test_acc=0.1878  client_acc_var=0.03840
+  round   7  test_acc=0.1956  client_acc_var=0.03614
+  round   8  test_acc=0.2176  client_acc_var=0.03787
+  round   9  test_acc=0.2328  client_acc_var=0.03511
+  round  10  test_acc=0.2242  client_acc_var=0.03886
+  round  11  test_acc=0.2464  client_acc_var=0.03610
+  round  12  test_acc=0.2504  client_acc_var=0.03393
+  round  13  test_acc=0.2614  client_acc_var=0.03226
+  round  14  test_acc=0.2560  client_acc_var=0.03333
+  round  15  test_acc=0.2788  client_acc_var=0.03216
+  round  16  test_acc=0.2532  client_acc_var=0.03710
+  round  17  test_acc=0.2772  client_acc_var=0.03356
+  round  18  test_acc=0.2794  client_acc_var=0.03456
+  round  19  test_acc=0.2760  client_acc_var=0.03266
+  round  20  test_acc=0.2872  client_acc_var=0.03234
+  round  21  test_acc=0.2894  client_acc_var=0.02651
+  round  22  test_acc=0.2862  client_acc_var=0.03257
+  round  23  test_acc=0.2828  client_acc_var=0.03656
+  round  24  test_acc=0.2908  client_acc_var=0.03190
+  round  25  test_acc=0.3012  client_acc_var=0.03254
+  round  26  test_acc=0.2978  client_acc_var=0.03057
+  round  27  test_acc=0.3154  client_acc_var=0.02438
+  round  28  test_acc=0.3044  client_acc_var=0.02899
+  round  29  test_acc=0.3130  client_acc_var=0.02619
+  round  30  test_acc=0.3080  client_acc_var=0.02894
+  round  31  test_acc=0.3154  client_acc_var=0.02980
+  round  32  test_acc=0.3172  client_acc_var=0.02754
+  round  33  test_acc=0.3306  client_acc_var=0.02627
+  round  34  test_acc=0.3334  client_acc_var=0.02309
+  round  35  test_acc=0.3254  client_acc_var=0.02662
+  round  36  test_acc=0.3364  client_acc_var=0.02365
+  round  37  test_acc=0.3404  client_acc_var=0.02373
+  round  38  test_acc=0.3326  client_acc_var=0.02584
+  round  39  test_acc=0.3398  client_acc_var=0.02464
+  round  40  test_acc=0.3296  client_acc_var=0.02836
+  round  41  test_acc=0.3424  client_acc_var=0.02544
+  round  42  test_acc=0.3526  client_acc_var=0.02378
+  round  43  test_acc=0.3658  client_acc_var=0.01362
+  round  44  test_acc=0.3610  client_acc_var=0.01961
+  round  45  test_acc=0.3412  client_acc_var=0.03041
+  round  46  test_acc=0.3426  client_acc_var=0.03008
+  round  47  test_acc=0.3552  client_acc_var=0.02413
+  round  48  test_acc=0.3646  client_acc_var=0.02273
+  round  49  test_acc=0.3602  client_acc_var=0.02308
+  round  50  test_acc=0.3486  client_acc_var=0.02570
+  round  51  test_acc=0.3608  client_acc_var=0.02584
+  round  52  test_acc=0.3598  client_acc_var=0.02464
+  round  53  test_acc=0.3638  client_acc_var=0.02582
+  round  54  test_acc=0.3670  client_acc_var=0.02357
+  round  55  test_acc=0.3738  client_acc_var=0.01630
+  round  56  test_acc=0.3620  client_acc_var=0.02427
+  round  57  test_acc=0.3754  client_acc_var=0.02126
+  round  58  test_acc=0.3742  client_acc_var=0.02028
+  round  59  test_acc=0.3814  client_acc_var=0.01984
+  round  60  test_acc=0.3888  client_acc_var=0.01792
+[D_diag_cifar10_fedavg_dir0.1_uniform_s0] wall-clock: 41.3 min (41.3 s/round)
+[D_diag_cifar10_fedavg_dir0.1_uniform_s0] done -> /Users/abdul/Documents/MSc. Project/fl-privacy-noniid/results/D_diag_cifar10_fedavg_dir0.1_uniform_s0
+PHASE D - GRANULARITY OF DIFFERENTIAL PRIVACY
+
+mechanism and completeness
+  ok   clientdp_eps1_s0       60 rounds, final 10.00%
+  ok   clientdp_eps4_s0       60 rounds, final 8.38%
+  ok   clientdp_eps8_s0       60 rounds, final 11.12%
+  ok   adaptive_eps1_s0       60 rounds, final 24.42%
+  ok   adaptive_eps4_s0       60 rounds, final 25.96%
+  ok   adaptive_eps8_s0       60 rounds, final 25.50%
+  ok   sampledp_eps1_s0       60 rounds, final 23.62%
+  ok   none_s0                60 rounds, final 43.42%
+  ok   diag uniform_s0        60 rounds, final 38.88%
+
+controls against their twins
+  ok   none_s0                vs A_cifar10_fedavg_dir0.1_s0: max diff 0.00e+00
+  ok   sampledp_eps1_s0       vs B_cifar10_fedavg_dir0.1_eps1_s0: max diff 0.00e+00
+
+arms that should differ, do
+  ok   time-adaptive vs constant schedule at eps=1: max difference 1.56 points
+
+time-adaptive: realised epsilon recomputed from the actual schedule
+  (opacus unavailable here; run this where the experiments run)
+
+results
+  unprotected, weighted averaging    43.42%
+  unprotected, uniform averaging     38.88%   <- the re-weighting alone costs +4.54 points
+  sample-level   eps=1:  23.62%  (best 23.62% at round 60)
+  client-level   eps=1:  10.00%  (best 10.96% at round 17)
+  client-level   eps=4:   8.38%  (best 13.32% at round 47)
+  client-level   eps=8:  11.12%  (best 13.84% at round 17)
+  time-adaptive  eps=1:  24.42%  (best 24.42% at round 60)
+  time-adaptive  eps=4:  25.96%  (best 25.96% at round 60)
+  time-adaptive  eps=8:  25.50%  (best 25.60% at round 57)
+
+PASS
+
+old outputs kept as *.stale-20260818-130045

@@ -140,13 +140,18 @@ const Page = () => (
             learning it is usually applied by clipping each update to a fixed norm and then adding calibrated noise.
           </Typography>
           <Typography variant='body2' color='text.secondary'>
-            The granularity matters as much as the value. Protecting a single training sample, a single user, or an
-            entire silo are different guarantees at the same nominal ε, and with only 15 clients the silo-level
-            guarantee is the hard one — which is what Phase D is designed to examine.
+            The granularity matters as much as the value. Protecting a single training <em>sample</em> and protecting a
+            single <em>institution</em> are different guarantees at the same nominal ε, and the second is far stronger.
+            With only fifteen clients participating every round, it is also far more expensive — Phase D measures how
+            much.
           </Typography>
-          <Caveat severity='info' title='No results yet'>
-            Phases B and D have not been run. Nothing on this site reports an accuracy cost for differential privacy.
-          </Caveat>
+          <div className='flex gap-2 flex-wrap'>
+            <Chip size='small' variant='tonal' color='success' label='sample-level at ε = 1 → 23.62%' />
+            <Chip size='small' variant='tonal' color='error' label='client-level at ε = 1 → 10.00%, the chance line' />
+          </div>
+          <LinkButton href='/granularity' size='small' variant='tonal' className='self-start'>
+            See what each guarantee costs
+          </LinkButton>
       </SectionCard>
 
       <SectionCard icon='tabler-shield-check' color='info' title='Secure aggregation'>
@@ -157,9 +162,12 @@ const Page = () => (
           </Typography>
           <Typography variant='body2' color='text.secondary'>
             The two are complementary rather than alternatives — masking hides individual contributions from the
-            server, and differential privacy bounds what the revealed sum leaks. The cost of masking is paid in
-            communication rather than accuracy.
+            server, and differential privacy bounds what the revealed sum leaks. Phase C measured the cost: none in
+            accuracy, none in bandwidth, and roughly a third of a processor-second per round in computation.
           </Typography>
+          <LinkButton href='/secagg' size='small' variant='tonal' className='self-start'>
+            See what masking costs
+          </LinkButton>
       </SectionCard>
 
       <SectionCard icon='tabler-shield-lock' color='error' title='Gradient inversion, and why higher PSNR is worse'>
@@ -183,7 +191,8 @@ const Page = () => (
             uninterpretable, so they appear wherever one is reported.
           </Typography>
           <Caveat severity='info' title='No results yet'>
-            Phase E has not been run. No reconstruction or PSNR figures appear on this site.
+            Phase E has not been run — it is the only phase still outstanding. No reconstruction or PSNR figures appear
+            on this site.
           </Caveat>
       </SectionCard>
     </div>
