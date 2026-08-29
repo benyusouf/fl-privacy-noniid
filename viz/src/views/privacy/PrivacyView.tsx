@@ -264,7 +264,7 @@ const PrivacyView = () => {
         <CardHeader title='What the guarantee actually is' />
         <CardContent className='flex flex-col gap-3'>
           <Typography className='max-is-[85ch]'>
-            Every figure on this page reports <strong>delivered</strong> ε — the worst client&apos;s realised budget —
+            Every figure on this page reports <strong>delivered</strong> ε — the worst client&apos;s realised privacy loss —
             rather than the target ε that names the directory. A federation can only claim the protection of its
             weakest member, so the delivered figure is the guarantee and the target is a label.
           </Typography>

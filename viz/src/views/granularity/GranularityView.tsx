@@ -317,7 +317,7 @@ const GranularityView = () => {
           )}
 
           <Caveat severity='info' title='This run is recorded but not counted'>
-            Section 3.11 excludes calibration and diagnostic activity from the study&apos;s run totals, so this run
+            Section 3.10.7 excludes calibration and diagnostic activity from the study&apos;s run totals, so this run
             appears in the explorer and in the downloads but does not add to the phase count. Without it the noise cost
             and the averaging cost would have been permanently confounded, which is why it exists.{' '}
             {reweight.uniform.run && <RunLink name={reweight.uniform.run.name} />}

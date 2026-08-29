@@ -46,7 +46,7 @@ const PUBLISHABLE = [
   ['partition_report.json', 'Client sizes and Hellinger distances as drawn'],
   ['config_used.json', 'Every parameter the run executed with'],
   ['dp_calibration.json', 'Per-client noise multiplier and realised epsilon'],
-  ['timing.txt', 'Elapsed time — unreliable, see Section 3.11'],
+  ['timing.txt', 'Elapsed time — unreliable, see Section 3.10.7'],
   ['run.log', 'Captured transcript of the run'],
   ['provenance.txt', 'Reconstructed record — not a transcript']
 ]

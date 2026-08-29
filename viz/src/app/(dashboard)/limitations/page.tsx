@@ -154,8 +154,9 @@ const Page = () => {
 
         <SectionCard icon='tabler-list-check' color='info' title='Four phases of five' prose>
             <Typography>
-              Phases A through D are complete, which answers RQ1, RQ2 and RQ3. Only RQ4 — whether gradient inversion
-              can recover training data, and whether the pipeline stops it — has no results at all.
+              Phases A through D are complete, which answers RQ1 and RQ2 in full. Only RQ3 — whether a
+              gradient-inversion attack can recover training data from unprotected updates, and whether the integrated
+              mechanisms prevent it — has no results at all.
             </Typography>
             <Typography variant='body2' color='text.secondary'>
               Any statement on this site about gradient inversion describes a design, not a finding. The attack

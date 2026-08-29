@@ -37,7 +37,7 @@ export const protectedRuns = allRuns.filter(r => r.dp !== null)
 export const phaseRuns = (phase: string) => allRuns.filter(r => r.phase === phase)
 
 /**
- * Runs that count toward the study's totals. Section 3.11 excludes calibration
+ * Runs that count toward the study's totals. Section 3.10.7 excludes calibration
  * and diagnostic activity, so a diagnostic is recorded, published and shown —
  * but not counted.
  */
@@ -170,6 +170,36 @@ export const rq1Points = (dataset: Dataset) =>
       err: [g.meanFinalAcc * 100 - g.minFinalAcc * 100, g.maxFinalAcc * 100 - g.meanFinalAcc * 100] as [number, number]
     }))
     .sort((a, b) => a.x - b.x)
+
+/**
+ * Measured mean Hellinger distance for a partition protocol, per dataset.
+ *
+ * Never a constant. Quantity skew measures 0.1004 on CIFAR-10 and 0.0866 on
+ * PathMNIST — the same protocol, two different measured heterogeneities —
+ * so a single figure for "quantity skew" is wrong for one of them whichever
+ * value is chosen. The pathological ceiling is the exception in kind: it is the
+ * closed form sqrt(1 - sqrt(1/k)) rather than a measurement, and the data agrees
+ * with it.
+ */
+export const measuredHellinger = (partition: Partition, dataset?: Dataset) => {
+  const rs = allRuns.filter(
+    r => r.partition === partition && r.hellingerMean !== null && (dataset ? r.dataset === dataset : true)
+  )
+
+  if (!rs.length) return null
+
+  const vs = rs.map(r => r.hellingerMean as number)
+  const distinct = [...new Set(vs)].sort((a, b) => a - b)
+
+  return {
+    mean: mean(vs),
+    min: Math.min(...vs),
+    max: Math.max(...vs),
+    /** More than one value means the protocol measures differently per dataset or seed. */
+    distinct,
+    runs: rs.length
+  }
+}
 
 export const centralizedBaseline = (dataset: Dataset) => {
   const rs = centralizedRuns.filter(r => r.dataset === dataset)

@@ -71,7 +71,7 @@ const Page = () => (
           </Typography>
           <div className='flex gap-2 flex-wrap'>
             <Chip size='small' variant='tonal' label='Dirichlet α=100 → H ≈ 0.03' />
-            <Chip size='small' variant='tonal' label='quantity β=0.5 → H ≈ 0.10' />
+            <Chip size='small' variant='tonal' label='quantity β=0.5 → H = 0.1004 (CIFAR-10), 0.0866 (PathMNIST)' />
             <Chip size='small' variant='tonal' label='Dirichlet α=1.0 → H ≈ 0.31' />
             <Chip size='small' variant='tonal' color='warning' label='Dirichlet α=0.1 → H ≈ 0.65' />
             <Chip size='small' variant='tonal' color='error' label='pathological → H ≈ 0.83' />

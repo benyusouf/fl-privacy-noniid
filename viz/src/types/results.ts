@@ -225,7 +225,7 @@ export type Run = {
   /** A run made to interpret another run, rather than to produce a result. */
   diagnostic: boolean
 
-  /** Section 3.11 excludes diagnostics from the study's run totals. */
+  /** Section 3.10.7 excludes diagnostics from the study's run totals. */
   counted: boolean
 
   /**

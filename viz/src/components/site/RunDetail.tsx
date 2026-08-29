@@ -123,7 +123,7 @@ const RunDetail = ({ run, embedded = false }: Props) => {
                     <TableCell>
                       Delivered ε
                       <Typography variant='caption' color='text.secondary' className='block'>
-                        the worst client&apos;s realised budget — the guarantee the federation can claim
+                        the worst client&apos;s realised privacy loss — the guarantee the federation can claim
                       </Typography>
                     </TableCell>
                     <TableCell align='right'>{run.dp.deliveredEpsilon.toFixed(4)}</TableCell>

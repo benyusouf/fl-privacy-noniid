@@ -148,7 +148,7 @@ const unknownPartitions = new Set()
  * Markers that sit between the phase letter and the dataset.
  *
  * A diagnostic is a run made to make another run interpretable — Phase D's
- * uniform-averaging control, for instance. Section 3.11 excludes them from the
+ * uniform-averaging control, for instance. Section 3.10.7 excludes them from the
  * study's run totals, so they are recorded and shown but not counted.
  */
 const NAME_MARKERS = { diag: 'diagnostic' }
@@ -460,8 +460,22 @@ const collect = () => {
        */
       uniformAveraging: config.uniform_averaging === true,
 
-      /** Section 3.11 excludes diagnostics from the study's run totals. */
-      counted: !meta.diagnostic,
+      /*
+       * Counted toward the study's totals.
+       *
+       * Section 3.10.7 excludes calibration and diagnostic activity, and a run
+       * that merely REPRODUCES an earlier one is not a new measurement either.
+       * Both Phase D controls declare `equals` and exist to prove the pipeline
+       * is deterministic; they add no configuration the study had not already
+       * run.
+       *
+       * Phase C's plain arms also declare `equals`, and they DO count — they
+       * are half of a measured pair, and the phase measures the difference
+       * between the halves. The discriminator is therefore not `equals` alone
+       * but whether some masked run names this run as its pair, which is
+       * resolved in a second pass once every run has been read.
+       */
+      reproduces: config.equals ?? null,
       diagnostic: meta.diagnostic,
 
       comparator: config.comparator ?? null,
@@ -536,6 +550,17 @@ const collect = () => {
       config,
       curve
     })
+  }
+
+  /*
+   * Second pass. `counted` needs to know which runs are named as the plain half
+   * of a secure-aggregation pair, and that is only knowable once every run has
+   * been read.
+   */
+  const pairedNames = new Set(runs.map(r => r.secagg?.pair).filter(Boolean))
+
+  for (const r of runs) {
+    r.counted = !r.diagnostic && !(r.reproduces && !pairedNames.has(r.name))
   }
 
   return { runs, excluded }

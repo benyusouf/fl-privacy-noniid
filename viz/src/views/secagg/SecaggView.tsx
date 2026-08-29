@@ -159,13 +159,13 @@ const SecaggView = () => {
         </div>
 
         <Typography className='max-is-[85ch]'>
-          At round 1 the two runs agree <strong>exactly</strong> — the masks sum to about 1×10⁻¹⁴, so the first
+          At round 1 the two runs agree <strong>exactly</strong> — the masks sum to at most 2.3×10⁻¹⁴, so the first
           aggregate is arithmetically the same number the plain run computed. Masking does not approximate the average;
           it reproduces it.
         </Typography>
 
         <Caveat severity='info' title='Why the curves separate after round 1'>
-          A residue at 1×10⁻¹⁴ changes where round 2 starts from, and two runs of a non-convex optimisation then follow
+          A residue at 2.3×10⁻¹⁴ changes where round 2 starts from, and two runs of a non-convex optimisation then follow
           slightly different paths. The largest gap here is {pair.maxWanderPts.toFixed(2)} points, against a
           seed-to-seed spread of roughly 6 points at this same cell. <strong>This is not a cost of masking</strong> —
           it is rounding amplified through training, and it carries no information.

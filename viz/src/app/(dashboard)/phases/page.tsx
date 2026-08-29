@@ -92,7 +92,7 @@ const PHASES: Phase[] = [
   {
     id: 'D',
     title: 'Privacy granularity and budget scheduling',
-    rq: 'RQ3',
+    rq: 'RQ2',
     icon: 'tabler-adjustments',
     color: 'warning',
     planned: 8,
@@ -101,14 +101,14 @@ const PHASES: Phase[] = [
       'One cell throughout: CIFAR-10, FedAvg, Dirichlet α = 0.1, seed 0. Only the mechanism changes, so every difference is attributable to it.',
     answers:
       'Which granularity is viable at cross-silo scale with 15 clients, and whether spending the budget unevenly across rounds beats spending it uniformly. Both answers are negative.',
-    note: 'Nine runs recorded, eight counted: a diagnostic control isolating the cost of uniform averaging is excluded from the totals by §3.11. Two further arms are controls that reproduce their Phase A and Phase B originals exactly.',
+    note: 'Nine runs recorded, eight counted: a diagnostic control isolating the cost of uniform averaging is excluded from the totals by §3.10.7. Two further arms are controls that reproduce their Phase A and Phase B originals exactly.',
     href: '/granularity',
     hrefLabel: 'See what the guarantee protects'
   },
   {
     id: 'E',
     title: 'Gradient inversion',
-    rq: 'RQ4',
+    rq: 'RQ3',
     icon: 'tabler-shield-lock',
     color: 'error',
     planned: 14,

@@ -83,7 +83,7 @@ const VerticalMenu = ({ scrollMenu }: Props) => {
             Secure aggregation (RQ2)
           </MenuItem>
           <MenuItem href='/granularity' icon={<i className='tabler-building-bank' />}>
-            What privacy protects (RQ3)
+            What privacy protects (RQ2)
           </MenuItem>
           <MenuItem href='/runs' icon={<i className='tabler-table' />}>
             Run explorer

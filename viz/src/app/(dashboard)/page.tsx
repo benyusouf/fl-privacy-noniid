@@ -25,42 +25,58 @@ export const metadata = {
     'Results, charts and downloadable data from Abdullahi Yusuf\u2019s MSc research into privacy-preserving federated learning with non-IID data.'
 }
 
+/*
+ * The three research questions, verbatim from §1.7 of the dissertation.
+ *
+ * Dr Omolara's review of 20 August 2026 reduced six objectives and four
+ * questions to three and three (D90). The old second and third questions were
+ * both budget questions differing only in axis — the protected unit against the
+ * rounds — so they merged into RQ2, and the old fourth question became RQ3.
+ * There is no fourth research question in the study any more.
+ *
+ * `short` is the Table 1.2 phrasing, used where the full text is too long to
+ * sit in a card. Neither string is paraphrased.
+ */
 const RQS = [
   {
     id: 'RQ1',
+    objective: 'Objective 1',
     phase: 'Phase A',
     status: 'answered',
     icon: 'tabler-chart-dots',
     color: 'primary' as const,
-    q: 'How does federated learning compare with centralized training as data heterogeneity increases, across four aggregation strategies?',
-    href: '/rq1'
+    q: 'How does federated learning compare with centralized training as non-IID severity increases, across the four aggregation strategies?',
+    short:
+      'Federated learning compared with centralized training under increasing non-IID severity, across four aggregation strategies',
+    links: [{ href: '/rq1', label: 'See the answer' }]
   },
   {
     id: 'RQ2',
-    phase: 'Phases B and C',
+    objective: 'Objective 2',
+    phase: 'Phases B, C and D',
     status: 'answered',
     icon: 'tabler-lock',
     color: 'success' as const,
-    q: 'What accuracy and communication cost do differential privacy and secure aggregation add, and how do those costs interact with heterogeneity?',
-    href: '/privacy'
+    q: 'What do differential privacy and secure aggregation cost a cross-silo federation in accuracy, communication and computation as heterogeneity varies, and how should the privacy budget be allocated, across the protected unit and across rounds, for differential privacy to remain viable at this scale?',
+    short:
+      'Accuracy, communication and computation cost of differential privacy and secure aggregation, read against measured heterogeneity; the granularity of the protected unit; the time-adaptive spending schedule',
+    links: [
+      { href: '/privacy', label: 'What privacy costs' },
+      { href: '/secagg', label: 'Secure aggregation' },
+      { href: '/granularity', label: 'What it protects' }
+    ]
   },
   {
     id: 'RQ3',
-    phase: 'Phase D',
-    status: 'answered',
-    icon: 'tabler-building-bank',
-    color: 'warning' as const,
-    q: 'Which differential-privacy granularity is viable at cross-silo scale, and does time-adaptive budget spending help?',
-    href: '/granularity'
-  },
-  {
-    id: 'RQ4',
+    objective: 'Objective 3',
     phase: 'Phase E',
     status: 'pending',
     icon: 'tabler-shield-lock',
     color: 'error' as const,
-    q: 'Can gradient inversion recover training data, and does the pipeline stop it?',
-    href: '/phases'
+    q: 'Can a gradient-inversion attack recover training data from unprotected model updates, and do the integrated privacy mechanisms mitigate or prevent the attack?',
+    short:
+      'Gradient-inversion attack on unprotected updates, and whether the integrated mechanisms mitigate or prevent it',
+    links: [{ href: '/phases', label: 'See what it will involve' }]
   }
 ]
 
@@ -209,12 +225,12 @@ const Page = () => {
       </Card>
 
       <Typography variant='h5' className='mbe-4'>
-        The four research questions
+        The three research questions
       </Typography>
-      <div className='grid grid-cols-1 md:grid-cols-2 gap-6 mbe-6'>
+      <div className='grid grid-cols-1 lg:grid-cols-3 gap-6 mbe-6'>
         {RQS.map(rq => (
           <Card key={rq.id}>
-            <CardContent className='flex flex-col gap-3'>
+            <CardContent className='flex flex-col gap-3 bs-full'>
               <div className='flex items-center gap-3'>
                 <CustomAvatar color={rq.color} skin='light' variant='rounded' size={40}>
                   <i className={`${rq.icon} text-[24px]`} />
@@ -222,21 +238,25 @@ const Page = () => {
                 <div className='flex flex-col'>
                   <Typography className='font-medium'>{rq.id}</Typography>
                   <Typography variant='caption' color='text.secondary'>
-                    {rq.phase}
+                    {rq.objective} · {rq.phase}
                   </Typography>
                 </div>
                 <Chip
                   size='small'
                   variant='tonal'
-                  color={rq.status === 'answered' ? 'success' : rq.status === 'partly answered' ? 'info' : 'default'}
+                  color={rq.status === 'answered' ? 'success' : 'default'}
                   label={rq.status}
                   className='mis-auto'
                 />
               </div>
-              <Typography variant='body2'>{rq.q}</Typography>
-              <LinkButton href={rq.href} size='small' variant='tonal' className='self-start'>
-                {rq.status === 'pending' ? 'See what it will involve' : 'See the answer'}
-              </LinkButton>
+              <Typography variant='body2'>{rq.short}</Typography>
+              <div className='flex gap-1 flex-wrap mbs-auto'>
+                {rq.links.map(l => (
+                  <LinkButton key={l.href} href={l.href} size='small' variant='tonal' color={rq.color}>
+                    {l.label}
+                  </LinkButton>
+                ))}
+              </div>
             </CardContent>
           </Card>
         ))}

@@ -13,7 +13,7 @@ import Caveat from '@/components/site/Caveat'
 import SectionCard from '@/components/site/SectionCard'
 
 // Lib Imports
-import { allRuns, bytes, federatedRuns } from '@/lib/results'
+import { allRuns, bytes, federatedRuns, measuredHellinger } from '@/lib/results'
 
 export const metadata = {
   title: 'Methodology — FL with non-IID data',
@@ -27,13 +27,26 @@ const Page = () => {
   const cfg = ref?.config as Record<string, any>
   const model = (cfg?.model ?? {}) as Record<string, any>
 
-  const partitions = [
-    { protocol: 'Dirichlet, α = 100', kind: 'Label skew, near-homogeneous', h: '≈ 0.03' },
-    { protocol: 'Dirichlet, α = 1.0', kind: 'Label skew, moderate', h: '≈ 0.31' },
-    { protocol: 'Dirichlet, α = 0.1', kind: 'Label skew, severe', h: '≈ 0.65' },
-    { protocol: 'Pathological, 1 class per client', kind: 'Label skew, extreme', h: '≈ 0.83' },
-    { protocol: 'Quantity skew, β = 0.5', kind: 'Volume skew, even labels', h: '≈ 0.10' }
-  ]
+  /*
+   * Measured from the partition reports the runs themselves wrote, never typed
+   * in. Quantity skew is the reason this matters: it measures 0.1004 on
+   * CIFAR-10 and 0.0866 on PathMNIST, so any single constant is wrong for one
+   * of the two datasets.
+   */
+  const partitions = (
+    [
+      ['dir100', 'Dirichlet, α = 100', 'Label skew, near-homogeneous'],
+      ['dir1.0', 'Dirichlet, α = 1.0', 'Label skew, moderate'],
+      ['dir0.1', 'Dirichlet, α = 0.1', 'Label skew, severe'],
+      ['path1', 'Pathological, 1 class per client', 'Label skew, extreme'],
+      ['quantity', 'Quantity skew, β = 0.5', 'Volume skew, even labels']
+    ] as const
+  ).map(([key, protocol, kind]) => ({
+    protocol,
+    kind,
+    cifar: measuredHellinger(key, 'cifar10'),
+    path: measuredHellinger(key, 'pathmnist')
+  }))
 
   return (
     <div className='flex flex-col'>
@@ -121,7 +134,8 @@ const Page = () => {
                   <TableRow>
                     <TableCell>Protocol</TableCell>
                     <TableCell>What it varies</TableCell>
-                    <TableCell align='right'>measured mean H</TableCell>
+                    <TableCell align='right'>measured H, CIFAR-10</TableCell>
+                    <TableCell align='right'>measured H, PathMNIST</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
@@ -129,15 +143,19 @@ const Page = () => {
                     <TableRow key={p.protocol}>
                       <TableCell>{p.protocol}</TableCell>
                       <TableCell>{p.kind}</TableCell>
-                      <TableCell align='right'>{p.h}</TableCell>
+                      <TableCell align='right'>{p.cifar ? p.cifar.mean.toFixed(4) : '—'}</TableCell>
+                      <TableCell align='right'>{p.path ? p.path.mean.toFixed(4) : '—'}</TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
               </Table>
             </TableContainer>
             <Typography variant='caption' color='text.secondary' className='block mbs-3'>
-              Measured values vary with seed; the figures here are the means across the runs on this site. Each
-              run&apos;s own partition report is shown in the run explorer.
+              Every figure here is the mean of what the partition reports recorded, computed from the published files
+              rather than typed in. The two datasets are shown separately because the same protocol does not produce
+              the same heterogeneity on both — quantity skew measures 0.1004 on CIFAR-10 and 0.0866 on PathMNIST. The
+              pathological value is the exception in kind: √(1 − √(1/k)) is a closed-form ceiling, and the measurement
+              agrees with it. Each run&apos;s own partition report is shown in the run explorer.
             </Typography>
         </SectionCard>
 
@@ -195,7 +213,7 @@ const Page = () => {
               configuration.
             </Typography>
             <Typography variant='body2' color='text.secondary'>
-              Recorded and counted are not the same thing. Section 3.11 excludes calibration and diagnostic activity
+              Recorded and counted are not the same thing. Section 3.10.7 excludes calibration and diagnostic activity
               from the study&apos;s run totals, so a diagnostic run — one made to interpret another run rather than to
               produce a result — is published and browsable here but does not add to a phase count. This site shows
               both numbers rather than quietly picking one.
