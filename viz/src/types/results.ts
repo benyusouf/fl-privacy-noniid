@@ -266,11 +266,80 @@ export type DownloadFile = {
 
 export type Downloads = {
   runs: Record<string, DownloadFile[]>
+  /** Phase E files by condition id; '_phase' holds the phase-level files. Paths are relative to runs/E_attack/. */
+  attack?: Record<string, DownloadFile[]>
   archive: { path: string; size: number; sizeLabel: string }
   totalFiles: number
   totalBytes: number
   totalLabel: string
   note: string
+}
+
+// ---------------------------------------------------------------------------
+// Phase E — gradient inversion (RQ3). Attack conditions, not runs.
+// ---------------------------------------------------------------------------
+
+export type AttackArch = 'lenet' | 'smallcnn'
+export type AttackDefence = 'none' | 'dp8' | 'dp4' | 'dp1' | 'sa' | 'sadp8'
+export type AttackObject = 'grad' | 'delta'
+
+export type AttackCondition = {
+  id: string
+  arch: AttackArch
+  archLabel: string
+  defence: AttackDefence
+  defenceLabel: string
+  epsilon: number | null
+  secagg: boolean
+  object: AttackObject
+  objectLabel: string
+  /** Local SGD steps folded into the attacked object: 1 for a gradient. */
+  objectLocalSteps: number
+  psnrMean: number
+  psnrMax: number
+  psnrPerImage: number[]
+  /** Each image's own flat-grey floor, computed as Section 3.9 defines it. */
+  greyPerImage: number[]
+  greyMean: number
+  aboveFloor: number
+  finalAttackLoss: number
+  sigma: number | null
+  realisedEpsilon: number | null
+  /** Expected noise norm over the clipped signal norm; a ratio of recorded values. */
+  noiseToSignal: number | null
+  maskCancellationError: number | null
+  keyAgreementMessages: number | null
+  params: number | null
+  processorSeconds: number
+  /** Paths under public/data/runs/, one per victim image, in ground-truth order. */
+  images: string[]
+}
+
+export type AttackGroundTruth = { k: number; label: number; labelName: string; index: number; image: string }
+
+export type AttackBundle = {
+  planned: number
+  recorded: number
+  references: { randomImage: number; flatGrey: number; noisedCopy: number }
+  design: {
+    sampleRate: number
+    steps: number
+    delta: number
+    sigma: Record<string, number>
+    iterations: number
+    restarts: number
+    imagesPerClient: number | null
+    localEpochs: number | null
+    localBatch: number | null
+    localLr: number | null
+    pretrainImages: number | null
+    pretrainEpochs: number | null
+    objective: string | null
+    labelsKnown: boolean | null
+    numClients: number
+  }
+  groundTruth: AttackGroundTruth[]
+  conditions: AttackCondition[]
 }
 
 export type ResultsBundle = {
@@ -295,6 +364,8 @@ export type ResultsBundle = {
     datasets: Record<string, string>
   }
   runs: Run[]
+  /** Phase E, or null before it is recorded. */
+  attack: AttackBundle | null
 }
 
 /** A configuration aggregated across whatever seeds exist for it. */

@@ -17,6 +17,7 @@ import type { PhaseProgressItem } from '@/components/site/PhaseProgress'
 
 // Lib Imports
 import { allRuns } from '@/lib/results'
+import { attack } from '@/lib/attack'
 
 export const metadata = {
   title: 'Phases A–E — FL with non-IID data',
@@ -113,10 +114,14 @@ const PHASES: Phase[] = [
     color: 'error',
     planned: 14,
     noTraining: true,
-    varies: 'Attack objective, model architecture, and the strength of the defence in place.',
-    fixed: 'The target batch and the channel under attack — the update the protocol actually exposes.',
+    varies:
+      'The defence in place (none, DP at ε = 8, 4 and 1, secure aggregation, both together) and the object attacked (one batch gradient, or the multi-epoch delta the pipeline transmits).',
+    fixed:
+      'The victim client’s eight CIFAR-10 images, one per class; LeNet with sigmoid activations; layer-wise cosine matching; one seed. SmallCNN is attacked undefended as an architectural control.',
     answers: 'Whether training data can be reconstructed from what clients transmit, and whether the pipeline stops it.',
-    note: 'A probe directory exists in the repository but has no recorded configuration and unresolved provenance, so no Phase E figures appear on this site.'
+    note: 'Fourteen attack conditions, counted apart from the 120 training runs. The earlier exploratory probe directory still has no recorded configuration and remains excluded.',
+    href: '/attack',
+    hrefLabel: 'See what an attacker recovers'
   }
 ]
 
@@ -129,7 +134,8 @@ const FACETS = [
 const Page = () => {
   // Counts come from the recorded runs, never from a literal — a phase cannot
   // claim progress the data does not show.
-  const recorded = (id: string) => allRuns.filter(r => r.phase === id).length
+  const recorded = (id: string) =>
+    id === 'E' ? (attack?.recorded ?? 0) : allRuns.filter(r => r.phase === id).length
 
   const statusOf = (p: Phase): PhaseProgressItem['status'] => {
     const done = recorded(p.id)
@@ -186,7 +192,7 @@ const Page = () => {
                         color={status === 'complete' ? 'success' : status === 'running' ? 'info' : 'secondary'}
                         label={
                           status === 'complete'
-                            ? `complete · ${done} runs`
+                            ? `complete · ${done} ${p.noTraining ? 'attack conditions' : 'runs'}`
                             : status === 'running'
                               ? `in progress · ${done} of ${p.planned}`
                               : p.noTraining

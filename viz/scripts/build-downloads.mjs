@@ -85,7 +85,52 @@ function collect() {
     if (present.length) manifest[name] = present
   }
 
-  return { manifest, files, bytes }
+  /*
+   * Phase E. Its fourteen attack conditions are not runs and carry no
+   * config_used.json, so the loop above skips them. Published under
+   * runs/E_attack/ so the archive picks them up with everything else, and the
+   * PNGs are what the attack page displays: the site shows exactly the file a
+   * reader can download.
+   */
+  const attackRoot = join(RESULTS_DIR, 'E_attack')
+  const attack = {}
+
+  const publish = (relDir, file, description, key) => {
+    const src = join(attackRoot, relDir, file)
+
+    if (!existsSync(src)) return
+    const size = statSync(src).size
+    const dest = join(RUNS_DIR, 'E_attack', relDir)
+
+    mkdirSync(dest, { recursive: true })
+    copyFileSync(src, join(dest, file))
+    ;(attack[key] ??= []).push({ file: relDir ? `${relDir}/${file}` : file, description, size, sizeLabel: human(size) })
+    files += 1
+    bytes += size
+  }
+
+  if (existsSync(attackRoot)) {
+    publish('', 'phase_e_design.json', 'The fourteen conditions, victim data and calibrated σ', '_phase')
+    publish('', 'metrics.csv', 'One row per attack condition', '_phase')
+    publish('', 'figure_grid.png', 'Every reconstruction beside the ground truth', '_phase')
+
+    for (const f of readdirSync(attackRoot).sort()) {
+      if (/^ground_truth_\d+\.png$/.test(f)) publish('', f, 'Victim image (ground truth)', '_phase')
+    }
+
+    for (const id of readdirSync(attackRoot).sort()) {
+      const dir = join(attackRoot, id)
+
+      if (!statSync(dir).isDirectory()) continue
+      publish(id, 'result.json', 'Every recorded figure for this condition', id)
+
+      for (const f of readdirSync(dir).sort()) {
+        if (/^reconstruction_\d+\.png$/.test(f)) publish(id, f, 'Reconstruction, min-max normalised as scored', id)
+      }
+    }
+  }
+
+  return { manifest, attack, files, bytes }
 }
 
 /*
@@ -169,7 +214,7 @@ try {
 
 mkdirSync(RUNS_DIR, { recursive: true })
 
-const { manifest, files, bytes } = collect()
+const { manifest, attack, files, bytes } = collect()
 const bundle = archive()
 
 mkdirSync(OUT_DIR, { recursive: true })
@@ -178,6 +223,7 @@ writeFileSync(
   `${JSON.stringify(
     {
       runs: manifest,
+      attack,
       archive: { ...bundle, sizeLabel: human(bundle.size) },
       totalFiles: files,
       totalBytes: bytes,

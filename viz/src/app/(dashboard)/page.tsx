@@ -70,13 +70,13 @@ const RQS = [
     id: 'RQ3',
     objective: 'Objective 3',
     phase: 'Phase E',
-    status: 'pending',
+    status: 'answered',
     icon: 'tabler-shield-lock',
     color: 'error' as const,
     q: 'Can a gradient-inversion attack recover training data from unprotected model updates, and do the integrated privacy mechanisms mitigate or prevent the attack?',
     short:
       'Gradient-inversion attack on unprotected updates, and whether the integrated mechanisms mitigate or prevent it',
-    links: [{ href: '/phases', label: 'See what it will involve' }]
+    links: [{ href: '/attack', label: 'What an attacker recovers' }]
   }
 ]
 
@@ -119,6 +119,14 @@ const CAPABILITIES = [
     body: 'Protecting one institution rather than one record, and whether spending the privacy budget unevenly helps. The strongest negative result in the study.',
     href: '/granularity',
     action: 'Open the granularity results'
+  },
+  {
+    icon: 'tabler-shield-lock',
+    color: 'error' as const,
+    title: 'See what an attacker can recover',
+    body: 'Every gradient-inversion reconstruction beside the image it tried to recover, across six defences and the two objects a client could transmit.',
+    href: '/attack',
+    action: 'Open the attack results'
   },
   {
     icon: 'tabler-table',

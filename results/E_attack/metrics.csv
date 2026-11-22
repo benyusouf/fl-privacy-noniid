@@ -1,0 +1,15 @@
+id,architecture,defence,epsilon,secagg,attack_object,psnr_db_mean,psnr_db_max,grey_floor_db_mean,images_above_grey_floor,final_attack_loss,processor_seconds
+E_lenet_none_grad,lenet,none,,False,grad,13.68,15.54,14.31,5,0.000236,93.01
+E_lenet_none_delta,lenet,none,,False,delta,5.69,6.61,14.31,0,0.07132,91.14
+E_smallcnn_none_grad,smallcnn,none,,False,grad,8.61,11.68,14.31,0,0.146719,600.82
+E_smallcnn_none_delta,smallcnn,none,,False,delta,8.51,9.89,14.31,0,0.173001,602.64
+E_lenet_dp8_grad,lenet,dp8,8,False,grad,5.31,5.99,14.31,0,0.657768,90.91
+E_lenet_dp8_delta,lenet,dp8,8,False,delta,5.31,5.98,14.31,0,0.659973,89.95
+E_lenet_dp4_grad,lenet,dp4,4,False,grad,5.31,5.98,14.31,0,0.658848,91.76
+E_lenet_dp4_delta,lenet,dp4,4,False,delta,5.3,5.98,14.31,0,0.660123,92.39
+E_lenet_dp1_grad,lenet,dp1,1,False,grad,5.32,6.0,14.31,0,0.659953,90.32
+E_lenet_dp1_delta,lenet,dp1,1,False,delta,5.29,5.96,14.31,0,0.660296,91.77
+E_lenet_sa_grad,lenet,sa,,True,grad,5.49,6.41,14.31,0,0.137717,90.33
+E_lenet_sa_delta,lenet,sa,,True,delta,5.41,6.24,14.31,0,0.17228,89.58
+E_lenet_sadp8_grad,lenet,sadp8,8,True,grad,5.46,6.23,14.31,0,0.661267,90.54
+E_lenet_sadp8_delta,lenet,sadp8,8,True,delta,5.45,6.21,14.31,0,0.666693,91.55

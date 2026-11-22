@@ -1,0 +1,192 @@
+{
+  "condition": {
+    "id": "E_lenet_sadp8_grad",
+    "arch": "lenet",
+    "defence": "sadp8",
+    "eps": 8,
+    "secagg": true,
+    "obj": "grad"
+  },
+  "seed": 0,
+  "secagg": {
+    "num_clients": 15,
+    "mask_cancellation_max_abs_error": 4.206635040304718e-13,
+    "key_agreement_messages": 210
+  },
+  "dp_per_client": [
+    {
+      "pre_clip_norm": 2.4686813354492188,
+      "clip_scale": 0.40507455767596384,
+      "noise_norm_expected": 215.1600668064794,
+      "signal_norm_after_clip": 1.0
+    },
+    {
+      "pre_clip_norm": 3.4387946128845215,
+      "clip_scale": 0.2907995715281124,
+      "noise_norm_expected": 215.1600668064794,
+      "signal_norm_after_clip": 1.0
+    },
+    {
+      "pre_clip_norm": 3.438425302505493,
+      "clip_scale": 0.29083080538970135,
+      "noise_norm_expected": 215.1600668064794,
+      "signal_norm_after_clip": 1.0
+    },
+    {
+      "pre_clip_norm": 2.548179864883423,
+      "clip_scale": 0.3924369758120466,
+      "noise_norm_expected": 215.1600668064794,
+      "signal_norm_after_clip": 1.0
+    },
+    {
+      "pre_clip_norm": 2.7301957607269287,
+      "clip_scale": 0.3662741018005774,
+      "noise_norm_expected": 215.1600668064794,
+      "signal_norm_after_clip": 1.0
+    },
+    {
+      "pre_clip_norm": 2.731055974960327,
+      "clip_scale": 0.36615873463176696,
+      "noise_norm_expected": 215.1600668064794,
+      "signal_norm_after_clip": 1.0
+    },
+    {
+      "pre_clip_norm": 3.1892378330230713,
+      "clip_scale": 0.3135545394719284,
+      "noise_norm_expected": 215.1600668064794,
+      "signal_norm_after_clip": 1.0
+    },
+    {
+      "pre_clip_norm": 3.5444259643554688,
+      "clip_scale": 0.28213313243286875,
+      "noise_norm_expected": 215.1600668064794,
+      "signal_norm_after_clip": 1.0
+    },
+    {
+      "pre_clip_norm": 2.8217391967773438,
+      "clip_scale": 0.3543913630083466,
+      "noise_norm_expected": 215.1600668064794,
+      "signal_norm_after_clip": 1.0
+    },
+    {
+      "pre_clip_norm": 3.5452229976654053,
+      "clip_scale": 0.28206970355842736,
+      "noise_norm_expected": 215.1600668064794,
+      "signal_norm_after_clip": 1.0
+    },
+    {
+      "pre_clip_norm": 2.325921058654785,
+      "clip_scale": 0.4299372054262056,
+      "noise_norm_expected": 215.1600668064794,
+      "signal_norm_after_clip": 1.0
+    },
+    {
+      "pre_clip_norm": 3.2265238761901855,
+      "clip_scale": 0.3099310708280826,
+      "noise_norm_expected": 215.1600668064794,
+      "signal_norm_after_clip": 0.9999999999999999
+    },
+    {
+      "pre_clip_norm": 2.42905592918396,
+      "clip_scale": 0.41168257510478545,
+      "noise_norm_expected": 215.1600668064794,
+      "signal_norm_after_clip": 1.0
+    },
+    {
+      "pre_clip_norm": 3.406163454055786,
+      "clip_scale": 0.29358544106545453,
+      "noise_norm_expected": 215.1600668064794,
+      "signal_norm_after_clip": 1.0
+    },
+    {
+      "pre_clip_norm": 2.615339994430542,
+      "clip_scale": 0.38235946459333586,
+      "noise_norm_expected": 215.1600668064794,
+      "signal_norm_after_clip": 1.0
+    }
+  ],
+  "dp_calibration": {
+    "target_epsilon": 8,
+    "sigma": 1.7103149414062502,
+    "sample_rate": 0.048,
+    "steps": 2520,
+    "delta": 1e-05,
+    "realised_epsilon": 7.999586847277322,
+    "note": "noise scale from the Phase B accountant; applied to the clipped transmitted object, so the object carries no eps guarantee of its own (Section 3.10.5)"
+  },
+  "victim_indices": [
+    5984,
+    16063,
+    26982,
+    39665,
+    2877,
+    9454,
+    22827,
+    43635
+  ],
+  "victim_labels": [
+    0,
+    1,
+    2,
+    3,
+    5,
+    7,
+    8,
+    9
+  ],
+  "object_local_steps": 1,
+  "psnr_db_per_image": [
+    5.37,
+    4.97,
+    6.23,
+    5.8,
+    5.55,
+    5.31,
+    5.3,
+    5.11
+  ],
+  "grey_floor_db_per_image": [
+    13.57,
+    10.55,
+    18.7,
+    16.27,
+    12.73,
+    19.06,
+    11.78,
+    11.84
+  ],
+  "psnr_db_mean": 5.46,
+  "psnr_db_max": 6.23,
+  "grey_floor_db_mean": 14.31,
+  "images_above_grey_floor": 0,
+  "final_attack_loss": 0.661267,
+  "attack": {
+    "objective": "cosine_layerwise",
+    "tv_weight": 0.01,
+    "adam_lr": 0.1,
+    "iterations": 3000,
+    "restarts": 2,
+    "labels_known": true
+  },
+  "model": {
+    "arch": "lenet",
+    "params": 15826,
+    "pretrain_images": 256,
+    "pretrain_epochs": 2
+  },
+  "local_training": {
+    "epochs": 2,
+    "batch": 2,
+    "lr": 0.01,
+    "images": 8
+  },
+  "processor_seconds": 90.54,
+  "elapsed_seconds": 37.45,
+  "provenance": {
+    "git_commit": "cf262995837835bf767b4e24d689a7638e9678d1",
+    "driver_sha256": "2f3a76a013867183d748eb48074a56e83597a87d28a850780feb98122158ba39",
+    "python": "3.14.8",
+    "torch": "2.13.0",
+    "platform": "macOS-26.5.2-arm64-arm-64bit-Mach-O"
+  }
+}

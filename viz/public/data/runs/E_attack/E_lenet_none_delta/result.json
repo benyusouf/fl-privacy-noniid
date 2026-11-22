@@ -1,0 +1,86 @@
+{
+  "condition": {
+    "id": "E_lenet_none_delta",
+    "arch": "lenet",
+    "defence": "none",
+    "eps": null,
+    "secagg": false,
+    "obj": "delta"
+  },
+  "seed": 0,
+  "victim_indices": [
+    5984,
+    16063,
+    26982,
+    39665,
+    2877,
+    9454,
+    22827,
+    43635
+  ],
+  "victim_labels": [
+    0,
+    1,
+    2,
+    3,
+    5,
+    7,
+    8,
+    9
+  ],
+  "object_local_steps": 8,
+  "psnr_db_per_image": [
+    5.95,
+    5.16,
+    6.61,
+    5.97,
+    5.59,
+    5.49,
+    5.39,
+    5.33
+  ],
+  "grey_floor_db_per_image": [
+    13.57,
+    10.55,
+    18.7,
+    16.27,
+    12.73,
+    19.06,
+    11.78,
+    11.84
+  ],
+  "psnr_db_mean": 5.69,
+  "psnr_db_max": 6.61,
+  "grey_floor_db_mean": 14.31,
+  "images_above_grey_floor": 0,
+  "final_attack_loss": 0.07132,
+  "attack": {
+    "objective": "cosine_layerwise",
+    "tv_weight": 0.01,
+    "adam_lr": 0.1,
+    "iterations": 3000,
+    "restarts": 2,
+    "labels_known": true
+  },
+  "model": {
+    "arch": "lenet",
+    "params": 15826,
+    "pretrain_images": 256,
+    "pretrain_epochs": 2
+  },
+  "local_training": {
+    "epochs": 2,
+    "batch": 2,
+    "lr": 0.01,
+    "images": 8
+  },
+  "processor_seconds": 91.14,
+  "elapsed_seconds": 39.41,
+  "provenance": {
+    "git_commit": "cf262995837835bf767b4e24d689a7638e9678d1",
+    "driver_sha256": "2f3a76a013867183d748eb48074a56e83597a87d28a850780feb98122158ba39",
+    "python": "3.14.8",
+    "torch": "2.13.0",
+    "platform": "macOS-26.5.2-arm64-arm-64bit-Mach-O"
+  }
+}

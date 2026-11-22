@@ -15,6 +15,7 @@ const verticalMenuData = (): VerticalMenuDataType[] => [
       { label: 'Cost of privacy (RQ2)', href: '/privacy', icon: 'tabler-lock' },
       { label: 'Secure aggregation (RQ2)', href: '/secagg', icon: 'tabler-shield-check' },
       { label: 'What privacy protects (RQ2)', href: '/granularity', icon: 'tabler-building-bank' },
+      { label: 'Gradient inversion (RQ3)', href: '/attack', icon: 'tabler-shield-lock' },
       { label: 'Run explorer', href: '/runs', icon: 'tabler-table' },
       { label: 'Phases A–E', href: '/phases', icon: 'tabler-list-check' },
       { label: 'Data and records', href: '/downloads', icon: 'tabler-download' }

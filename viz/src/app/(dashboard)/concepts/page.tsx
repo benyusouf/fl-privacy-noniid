@@ -5,7 +5,6 @@ import Chip from '@mui/material/Chip'
 // Component Imports
 import LinkButton from '@/components/site/LinkButton'
 import PageHeader from '@/components/site/PageHeader'
-import Caveat from '@/components/site/Caveat'
 import SectionCard from '@/components/site/SectionCard'
 
 export const metadata = {
@@ -182,18 +181,17 @@ const Page = () => (
           </Typography>
           <div className='flex gap-2 flex-wrap'>
             <Chip size='small' variant='tonal' color='success' label='random image — 8.7 dB' />
-            <Chip size='small' variant='tonal' color='success' label='flat grey — 13.82 dB' />
+            <Chip size='small' variant='tonal' color='success' label='flat grey — 13.8 dB' />
             <Chip size='small' variant='tonal' color='error' label='lightly noised copy — 26.1 dB' />
           </div>
           <Typography variant='body2' color='text.secondary'>
-            A reconstruction at or below 13.82 dB has failed — it carries no more information than a blank image. A
+            A reconstruction at or below 13.8 dB has failed — it carries no more information than a blank image. A
             reconstruction near 26 dB is a recognisable copy of the original. Without those anchors a PSNR figure is
             uninterpretable, so they appear wherever one is reported.
           </Typography>
-          <Caveat severity='info' title='No results yet'>
-            Phase E has not been run — it is the only phase still outstanding. No reconstruction or PSNR figures appear
-            on this site.
-          </Caveat>
+          <LinkButton href='/attack' size='small' variant='tonal' className='self-start'>
+            See every reconstruction from Phase E
+          </LinkButton>
       </SectionCard>
     </div>
   </div>

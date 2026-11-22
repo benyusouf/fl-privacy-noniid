@@ -152,15 +152,17 @@ const Page = () => {
             </Typography>
         </SectionCard>
 
-        <SectionCard icon='tabler-list-check' color='info' title='Four phases of five' prose>
+        <SectionCard icon='tabler-list-check' color='info' title='Phase E answers RQ3 at one batch size and one seed' prose>
             <Typography>
-              Phases A through D are complete, which answers RQ1 and RQ2 in full. Only RQ3 — whether a
-              gradient-inversion attack can recover training data from unprotected updates, and whether the integrated
-              mechanisms prevent it — has no results at all.
+              All five phases are complete. Phase E attacks a victim holding eight images, at one seed, and at that
+              batch size even the undefended single-gradient attack recovers only coarse colour and layout. The
+              defences are therefore tested against an attack that barely succeeds, and the phase cannot say how they
+              would fare against one that recovers recognisable images.
             </Typography>
             <Typography variant='body2' color='text.secondary'>
-              Any statement on this site about gradient inversion describes a design, not a finding. The attack
-              pipeline is implemented, but implemented is not measured.
+              The DP conditions apply calibrated noise to the whole transmitted object rather than per example, so they
+              carry no ε guarantee of their own. A Phase E conclusion is about how much noise defeats inversion, not
+              about what a given ε promises.
             </Typography>
         </SectionCard>
 

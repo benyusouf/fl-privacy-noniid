@@ -8,6 +8,7 @@
  *   node scripts/build-data.mjs
  *
  * Reads : ../results/<run>/{metrics.csv,partition_report.json,config_used.json,timing.txt}
+ *         ../results/E_attack/{phase_e_design.json,<condition>/result.json}
  * Writes: src/data/generated/results.json
  *
  * Design notes
@@ -256,6 +257,144 @@ const strategyLabelFor = (strategy, isFedAvgM) => {
   return STRATEGY_LABELS[strategy] ?? strategy
 }
 
+
+// ---------------------------------------------------------------------------
+// Phase E — gradient inversion (RQ3)
+//
+// Fourteen ATTACK CONDITIONS, counted apart from the 120 training runs
+// (Table 3.6, Note 4). Each condition directory holds result.json, the arrays,
+// and one PNG per image written by experiments/verify_phase_e.py. The PNGs are
+// published as-is by build-downloads.mjs; this bundle carries only their paths.
+//
+// Nothing is recomputed. Every figure below is copied from result.json; the
+// only derived value is noiseToSignal, a ratio of two recorded norms.
+// ---------------------------------------------------------------------------
+
+const ATTACK_DIR = 'E_attack'
+
+const CIFAR10_CLASSES = ['airplane', 'automobile', 'bird', 'cat', 'deer', 'dog', 'frog', 'horse', 'ship', 'truck']
+
+const DEFENCE_LABELS = {
+  none: 'No defence',
+  dp8: 'DP, ε = 8',
+  dp4: 'DP, ε = 4',
+  dp1: 'DP, ε = 1',
+  sa: 'Secure aggregation',
+  sadp8: 'Secure aggregation + DP, ε = 8'
+}
+
+const OBJECT_LABELS = {
+  grad: 'Single batch gradient',
+  delta: 'Multi-epoch delta'
+}
+
+const ARCH_LABELS = {
+  lenet: 'LeNet (sigmoid)',
+  smallcnn: 'SmallCNN (architectural control)'
+}
+
+const attackProblems = []
+
+const collectAttack = () => {
+  const root = join(RESULTS_DIR, ATTACK_DIR)
+  const designPath = join(root, 'phase_e_design.json')
+
+  if (!existsSync(designPath)) return null
+
+  const design = readJson(designPath)
+  const conditions = []
+
+  for (const c of design.conditions) {
+    const p = join(root, c.id, 'result.json')
+
+    if (!existsSync(p)) {
+      attackProblems.push(`${c.id}: no result.json`)
+      continue
+    }
+
+    const r = readJson(p)
+    const images = r.psnr_db_per_image.map((_, k) => `${ATTACK_DIR}/${c.id}/reconstruction_${k}.png`)
+
+    for (const img of images) {
+      if (!existsSync(join(RESULTS_DIR, img))) attackProblems.push(`${c.id}: missing ${img}`)
+    }
+
+    const dp = r.dp ?? r.dp_per_client?.[0] ?? null
+
+    conditions.push({
+      id: c.id,
+      arch: c.arch,
+      archLabel: ARCH_LABELS[c.arch] ?? c.arch,
+      defence: c.defence,
+      defenceLabel: DEFENCE_LABELS[c.defence] ?? c.defence,
+      epsilon: c.eps,
+      secagg: c.secagg,
+      object: c.obj,
+      objectLabel: OBJECT_LABELS[c.obj] ?? c.obj,
+      objectLocalSteps: r.object_local_steps,
+      psnrMean: r.psnr_db_mean,
+      psnrMax: r.psnr_db_max,
+      psnrPerImage: r.psnr_db_per_image,
+      greyPerImage: r.grey_floor_db_per_image,
+      greyMean: r.grey_floor_db_mean,
+      aboveFloor: r.images_above_grey_floor,
+      finalAttackLoss: r.final_attack_loss,
+      sigma: r.dp_calibration?.sigma ?? null,
+      realisedEpsilon: r.dp_calibration?.realised_epsilon ?? null,
+      noiseToSignal: dp ? dp.noise_norm_expected / dp.signal_norm_after_clip : null,
+      maskCancellationError: r.secagg?.mask_cancellation_max_abs_error ?? null,
+      keyAgreementMessages: r.secagg?.key_agreement_messages ?? null,
+      params: r.model?.params ?? null,
+      processorSeconds: r.processor_seconds,
+      images
+    })
+  }
+
+  const first = conditions.length ? readJson(join(root, conditions[0].id, 'result.json')) : null
+
+  const groundTruth = first
+    ? first.victim_labels.map((label, k) => ({
+        k,
+        label,
+        labelName: CIFAR10_CLASSES[label] ?? String(label),
+        index: first.victim_indices[k],
+        image: `${ATTACK_DIR}/ground_truth_${k}.png`
+      }))
+    : []
+
+  for (const g of groundTruth) {
+    if (!existsSync(join(RESULTS_DIR, g.image))) attackProblems.push(`missing ${g.image}`)
+  }
+
+  if (conditions.length !== 14) attackProblems.push(`${conditions.length} of 14 attack conditions recorded`)
+
+  return {
+    planned: design.conditions.length,
+    recorded: conditions.length,
+    /** Section 3.9's reference points, fixed before any run (D139). */
+    references: { randomImage: 8.7, flatGrey: 13.8, noisedCopy: 26.1 },
+    design: {
+      sampleRate: design.sample_rate,
+      steps: design.steps,
+      delta: design.delta,
+      sigma: design.sigma,
+      iterations: design.iters,
+      restarts: design.restarts,
+      imagesPerClient: first?.local_training?.images ?? null,
+      localEpochs: first?.local_training?.epochs ?? null,
+      localBatch: first?.local_training?.batch ?? null,
+      localLr: first?.local_training?.lr ?? null,
+      pretrainImages: first?.model?.pretrain_images ?? null,
+      pretrainEpochs: first?.model?.pretrain_epochs ?? null,
+      objective: first?.attack?.objective ?? null,
+      labelsKnown: first?.attack?.labels_known ?? null,
+      numClients: 15
+    },
+    groundTruth,
+    conditions
+  }
+}
+
 // ---------------------------------------------------------------------------
 // Build
 // ---------------------------------------------------------------------------
@@ -283,6 +422,10 @@ const collect = () => {
       excluded.push({ name, reason: 'superseded' })
       continue
     }
+
+    // Phase E is fourteen attack conditions, not training runs. It has its own
+    // record shape and is read by collectAttack() below, never as a run.
+    if (name === ATTACK_DIR) continue
 
     /*
      * Phases A to E are all real results. Anything else in results/ is a probe
@@ -567,10 +710,11 @@ const collect = () => {
 }
 
 const { runs, excluded } = collect()
+const attack = collectAttack()
 
 // Integrity checks. These are assertions about the emitted bundle, not about the
 // experiment — they catch a broken conversion, not a broken result.
-const problems = [...unknownPartitions, ...unknownMarkers]
+const problems = [...unknownPartitions, ...unknownMarkers, ...attackProblems]
 
 for (const r of runs) {
   if (r.finalAcc === null) problems.push(`${r.name}: no test_acc column`)
@@ -591,7 +735,7 @@ for (const r of runs) {
  * The hash is also the more useful field: it identifies the dataset, not the
  * moment someone happened to run the script.
  */
-const dataHash = createHash('sha256').update(JSON.stringify(runs)).digest('hex').slice(0, 12)
+const dataHash = createHash('sha256').update(JSON.stringify({ runs, attack })).digest('hex').slice(0, 12)
 
 const bundle = {
   dataHash,
@@ -609,7 +753,8 @@ const bundle = {
     partitions: PARTITION_LABELS,
     datasets: DATASET_LABELS
   },
-  runs
+  runs,
+  attack
 }
 
 mkdirSync(OUT_DIR, { recursive: true })
@@ -619,6 +764,7 @@ const kb = (statSync(OUT_FILE).size / 1024).toFixed(0)
 
 console.log(`build-data: ${runs.length} runs -> ${OUT_FILE} (${kb} KB, data ${dataHash})`)
 console.log(`build-data: ${excluded.length} directories excluded`)
+console.log(`build-data: Phase E ${attack ? `${attack.recorded} of ${attack.planned} attack conditions` : 'not recorded'}`)
 
 for (const e of excluded) console.log(`  - ${e.name}: ${e.reason}`)
 
