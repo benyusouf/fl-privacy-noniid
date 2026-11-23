@@ -545,7 +545,8 @@ a.text-link {
 }
 
 .site-header__menu {
-  display: none;
+  display: inline-flex;
+  flex: none;
   inline-size: 36px;
   block-size: 36px;
   border-radius: 8px;
@@ -841,8 +842,7 @@ a.text-link {
 .site-main {
   flex: 1 1 auto;
   inline-size: 100%;
-  max-inline-size: 1160px;
-  padding: 48px 56px 32px;
+  padding: 48px 48px 32px;
 }
 
 .site-footer {
@@ -851,8 +851,7 @@ a.text-link {
   justify-content: space-between;
   gap: 16px;
   flex-wrap: wrap;
-  max-inline-size: 1160px;
-  padding: 24px 56px 40px;
+  padding: 24px 48px 40px;
   font-size: 0.8125rem;
   color: var(--ink-2);
 }
@@ -967,6 +966,24 @@ a.text-link {
 
 .site-scrim {
   display: none;
+}
+
+/* Desktop: the header button hides the sidebar and the main column takes the
+   full width. The sidebar slides out rather than vanishing. */
+@media (min-width: 1024px) {
+  .site-sidebar {
+    transition:
+      margin-inline-start var(--dur-med) var(--ease-out),
+      visibility 0s linear 0s;
+  }
+
+  .is-nav-collapsed .site-sidebar {
+    margin-inline-start: -264px;
+    visibility: hidden;
+    transition:
+      margin-inline-start var(--dur-med) var(--ease-out),
+      visibility 0s linear var(--dur-med);
+  }
 }
 
 @media (max-width: 1023px) {

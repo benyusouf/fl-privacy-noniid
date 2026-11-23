@@ -24,12 +24,46 @@ import { JOURNEY, NAV, itemForPath, normalisePath } from './navigation'
  *
  * Docs-style: a slim header, a sticky sidebar whose "Results" group is drawn as
  * a numbered rail (the five results pages are meant to be read in order), and a
- * single left-aligned reading column. Below 1024px the sidebar becomes a
- * drawer opened from the header.
+ * main column that fills whatever width the sidebar leaves. The header button
+ * shows and hides the sidebar on desktop (remembered across visits; hidden, the
+ * main column takes the full width) and opens it as a drawer below 1024px.
  */
+
+const DESKTOP = '(min-width: 1024px)'
+const COLLAPSE_KEY = 'site-sidebar-collapsed'
+
 const SiteShell = ({ children }: { children: ReactNode }) => {
   const pathname = usePathname()
   const [open, setOpen] = useState(false)
+  const [collapsed, setCollapsed] = useState(false)
+
+  // Read the remembered desktop choice after mount, so server and client
+  // render the same markup first.
+  useEffect(() => {
+    try {
+      setCollapsed(window.localStorage.getItem(COLLAPSE_KEY) === '1')
+    } catch {
+      /* storage unavailable: default to shown */
+    }
+  }, [])
+
+  const toggleNav = () => {
+    if (window.matchMedia(DESKTOP).matches) {
+      setCollapsed(c => {
+        const next = !c
+
+        try {
+          window.localStorage.setItem(COLLAPSE_KEY, next ? '1' : '0')
+        } catch {
+          /* best effort */
+        }
+
+        return next
+      })
+    } else {
+      setOpen(o => !o)
+    }
+  }
 
   const active = itemForPath(pathname)
   const activeJourneyIndex = JOURNEY.findIndex(i => i.href === active?.href)
@@ -47,7 +81,7 @@ const SiteShell = ({ children }: { children: ReactNode }) => {
   }, [open])
 
   return (
-    <div className='site'>
+    <div className={`site${collapsed ? ' is-nav-collapsed' : ''}`}>
       <a href='#main' className='skip-link'>
         Skip to content
       </a>
@@ -57,10 +91,10 @@ const SiteShell = ({ children }: { children: ReactNode }) => {
           <button
             type='button'
             className='site-header__menu'
-            aria-label={open ? 'Close navigation' : 'Open navigation'}
-            aria-expanded={open}
+            aria-label={open || !collapsed ? 'Hide navigation' : 'Show navigation'}
+            aria-expanded={open || !collapsed}
             aria-controls='site-sidebar'
-            onClick={() => setOpen(o => !o)}
+            onClick={toggleNav}
           >
             <i className={open ? 'tabler-x' : 'tabler-menu-2'} aria-hidden />
           </button>
