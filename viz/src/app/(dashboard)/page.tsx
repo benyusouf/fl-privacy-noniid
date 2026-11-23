@@ -16,7 +16,16 @@ import FederatedRound from '@/components/diagrams/FederatedRound'
 import FederationHero from '@/components/diagrams/FederationHero'
 
 // Lib Imports
-import { allRuns, bundle, centralizedRuns, countedRuns, federatedRuns, protectedRuns, seedGroups } from '@/lib/results'
+import {
+  allRuns,
+  baselineRuns,
+  bundle,
+  centralizedRuns,
+  countedRuns,
+  federatedRuns,
+  protectedRuns,
+  seedGroups
+} from '@/lib/results'
 import { archiveUrl, downloads } from '@/lib/downloads'
 
 // Config Imports
@@ -166,9 +175,10 @@ const CAPABILITIES = [
 ]
 
 const Page = () => {
-  // Baseline arm only. Later phases reuse the Phase A grid at a single seed by
-  // design, so including them would report that decision as missing coverage.
-  const groups = seedGroups(federatedRuns.filter(r => r.dp === null && r.arm === null))
+  // Baseline arm only, federated and centralized, which is how Section 3.10.6
+  // states the seed policy. Later phases reuse the Phase A grid at a single seed
+  // by design, so including them would report that decision as missing coverage.
+  const groups = seedGroups(baselineRuns)
   const multiSeed = groups.filter(g => !g.singleSeed).length
   const singleSeed = groups.filter(g => g.singleSeed).length
 
