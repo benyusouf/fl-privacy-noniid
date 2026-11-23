@@ -18,6 +18,9 @@ import { linePath } from '@/lib/chart-geometry.mjs'
 
 type Props = {
   dataset: Dataset
+  /** Linked highlighting with the summary table: the condition key in focus. */
+  focus?: string | null
+  onFocus?: (key: string | null) => void
 }
 
 /*
@@ -35,7 +38,7 @@ type Props = {
  * between-strategy difference at fixed epsilon, so separate lines would invite a
  * ranking the data cannot support.
  */
-const PrivacyCostChart = ({ dataset }: Props) => {
+const PrivacyCostChart = ({ dataset, focus = null, onFocus }: Props) => {
   const [hover, setHover] = useState<string | null>(null)
 
   const series = useMemo(() => privacyCostSeries(dataset), [dataset])
@@ -63,7 +66,11 @@ const PrivacyCostChart = ({ dataset }: Props) => {
               const isBaseline = s.condition.epsilon === null
 
               return (
-                <g key={s.condition.key}>
+                <g
+                  key={s.condition.key}
+                  opacity={focus !== null && focus !== s.condition.key ? 0.15 : 1}
+                  style={{ transition: 'opacity 200ms' }}
+                >
                   {/* range across the four strategies */}
                   {s.points.map(p => (
                     <line
@@ -139,11 +146,14 @@ const PrivacyCostChart = ({ dataset }: Props) => {
       <ChartLegend
         items={series.map(s => ({
           label: s.condition.label,
-          colour: conditionColour(s.condition.epsilon)
+          colour: conditionColour(s.condition.epsilon),
+          key: s.condition.key
         }))}
+        active={focus}
+        onActive={onFocus}
       />
       <p className='text-center mbs-2'>
-        <span className='text-textDisabled text-xs'>
+        <span className='text-textSecondary text-xs'>
           Each point is the mean of four strategies at seed 0; the whisker is their range, not a confidence interval.
         </span>
       </p>

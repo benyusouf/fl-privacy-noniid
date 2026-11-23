@@ -74,8 +74,11 @@ const ChartFrame = ({
   const fx = (v: number) => (formatX ? formatX(v, xTicks) : formatTick(v, xTicks))
   const fy = (v: number) => (formatY ? formatY(v, yTicks) : formatTick(v, yTicks))
 
-  const axis = theme.palette.divider
-  const text = theme.palette.text.secondary
+  // Theme tokens from site.css: hairline solid grid, slightly stronger axis.
+  void theme
+  const grid = 'var(--viz-grid)'
+  const axis = 'var(--viz-axis)'
+  const text = 'var(--viz-text)'
   const scales: Scales = { x, y, area }
 
   return (
@@ -83,14 +86,14 @@ const ChartFrame = ({
       viewBox={`0 0 ${vbWidth} ${vbHeight}`}
       width='100%'
       role='img'
-      style={{ display: 'block', overflow: 'visible' }}
+      style={{ display: 'block', overflow: 'visible', fontFamily: 'var(--font-ui)', fontVariantNumeric: 'tabular-nums' }}
     >
       {/* grid */}
       {yTicks.map(t => (
-        <line key={`gy${t}`} x1={area.x0} x2={area.x1} y1={y(t)} y2={y(t)} stroke={axis} strokeDasharray='3 3' />
+        <line key={`gy${t}`} x1={area.x0} x2={area.x1} y1={y(t)} y2={y(t)} stroke={grid} />
       ))}
       {xTicks.map(t => (
-        <line key={`gx${t}`} y1={area.y0} y2={area.y1} x1={x(t)} x2={x(t)} stroke={axis} strokeDasharray='3 3' />
+        <line key={`gx${t}`} y1={area.y0} y2={area.y1} x1={x(t)} x2={x(t)} stroke={grid} />
       ))}
 
       {underlay?.(scales)}

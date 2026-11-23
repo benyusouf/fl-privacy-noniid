@@ -1,5 +1,7 @@
 // Component Imports
 import PageHeader from '@/components/site/PageHeader'
+import SectionHead from '@/components/site/SectionHead'
+import PairwiseMasking from '@/components/diagrams/PairwiseMasking'
 import SecaggView from '@/views/secagg/SecaggView'
 
 // Lib Imports
@@ -19,7 +21,12 @@ const Page = () => (
       status={{ label: `Phase C complete · ${secaggRuns.length} runs`, color: 'success' }}
       lede={`What masking costs, measured against unmasked pairs at the same configuration. It costs nothing in accuracy and nothing in bandwidth; it costs computation, and that cost tracks the size of what is masked. ${maskedRuns.length} masked runs, each paired with a plain twin that in turn reproduces its Phase A original exactly.`}
     />
-    <SecaggView />
+    <PairwiseMasking />
+      <SectionHead
+        title='What masking costs'
+        lede='Each masked run against its plain pair: accuracy, bandwidth, then computation.'
+      />
+      <SecaggView />
   </div>
 )
 

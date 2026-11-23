@@ -1,11 +1,11 @@
 'use client'
 
 // React Imports
-import { useMemo } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 
 // MUI Imports
 import { deepmerge } from '@mui/utils'
-import { ThemeProvider, lighten, darken, createTheme } from '@mui/material/styles'
+import { ThemeProvider, createTheme } from '@mui/material/styles'
 import { AppRouterCacheProvider } from '@mui/material-nextjs/v14-appRouter'
 import CssBaseline from '@mui/material/CssBaseline'
 import type {} from '@mui/material/themeCssVarsAugmentation' //! Do not remove this import otherwise you will get type errors while making a production build
@@ -43,13 +43,21 @@ const CustomThemeProvider = (props: Props) => {
   const { settings } = useSettings()
   const isDark = useMedia('(prefers-color-scheme: dark)', systemMode === 'dark')
 
-  // Vars
-  const isServer = typeof window === 'undefined'
-  let currentMode: SystemMode
+  /*
+   * The resolved mode only feeds shadow strings into the theme (colours are CSS
+   * variables switched by the data attribute). It must be identical on the
+   * server and on the client's first render, or emotion generates different
+   * class names and React reports a hydration mismatch (#418) whenever the
+   * reader's saved or OS theme is dark. So the build-time mode is used until
+   * the component has mounted, and the real one after.
+   */
+  const [mounted, setMounted] = useState(false)
 
-  if (isServer) {
-    currentMode = systemMode
-  } else {
+  useEffect(() => setMounted(true), [])
+
+  let currentMode: SystemMode = systemMode
+
+  if (mounted) {
     if (settings.mode === 'system') {
       currentMode = isDark ? 'dark' : 'light'
     } else {
@@ -57,40 +65,21 @@ const CustomThemeProvider = (props: Props) => {
     }
   }
 
-  // Merge the primary color scheme override with the core theme
+  /*
+   * The template merged a user-selectable primary colour (stored in the settings
+   * cookie) over the theme. The overhaul has exactly one accent, defined in
+   * colorSchemes.ts, so that merge is gone: a stale cookie from the old design
+   * can no longer repaint the site purple.
+   */
   const theme = useMemo(() => {
-    const newTheme = {
-      colorSchemes: {
-        light: {
-          palette: {
-            primary: {
-              main: settings.primaryColor,
-              light: lighten(settings.primaryColor as string, 0.2),
-              dark: darken(settings.primaryColor as string, 0.1)
-            }
-          }
-        },
-        dark: {
-          palette: {
-            primary: {
-              main: settings.primaryColor,
-              light: lighten(settings.primaryColor as string, 0.2),
-              dark: darken(settings.primaryColor as string, 0.1)
-            }
-          }
-        }
-      },
-      cssVariables: {
-        colorSchemeSelector: 'data'
-      }
-    }
-
-    const coreTheme = deepmerge(defaultCoreTheme(settings, currentMode, direction), newTheme)
+    const coreTheme = deepmerge(defaultCoreTheme(settings, currentMode, direction), {
+      cssVariables: { colorSchemeSelector: 'data' }
+    })
 
     return createTheme(coreTheme)
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [settings.primaryColor, settings.skin, currentMode])
+  }, [settings.skin, currentMode])
 
   return (
     <AppRouterCacheProvider
@@ -104,8 +93,8 @@ const CustomThemeProvider = (props: Props) => {
     >
       <ThemeProvider
         theme={theme}
-        defaultMode={systemMode}
-        modeStorageKey={`${themeConfig.templateName.toLowerCase().split(' ').join('-')}-mui-template-mode`}
+        defaultMode='system'
+        modeStorageKey={themeConfig.modeStorageKey}
         forceThemeRerender
       >
         <>

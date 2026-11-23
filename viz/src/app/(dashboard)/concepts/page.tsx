@@ -6,6 +6,14 @@ import Chip from '@mui/material/Chip'
 import LinkButton from '@/components/site/LinkButton'
 import PageHeader from '@/components/site/PageHeader'
 import SectionCard from '@/components/site/SectionCard'
+import {
+  HellingerGlyph,
+  MaskGlyph,
+  NonIidGlyph,
+  PrivacyGlyph,
+  PsnrGlyph,
+  StrategyGlyph
+} from '@/components/diagrams/ConceptGlyphs'
 
 export const metadata = {
   title: 'Concepts — FL with non-IID data',
@@ -22,7 +30,7 @@ const Page = () => (
     />
 
     <div className='flex flex-col gap-6'>
-      <SectionCard icon='tabler-chart-pie' color='primary' title='Non-IID data, and the four ways it goes wrong'>
+      <SectionCard icon='tabler-chart-pie' color='primary' title='Non-IID data, and the four ways it goes wrong' figure={<NonIidGlyph />}>
           <Typography>
             Federated learning assumes data stays where it was collected. That assumption has a consequence: each
             client&apos;s data reflects wherever it came from, so the clients do not hold independent, identically
@@ -56,6 +64,7 @@ const Page = () => (
         icon='tabler-ruler-measure'
         color='info'
         title='Hellinger distance'
+        figure={<HellingerGlyph />}
         subtitle='The measured quantity that heterogeneity is reported as'
       >
           <Typography>
@@ -85,7 +94,7 @@ const Page = () => (
           </LinkButton>
       </SectionCard>
 
-      <SectionCard icon='tabler-git-merge' color='secondary' title='The four aggregation strategies'>
+      <SectionCard icon='tabler-git-merge' color='secondary' title='The four aggregation strategies' figure={<StrategyGlyph />}>
           <div>
             <Typography variant='subtitle2'>FedAvg</Typography>
             <Typography variant='body2'>
@@ -132,7 +141,7 @@ const Page = () => (
           </div>
       </SectionCard>
 
-      <SectionCard icon='tabler-lock' color='success' title='Differential privacy and ε'>
+      <SectionCard icon='tabler-lock' color='success' title='Differential privacy and ε' figure={<PrivacyGlyph />}>
           <Typography>
             Differential privacy bounds how much any single record can influence what is released. The bound is ε:
             smaller means stronger privacy and, in practice, more noise added and more accuracy lost. In federated
@@ -153,7 +162,7 @@ const Page = () => (
           </LinkButton>
       </SectionCard>
 
-      <SectionCard icon='tabler-shield-check' color='info' title='Secure aggregation'>
+      <SectionCard icon='tabler-shield-check' color='info' title='Secure aggregation' figure={<MaskGlyph />}>
           <Typography>
             Differential privacy limits what can be inferred from the aggregate. Secure aggregation addresses a
             different exposure: it stops the server from seeing any individual update at all. Clients add pairwise
@@ -169,7 +178,7 @@ const Page = () => (
           </LinkButton>
       </SectionCard>
 
-      <SectionCard icon='tabler-shield-lock' color='error' title='Gradient inversion, and why higher PSNR is worse'>
+      <SectionCard icon='tabler-shield-lock' color='error' title='Gradient inversion, and why higher PSNR is worse' figure={<PsnrGlyph />}>
           <Typography>
             A gradient inversion attack starts from what a client transmits and optimises a synthetic input until its
             gradient matches. If it succeeds, the transmitted update was not the privacy-preserving abstraction it was

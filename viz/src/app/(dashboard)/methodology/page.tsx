@@ -11,6 +11,10 @@ import Typography from '@mui/material/Typography'
 import PageHeader from '@/components/site/PageHeader'
 import Caveat from '@/components/site/Caveat'
 import SectionCard from '@/components/site/SectionCard'
+import SectionHead from '@/components/site/SectionHead'
+import FrameworkArchitecture from '@/components/diagrams/FrameworkArchitecture'
+import MechanismPlacement from '@/components/diagrams/MechanismPlacement'
+import ThreatModel from '@/components/diagrams/ThreatModel'
 
 // Lib Imports
 import { allRuns, bytes, federatedRuns, measuredHellinger } from '@/lib/results'
@@ -55,6 +59,13 @@ const Page = () => {
         title='Methodology'
         lede='The experimental design, the partition protocols, the architectures and the threat model. Where a value can be read from the recorded configurations it is read rather than restated.'
       />
+
+      <div className='flex flex-col gap-6'>
+        <FrameworkArchitecture />
+        <MechanismPlacement />
+      </div>
+
+      <SectionHead title='Design in detail' lede='Values read from the recorded configurations wherever they exist.' />
 
       <div className='flex flex-col gap-6'>
         <SectionCard icon='tabler-topology-star-3' color='primary' title='Setting' subtitle='Cross-silo, full participation'>
@@ -200,6 +211,8 @@ const Page = () => {
               between clients. Byzantine robustness is outside the scope of this study.
             </Typography>
         </SectionCard>
+
+        <ThreatModel />
 
         <SectionCard icon='tabler-database' color='primary' title='Recording' subtitle={`${allRuns.length} runs on this site`}>
             <Typography variant='body2'>

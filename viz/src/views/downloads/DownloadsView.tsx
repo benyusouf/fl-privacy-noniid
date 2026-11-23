@@ -146,7 +146,7 @@ const DownloadsView = () => {
                           >
                             <i className='tabler-download text-[15px]' />
                             <span className='text-xs'>{f.file}</span>
-                            <span className='text-xs text-textDisabled'>{f.sizeLabel}</span>
+                            <span className='text-xs text-textSecondary'>{f.sizeLabel}</span>
                           </a>
                         ))}
                       </div>

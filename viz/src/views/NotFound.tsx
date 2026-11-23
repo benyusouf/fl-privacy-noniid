@@ -3,73 +3,39 @@
 // Next Imports
 import Link from 'next/link'
 
-// MUI Imports
-import useMediaQuery from '@mui/material/useMediaQuery'
-import { styled, useTheme } from '@mui/material/styles'
-import Button from '@mui/material/Button'
-import Typography from '@mui/material/Typography'
-
-// Third-party Imports
-import classnames from 'classnames'
-
 // Type Imports
 import type { SystemMode } from '@core/types'
 
-// Hook Imports
-import { useImageVariant } from '@core/hooks/useImageVariant'
+// Component Imports
+import LogoMark from '@components/layout/shared/LogoMark'
 
-// Util Imports
-import { asset } from '@/utils/asset'
-
-// Styled Components
-const MaskImg = styled('img')({
-  blockSize: 'auto',
-  maxBlockSize: 355,
-  inlineSize: '100%',
-  position: 'absolute',
-  insetBlockEnd: 0,
-  zIndex: -1
-})
-
+/*
+ * 404. The template's cartoon illustration and background mask are gone: a
+ * plain statement of what happened and the two useful ways forward.
+ */
 const NotFound = ({ mode }: { mode: SystemMode }) => {
-  // Vars
-  // asset() prefixes the deployment basePath. These are raw <img> sources, which
-  // Next.js does not rewrite, so without it they 404 on a project page.
-  const darkImg = asset('/images/pages/misc-mask-dark.png')
-  const lightImg = asset('/images/pages/misc-mask-light.png')
-
-  // Hooks
-  const theme = useTheme()
-  const hidden = useMediaQuery(theme.breakpoints.down('md'))
-  const miscBackground = useImageVariant(mode, lightImg, darkImg)
+  void mode
 
   return (
-    <div className='flex items-center justify-center min-bs-[100dvh] relative p-6 overflow-x-hidden'>
-      <div className='flex items-center flex-col text-center'>
-        <div className='flex flex-col gap-2 is-[90vw] sm:is-[unset] mbe-6'>
-          <Typography className='font-medium text-8xl' color='text.primary'>
-            404
-          </Typography>
-          <Typography variant='h4'>Page not found</Typography>
-          <Typography>That page isn&#39;t part of this results explorer.</Typography>
+    <main className='flex items-center justify-center min-bs-[100dvh] p-6'>
+      <div className='flex flex-col items-start gap-4 max-is-[460px]'>
+        <LogoMark className='text-[28px] text-[var(--accent)]' aria-hidden />
+        <p className='text-sm text-[var(--ink-2)]'>Error 404</p>
+        <h1 className='page-head__title'>This page is not part of the results explorer</h1>
+        <p className='page-head__lede'>
+          The address may be mistyped, or the page may have moved. Every result is reachable from the overview, and
+          every run from the run explorer.
+        </p>
+        <div className='flex gap-3 flex-wrap mbs-2'>
+          <Link href='/' className='btn btn--primary'>
+            Go to the overview
+          </Link>
+          <Link href='/runs' className='btn'>
+            Open the run explorer
+          </Link>
         </div>
-        <Button href='/' component={Link} variant='contained'>
-          Back to overview
-        </Button>
-        <img
-          alt='error-404-illustration'
-          src={asset('/images/illustrations/characters/1.png')}
-          className='object-cover bs-[400px] md:bs-[450px] lg:bs-[500px] mbs-10 md:mbs-14 lg:mbs-20'
-        />
       </div>
-      {!hidden && (
-        <MaskImg
-          alt='mask'
-          src={miscBackground}
-          className={classnames({ 'scale-x-[-1]': theme.direction === 'rtl' })}
-        />
-      )}
-    </div>
+    </main>
   )
 }
 

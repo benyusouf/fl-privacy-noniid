@@ -113,7 +113,7 @@ const AuthorMenu = () => {
                     >
                       <i className={link.icon} />
                       <Typography color='text.primary'>{link.label}</Typography>
-                      <i className='tabler-external-link text-textDisabled text-[15px] mis-auto' />
+                      <i className='tabler-external-link text-textSecondary text-[15px] mis-auto' />
                     </MenuItem>
                   ))}
 
@@ -129,7 +129,7 @@ const AuthorMenu = () => {
                   >
                     <i className='tabler-code' />
                     <Typography color='text.primary'>Study repository</Typography>
-                    <i className='tabler-external-link text-textDisabled text-[15px] mis-auto' />
+                    <i className='tabler-external-link text-textSecondary text-[15px] mis-auto' />
                   </MenuItem>
                 </MenuList>
               </ClickAwayListener>

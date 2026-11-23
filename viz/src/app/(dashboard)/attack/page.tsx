@@ -1,5 +1,8 @@
 // Component Imports
 import PageHeader from '@/components/site/PageHeader'
+import SectionHead from '@/components/site/SectionHead'
+import InversionLoop from '@/components/diagrams/InversionLoop'
+import ThreatModel from '@/components/diagrams/ThreatModel'
 import AttackView from '@/views/attack/AttackView'
 
 // Lib Imports
@@ -26,6 +29,14 @@ const Page = () => {
             : { label: `Phase E · ${recorded} of ${planned} attack conditions`, color: 'info' }
         }
         lede='An honest-but-curious server optimises a synthetic image until its gradient matches what a client sent. Fourteen conditions cross six defences with the two objects a client could transmit — one batch gradient, or the multi-epoch update this pipeline actually sends — on the classical attack network, with the study’s own SmallCNN as an architectural control. Every reconstruction is shown beside the image it tried to recover.'
+      />
+      <InversionLoop />
+      <div className='mbs-6'>
+        <ThreatModel />
+      </div>
+      <SectionHead
+        title='What the attack recovered'
+        lede='Fourteen conditions, every reconstruction beside the image it tried to recover.'
       />
       <AttackView />
     </div>

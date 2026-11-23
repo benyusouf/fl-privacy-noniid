@@ -37,6 +37,8 @@ export type Config = {
   templateName: string
   homePageUrl: string
   settingsCookieName: string
+  /** localStorage key shared by InitColorSchemeScript and the MUI ThemeProvider. */
+  modeStorageKey: string
   mode: Mode
   skin: Skin
   semiDark: boolean
@@ -52,7 +54,9 @@ export type Config = {
 const themeConfig: Config = {
   templateName: 'FL / Non-IID',
   homePageUrl: '/',
-  settingsCookieName: 'vuexy-mui-next-demo-1',
+  // Renamed in the overhaul so settings saved under the old design are not reused.
+  settingsCookieName: 'fl-noniid-settings-v2',
+  modeStorageKey: 'fl-noniid-mode',
   mode: 'system', // 'system', 'light', 'dark'
   skin: 'default', // 'default', 'bordered'
   semiDark: false, // true, false

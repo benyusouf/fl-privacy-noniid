@@ -1,5 +1,7 @@
 // Component Imports
 import PageHeader from '@/components/site/PageHeader'
+import SectionHead from '@/components/site/SectionHead'
+import GranularityUnits from '@/components/diagrams/GranularityUnits'
 import GranularityView from '@/views/granularity/GranularityView'
 
 // Lib Imports
@@ -21,6 +23,11 @@ const Page = () => {
         title='What the guarantee protects'
         status={{ label: `Phase D complete · ${counted} counted runs`, color: 'success' }}
         lede='Sample-level differential privacy protects one record; client-level protects one institution. They are not the same strength at the same nominal ε, and at fifteen silos under full participation the stronger guarantee cannot be bought at any budget this study tried. Every arm here shares one cell — CIFAR-10, FedAvg, Dirichlet α = 0.1, seed 0 — so only the mechanism differs.'
+      />
+      <GranularityUnits />
+      <SectionHead
+        title='What each granularity delivers'
+        lede='Every arm shares one cell, so the mechanism is the only thing that differs.'
       />
       <GranularityView />
     </div>

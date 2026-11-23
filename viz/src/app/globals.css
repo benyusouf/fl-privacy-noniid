@@ -208,13 +208,4 @@ input[autocomplete='one-time-code'][data-input-otp='true'] {
   inline-size: 100% !important;
 }
 
-code {
-  font-family: inherit;
-  padding-block: 2px;
-  padding-inline: 4px;
-  border-radius: 4px;
-  font-size: 90%;
-  color: var(--mui-palette-info-main);
-  background-color: rgb(var(--mui-palette-info-mainChannel) / 0.08);
-  border: 0;
-}
+/* code styling moved to site.css */

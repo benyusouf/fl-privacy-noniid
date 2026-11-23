@@ -1,5 +1,7 @@
 // Component Imports
 import PageHeader from '@/components/site/PageHeader'
+import SectionHead from '@/components/site/SectionHead'
+import DpSgdPipeline from '@/components/diagrams/DpSgdPipeline'
 import PrivacyView from '@/views/privacy/PrivacyView'
 
 // Lib Imports
@@ -19,7 +21,12 @@ const Page = () => (
       status={{ label: `Phase B complete · ${protectedRuns.length} runs`, color: 'success' }}
       lede='What accuracy differential privacy costs, and what it does to the relationship between heterogeneity and accuracy that Phase A established. The headline cost is about nineteen points; the more interesting result is that accuracy stops tracking heterogeneity at all.'
     />
-    <PrivacyView />
+    <DpSgdPipeline />
+      <SectionHead
+        title='What privacy costs'
+        lede='Each Phase B run is measured against the Phase A run identical to it in every respect but the mechanism.'
+      />
+      <PrivacyView />
   </div>
 )
 

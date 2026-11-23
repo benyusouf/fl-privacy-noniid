@@ -390,7 +390,7 @@ const AttackView = () => {
           carry no meaning.
         </Typography>
         <Caveat severity='warning' title='The DP conditions simulate the mechanism; they do not reproduce it'>
-          Noise is calibrated by the same accountant as Phase B (q = {d.sampleRate.toFixed(4)}, {d.steps.toLocaleString()}{' '}
+          Noise is calibrated by the same accountant as Phase B (q = {d.sampleRate.toFixed(4)}, {d.steps.toLocaleString('en-US')}{' '}
           steps, δ = {d.delta}), giving σ ={' '}
           {Object.entries(d.sigma)
             .sort((a, b) => Number(b[0]) - Number(a[0]))
@@ -407,7 +407,7 @@ const AttackView = () => {
           the true aggregate — and there is no single client&apos;s update left in it to recover.
         </Caveat>
         <Typography variant='body2' color='text.secondary'>
-          Fixed for every condition: layer-wise cosine matching, {d.iterations.toLocaleString()} iterations,{' '}
+          Fixed for every condition: layer-wise cosine matching, {d.iterations.toLocaleString('en-US')} iterations,{' '}
           {d.restarts} restarts, labels known to the attacker; the model pre-trained {d.pretrainEpochs} epochs on{' '}
           {d.pretrainImages} images disjoint from every client&apos;s data; local training at batch {d.localBatch},
           learning rate {d.localLr}, {d.localEpochs} epochs. One seed, as Table 3.6 sets out.

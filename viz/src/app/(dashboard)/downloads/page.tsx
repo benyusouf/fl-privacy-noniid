@@ -3,6 +3,7 @@ import Button from '@mui/material/Button'
 
 // Component Imports
 import PageHeader from '@/components/site/PageHeader'
+import DataFlow from '@/components/diagrams/DataFlow'
 import DownloadsView from '@/views/downloads/DownloadsView'
 
 // Lib Imports
@@ -21,6 +22,10 @@ const Page = () => (
       title='Data and records'
       lede='Every figure on this site is computed from files served here. Nothing is shown that cannot be traced back to one of them, and model checkpoints are the only recorded artefact deliberately withheld.'
     />
+
+    <div className='mbe-8'>
+      <DataFlow emphasis='files' title='Where these files come from' />
+    </div>
 
     <div className='mbe-6'>
       <Button

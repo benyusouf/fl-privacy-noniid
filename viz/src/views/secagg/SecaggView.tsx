@@ -251,7 +251,7 @@ const SecaggView = () => {
                 <TableCell>Payload per round</TableCell>
                 {pairs.map(p => (
                   <TableCell key={p.masked.name} align='right'>
-                    {p.bytesPlain?.toLocaleString()} B
+                    {p.bytesPlain?.toLocaleString('en-US')} B
                   </TableCell>
                 ))}
                 <TableCell align='right'>

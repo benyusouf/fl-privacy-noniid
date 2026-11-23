@@ -23,7 +23,7 @@ type Props = {
 }
 
 const COLOUR: Record<PhaseProgressItem['status'], ThemeColor> = {
-  complete: 'success',
+  complete: 'primary',
   running: 'info',
   pending: 'secondary'
 }
@@ -80,7 +80,7 @@ const PhaseProgress = ({ phases }: Props) => {
                   >
                     {p.id}
                   </span>
-                  {p.status === 'complete' && <i className='tabler-check text-[18px] text-success' />}
+                  {p.status === 'complete' && <i className='tabler-check text-[18px] text-primary' />}
                   {p.status === 'running' && <i className='tabler-progress text-[18px] text-info' />}
                 </div>
                 <Typography variant='body2' className='font-medium'>

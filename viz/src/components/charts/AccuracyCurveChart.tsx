@@ -17,7 +17,7 @@ import type { Run } from '@/types/results'
 
 // Lib Imports
 import { chanceLevel, curvePoints, numClasses } from '@/lib/results'
-import { SERIES_COLOURS, CHANCE_COLOUR, colourFor } from './palette'
+import { SERIES_COLOURS, CHANCE_COLOUR, CHART_TEXT, colourFor } from './palette'
 import { extent, linePath } from '@/lib/chart-geometry.mjs'
 
 type Props = {
@@ -117,7 +117,7 @@ const AccuracyCurveChart = ({ runs, metric = 'test_acc', colourByStrategy = true
                   stroke={CHANCE_COLOUR}
                   strokeDasharray='6 4'
                 />
-                <text x={area.x1} y={y(chance) - 5} textAnchor='end' fontSize={11} fill={CHANCE_COLOUR}>
+                <text x={area.x1} y={y(chance) - 5} textAnchor='end' fontSize={11} fill={CHART_TEXT}>
                   chance ({numClasses(runs[0].dataset)} classes) = {chance.toFixed(2)}%
                 </text>
               </>

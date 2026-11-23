@@ -59,6 +59,9 @@ const PrivacyView = () => {
   // sampling ratio q are independent of epsilon; the sigma ratio is not.
   const [noiseEpsilon, setNoiseEpsilon] = useState<number>(1)
 
+  // Linked highlighting between the headline chart and the summary table.
+  const [focus, setFocus] = useState<string | null>(null)
+
   // Any run at this partition carries the same client noise profile: sigma is
   // calibrated from client sizes and epsilon, not from the strategy.
   const noiseRun = useMemo(() => dpCell(DATASET, noisePartition, 'fedavg', noiseEpsilon), [noisePartition, noiseEpsilon])
@@ -95,7 +98,7 @@ const PrivacyView = () => {
           }
         />
         <CardContent>
-          <PrivacyCostChart dataset={DATASET} />
+          <PrivacyCostChart dataset={DATASET} focus={focus} onFocus={setFocus} />
           <Typography variant='body2' className='mbs-4 max-is-[85ch]'>
             The cost of differential privacy is large and, on its own, uninteresting: around nineteen accuracy points
             at ε = 8. The result worth attention is the change in <strong>shape</strong>. Without a privacy mechanism,
@@ -109,7 +112,7 @@ const PrivacyView = () => {
       <Card>
         <CardHeader
           title='The cost, and the collapse'
-          subheader='Mean over twelve cells: four strategies × three partitions'
+          subheader='Mean over twelve cells: four strategies × three partitions. Point at a row to find it in the chart above.'
           action={
             <FigureData
               filename='privacy_cost_summary'
@@ -133,7 +136,13 @@ const PrivacyView = () => {
               </TableHead>
               <TableBody>
                 {summary.map(s => (
-                  <TableRow key={s.condition.key}>
+                  <TableRow
+                    key={s.condition.key}
+                    hover
+                    className={focus === s.condition.key ? 'is-linked' : undefined}
+                    onMouseEnter={() => setFocus(s.condition.key)}
+                    onMouseLeave={() => setFocus(null)}
+                  >
                     <TableCell>{s.condition.label}</TableCell>
                     <TableCell align='right'>{s.acc.toFixed(2)}%</TableCell>
                     <TableCell align='right'>{s.cost === null ? '—' : `${s.cost.toFixed(2)} pts`}</TableCell>

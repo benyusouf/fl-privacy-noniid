@@ -8,6 +8,7 @@ import Chip from '@mui/material/Chip'
 import LinkButton from '@/components/site/LinkButton'
 import PageHeader from '@/components/site/PageHeader'
 import RunDetail from '@/components/site/RunDetail'
+import DataFlow from '@/components/diagrams/DataFlow'
 
 // Lib Imports
 import { allRunSlugs, runNameFromSlug } from '@/lib/runHref'
@@ -49,6 +50,7 @@ const Page = async ({ params }: Props) => {
       <PageHeader
         eyebrow={`Phase ${run.phase} · run record`}
         title={run.name}
+        mono
         lede={`${run.datasetLabel} · ${run.strategyLabel}${
           run.partitionLabel ? ` · ${run.partitionLabel}` : ''
         } · seed ${run.seed ?? '—'}`}
@@ -63,6 +65,10 @@ const Page = async ({ params }: Props) => {
       </div>
 
       <RunDetail run={run} />
+
+      <div className='mbs-8'>
+        <DataFlow title='Where this record comes from' />
+      </div>
     </div>
   )
 }

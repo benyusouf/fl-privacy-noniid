@@ -28,7 +28,10 @@ const CHAR_W = 6.6
 const SvgTooltip = ({ x, y, lines, bounds }: Props) => {
   const theme = useTheme()
 
-  const w = Math.max(...lines.map(l => l.text.length * CHAR_W)) + PAD * 2
+  // A coloured line gets a swatch before its text; the text itself stays in ink.
+  const swatch = lines.some(l => l.colour)
+  const indent = swatch ? 14 : 0
+  const w = Math.max(...lines.map(l => l.text.length * CHAR_W)) + PAD * 2 + indent
   const h = lines.length * LINE_H + PAD * 2
 
   // Flip to the other side of the cursor when there is not room.
@@ -43,19 +46,32 @@ const SvgTooltip = ({ x, y, lines, bounds }: Props) => {
         width={w}
         height={h}
         rx={6}
-        fill={theme.palette.background.paper}
-        stroke={theme.palette.divider}
-        opacity={0.97}
+        fill='var(--viz-surface)'
+        stroke='var(--line-strong)'
+        opacity={0.98}
       />
+      {lines.map((l, i) =>
+        l.colour ? (
+          <rect
+            key={`s${i}`}
+            x={left + PAD}
+            y={top + PAD + LINE_H * i + LINE_H / 2 - 4}
+            width={8}
+            height={8}
+            rx={2}
+            fill={l.colour}
+          />
+        ) : null
+      )}
       {lines.map((l, i) => (
         <text
           key={i}
-          x={left + PAD}
+          x={left + PAD + indent}
           y={top + PAD + LINE_H * i + LINE_H / 2}
           dominantBaseline='middle'
           fontSize={12}
           fontWeight={l.bold ? 600 : 400}
-          fill={l.colour ?? theme.palette.text.primary}
+          fill={theme.palette.text.primary}
         >
           {l.text}
         </text>

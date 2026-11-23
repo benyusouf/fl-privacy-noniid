@@ -6,6 +6,8 @@ import Typography from '@mui/material/Typography'
 import PageHeader from '@/components/site/PageHeader'
 import SectionCard from '@/components/site/SectionCard'
 import StatCard from '@/components/site/StatCard'
+import SectionHead from '@/components/site/SectionHead'
+import ResearchGap from '@/components/diagrams/ResearchGap'
 
 // Lib Imports
 import { federatedRuns, seedGroups, timingStats } from '@/lib/results'
@@ -33,7 +35,14 @@ const Page = () => {
         lede='What this study cannot conclude, and why. This section is given real space deliberately: several of the results below are only interpretable alongside the constraint that produced them, and a declared limitation is worth more than a tidy number.'
       />
 
-      <div className='grid grid-cols-1 sm:grid-cols-3 gap-6 mbe-6'>
+      <ResearchGap />
+
+      <SectionHead
+        title='What the study cannot conclude'
+        lede='Closing that gap has costs. Each constraint below is stated beside the results it qualifies.'
+      />
+
+      <div className='grid grid-cols-1 sm:grid-cols-3 gap-4 mbe-6'>
         <StatCard
           label='Configurations at one seed'
           value={`${single} of ${single + multi}`}

@@ -11,6 +11,7 @@ import { useTheme } from '@mui/material/styles'
 import ChartFrame from './ChartFrame'
 import ChartLegend from './ChartLegend'
 import SvgTooltip from './SvgTooltip'
+import { CHART_TEXT, SECOND_MEASURE_COLOUR, SIZE_COLOUR } from './palette'
 
 // Type Imports
 import type { Run } from '@/types/results'
@@ -22,8 +23,7 @@ type Props = {
   run: Run
 }
 
-const SIZE_COLOUR = '#666CFF'
-const HELLINGER_COLOUR = '#FDB528'
+const HELLINGER_COLOUR = SECOND_MEASURE_COLOUR
 
 /*
  * Per-client view of what the partition protocol actually produced.
@@ -92,7 +92,7 @@ const ClientDistributionChart = ({ run }: Props) => {
                   y={hy(t)}
                   dominantBaseline='middle'
                   fontSize={11}
-                  fill={HELLINGER_COLOUR}
+                  fill={CHART_TEXT}
                 >
                   {t.toFixed(2)}
                 </text>
@@ -101,7 +101,7 @@ const ClientDistributionChart = ({ run }: Props) => {
                 transform={`translate(${area.x1 + 46} ${(area.y0 + area.y1) / 2}) rotate(90)`}
                 textAnchor='middle'
                 fontSize={12}
-                fill={HELLINGER_COLOUR}
+                fill={CHART_TEXT}
               >
                 Hellinger distance
               </text>
@@ -116,7 +116,7 @@ const ClientDistributionChart = ({ run }: Props) => {
                     stroke={HELLINGER_COLOUR}
                     strokeDasharray='5 4'
                   />
-                  <text x={area.x0 + 4} y={hy(run.hellingerMean) - 5} fontSize={11} fill={HELLINGER_COLOUR}>
+                  <text x={area.x0 + 4} y={hy(run.hellingerMean) - 5} fontSize={11} fill={CHART_TEXT}>
                     mean H = {run.hellingerMean.toFixed(3)}
                   </text>
                 </>
@@ -161,7 +161,7 @@ const ClientDistributionChart = ({ run }: Props) => {
                   bounds={area}
                   lines={[
                     { text: `client ${hover}`, bold: true },
-                    { text: `${data[hover].size.toLocaleString()} samples`, colour: SIZE_COLOUR },
+                    { text: `${data[hover].size.toLocaleString('en-US')} samples`, colour: SIZE_COLOUR },
                     {
                       text: `H = ${data[hover].hellinger?.toFixed(4) ?? '—'}`,
                       colour: HELLINGER_COLOUR

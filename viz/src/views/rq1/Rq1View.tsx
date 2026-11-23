@@ -24,7 +24,7 @@ import FigureData from '@/components/site/FigureData'
 import HellingerScatterChart from '@/components/charts/HellingerScatterChart'
 
 // Type Imports
-import type { Dataset } from '@/types/results'
+import type { Dataset, Strategy } from '@/types/results'
 
 // Lib Imports
 import {
@@ -39,6 +39,10 @@ import {
 
 const Rq1View = () => {
   const [dataset, setDataset] = useState<Dataset>('cifar10')
+
+  // Linked highlighting: pointing at a strategy in the chart, its legend or the
+  // table lights up the same strategy (and cell) everywhere on the page.
+  const [focus, setFocus] = useState<{ strategy: Strategy; partition?: string | null } | null>(null)
 
   // Unprotected only, matching rq1Points(). RQ1 is the no-mechanism baseline;
   // without this filter the Phase B runs join the table and, since the lookup
@@ -75,7 +79,7 @@ const Rq1View = () => {
       <Card>
         <CardHeader
           title='Final accuracy against measured heterogeneity'
-          subheader='Each point is one (strategy, partition) block. Bars span min to max across seeds.'
+          subheader='Each point is one (strategy, partition) block. Bars span min to max across seeds. Point at a strategy here or in the table below to trace it.'
           action={
             <div className='flex gap-2 items-center flex-wrap'>
             <FigureData
@@ -100,7 +104,7 @@ const Rq1View = () => {
           }
         />
         <CardContent>
-          <HellingerScatterChart dataset={dataset} />
+          <HellingerScatterChart dataset={dataset} focus={focus} onFocus={setFocus} />
           <Typography variant='caption' color='text.secondary' className='block mbs-4'>
             The x-axis is the measured mean Hellinger distance between each client&apos;s label distribution and the
             global one — not the Dirichlet α that generated the partition. Reporting the measured quantity rather than
@@ -148,7 +152,13 @@ const Rq1View = () => {
                   <TableCell>Partition</TableCell>
                   <TableCell align='right'>measured H</TableCell>
                   {STRATEGY_ORDER.map(s => (
-                    <TableCell key={s} align='right'>
+                    <TableCell
+                      key={s}
+                      align='right'
+                      className={focus?.strategy === s ? 'linked-col' : undefined}
+                      onMouseEnter={() => setFocus({ strategy: s })}
+                      onMouseLeave={() => setFocus(null)}
+                    >
                       {s === 'scaffold' ? 'SCAFFOLD' : s === 'fedavg' ? 'FedAvg' : s === 'fedprox' ? 'FedProx' : 'MOON'}
                     </TableCell>
                   ))}
@@ -160,7 +170,19 @@ const Rq1View = () => {
                     <TableCell>{r.label}</TableCell>
                     <TableCell align='right'>{r.hellinger === null ? '—' : r.hellinger.toFixed(3)}</TableCell>
                     {r.cells.map((g, i) => (
-                      <TableCell key={i} align='right'>
+                      <TableCell
+                        key={i}
+                        align='right'
+                        className={
+                          focus?.strategy === STRATEGY_ORDER[i]
+                            ? focus?.partition === r.partition
+                              ? 'linked-col linked-cell'
+                              : 'linked-col'
+                            : undefined
+                        }
+                        onMouseEnter={() => setFocus({ strategy: STRATEGY_ORDER[i], partition: r.partition })}
+                        onMouseLeave={() => setFocus(null)}
+                      >
                         {g === null ? (
                           '—'
                         ) : (

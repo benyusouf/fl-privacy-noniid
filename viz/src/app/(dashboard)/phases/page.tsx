@@ -6,10 +6,10 @@ import Divider from '@mui/material/Divider'
 import Typography from '@mui/material/Typography'
 
 // Component Imports
-import CustomAvatar from '@core/components/mui/Avatar'
 import LinkButton from '@/components/site/LinkButton'
 import PageHeader from '@/components/site/PageHeader'
 import PhaseProgress from '@/components/site/PhaseProgress'
+import PhasePipeline from '@/components/diagrams/PhasePipeline'
 
 // Type Imports
 import type { ThemeColor } from '@core/types'
@@ -162,7 +162,17 @@ const Page = () => {
         lede='Five phases, each isolating one variable against a fixed baseline. Phases that have not been run are shown with that status rather than omitted, so the shape of the whole study is visible alongside how much of it has been executed.'
       />
 
-      <div className='mbe-6'>
+      <PhasePipeline
+        phases={PHASES.map(p => ({
+          id: p.id,
+          title: p.title,
+          rq: p.rq,
+          count: recorded(p.id),
+          unit: p.noTraining ? 'attack conditions' : 'runs'
+        }))}
+      />
+
+      <div className='mbs-6 mbe-6'>
         <PhaseProgress phases={progress} />
       </div>
 
@@ -172,18 +182,18 @@ const Page = () => {
           const done = recorded(p.id)
 
           return (
-            <Card key={p.id}>
+            <Card key={p.id} id={`phase-${p.id}`} className='scroll-mt-20'>
               <CardContent className='flex flex-col gap-5'>
                 <div className='flex items-start gap-4 flex-wrap'>
-                  <CustomAvatar color={p.color} skin='light' variant='rounded' size={48}>
-                    <i className={`${p.icon} text-[28px]`} />
-                  </CustomAvatar>
+                  <span className='phase-letter' aria-hidden>
+                    {p.id}
+                  </span>
                   <div className='flex flex-col gap-1 flex-1 min-is-[240px]'>
                     <div className='flex items-center gap-2 flex-wrap'>
                       <Typography variant='h6'>
                         Phase {p.id} — {p.title}
                       </Typography>
-                      <Chip size='small' variant='tonal' color={p.color} label={p.rq} />
+                      <span className='page-head__rq'>{p.rq}</span>
                     </div>
                     <div className='flex items-center gap-2 flex-wrap'>
                       <Chip
@@ -204,7 +214,7 @@ const Page = () => {
                     </div>
                   </div>
                   {p.href && (
-                    <LinkButton href={p.href} size='small' variant='tonal' color={p.color}>
+                    <LinkButton href={p.href} size='small' variant='tonal' color='secondary'>
                       {p.hrefLabel}
                     </LinkButton>
                   )}
@@ -227,7 +237,7 @@ const Page = () => {
                 </div>
 
                 {p.note && (
-                  <div className='flex gap-2 items-start p-4 rounded bg-actionHover'>
+                  <div className='flex gap-2 items-start p-4 rounded-lg bg-[var(--surface-subtle)] border border-[var(--line)]'>
                     <i className='tabler-info-circle text-[18px] text-textSecondary mbs-[2px]' />
                     <Typography variant='body2' color='text.secondary'>
                       {p.note}

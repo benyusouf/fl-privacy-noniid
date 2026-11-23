@@ -10,6 +10,7 @@ import Typography from '@mui/material/Typography'
 import ChartFrame from './ChartFrame'
 import ChartLegend from './ChartLegend'
 import SvgTooltip from './SvgTooltip'
+import { CHART_TEXT, SECOND_MEASURE_COLOUR, SIZE_COLOUR } from './palette'
 
 // Type Imports
 import type { Run } from '@/types/results'
@@ -22,8 +23,7 @@ type Props = {
   run: Run
 }
 
-const SIGMA_COLOUR = '#8264F0'
-const SIZE_COLOUR = '#666CFF'
+const SIGMA_COLOUR = SECOND_MEASURE_COLOUR
 
 /*
  * Who pays for the privacy guarantee.
@@ -90,7 +90,7 @@ const ClientNoiseChart = ({ run }: Props) => {
                   y={sy(sizeMax * 1.12 * t)}
                   dominantBaseline='middle'
                   fontSize={11}
-                  fill={SIZE_COLOUR}
+                  fill={CHART_TEXT}
                 >
                   {Math.round((sizeMax * 1.12 * t) / 100) / 10}k
                 </text>
@@ -99,7 +99,7 @@ const ClientNoiseChart = ({ run }: Props) => {
                 transform={`translate(${area.x1 + 52} ${(area.y0 + area.y1) / 2}) rotate(90)`}
                 textAnchor='middle'
                 fontSize={12}
-                fill={SIZE_COLOUR}
+                fill={CHART_TEXT}
               >
                 samples held
               </text>
@@ -152,7 +152,7 @@ const ClientNoiseChart = ({ run }: Props) => {
                   bounds={area}
                   lines={[
                     { text: `client ${clients[hover].client}`, bold: true },
-                    { text: `${clients[hover].n.toLocaleString()} samples`, colour: SIZE_COLOUR },
+                    { text: `${clients[hover].n.toLocaleString('en-US')} samples`, colour: SIZE_COLOUR },
                     {
                       text: clients[hover].schedule
                         ? `σ = ${lo(clients[hover]).toFixed(2)}–${hi(clients[hover]).toFixed(2)} over the run`

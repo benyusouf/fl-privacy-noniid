@@ -1,16 +1,19 @@
+// Next Imports
+import Link from 'next/link'
+
 // MUI Imports
 import Card from '@mui/material/Card'
 import CardContent from '@mui/material/CardContent'
 import CardHeader from '@mui/material/CardHeader'
 import Chip from '@mui/material/Chip'
-import Button from '@mui/material/Button'
 import Typography from '@mui/material/Typography'
 
 // Component Imports
-import LinkButton from '@/components/site/LinkButton'
-import PageHeader from '@/components/site/PageHeader'
+import SectionHead from '@/components/site/SectionHead'
 import StatCard from '@/components/site/StatCard'
-import CustomAvatar from '@core/components/mui/Avatar'
+import ConceptualFramework from '@/components/diagrams/ConceptualFramework'
+import FederatedRound from '@/components/diagrams/FederatedRound'
+import FederationHero from '@/components/diagrams/FederationHero'
 
 // Lib Imports
 import { allRuns, bundle, centralizedRuns, countedRuns, federatedRuns, protectedRuns, seedGroups } from '@/lib/results'
@@ -171,106 +174,123 @@ const Page = () => {
 
   return (
     <div className='flex flex-col'>
-      <PageHeader
-        eyebrow={`${author.name} · ${author.role} · ${author.affiliation}`}
-        title='Federated Learning for Privacy-Preserving AI Models'
-        lede='The complete record of this research on secure, decentralized model training with non-IID data. Every experiment, every result, every chart and every file the study produced is here, and all of it can be read on the page or taken away as data.'
-      />
+      <section className='hero' aria-labelledby='hero-title'>
+        <div>
+          <p className='page-head__context'>
+            {author.role}, {author.affiliation}
+          </p>
+          <h1 id='hero-title' className='hero__title mbs-3'>
+            Federated Learning for Privacy‑Preserving AI Models
+          </h1>
+          <p className='hero__lede'>
+            The complete record of this research on secure, decentralized model training with non-IID data. Every
+            experiment, every result, every chart and every file the study produced is here, and all of it can be read on
+            the page or taken away as data.
+          </p>
+          <p className='hero__by'>
+            By <strong>{author.name}</strong>
+          </p>
+          <div className='hero__actions'>
+            <Link href='/rq1' className='btn btn--primary'>
+              Start with the results
+              <i className='tabler-arrow-right text-base' aria-hidden />
+            </Link>
+            <Link href='/runs' className='btn'>
+              Explore every run
+            </Link>
+            <a href={archiveUrl()} download className='btn'>
+              <i className='tabler-download text-base' aria-hidden />
+              Download all results ({downloads.archive.sizeLabel})
+            </a>
+          </div>
+        </div>
+        <FederationHero />
+      </section>
 
-      <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mbe-6'>
+      <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4'>
         <StatCard
           label='Runs recorded'
           value={String(allRuns.length)}
           hint={`${countedRuns.length} counted; ${allRuns.length - countedRuns.length} diagnostic`}
-          icon='tabler-database'
-          color='primary'
         />
         <StatCard
           label='Federated / centralized'
           value={`${federatedRuns.length} / ${centralizedRuns.length}`}
           hint='15 institutional clients, full participation'
-          icon='tabler-topology-star-3'
-          color='info'
         />
         <StatCard
           label='Under differential privacy'
           value={String(protectedRuns.length)}
           hint='sample-level, client-level and time-adaptive'
-          icon='tabler-lock'
-          color='success'
         />
         <StatCard
           label='Repeated at three seeds'
           value={`${multiSeed} of ${multiSeed + singleSeed}`}
           hint='of the unprotected configurations'
-          icon='tabler-repeat'
-          color='warning'
         />
       </div>
 
-      <Card className='mbe-6'>
-        <CardHeader title='What you can do here' />
-        <CardContent>
-          <div className='grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5'>
-            {CAPABILITIES.map(c => (
-              <div key={c.title} className='flex gap-4 items-start'>
-                <CustomAvatar color={c.color} skin='light' variant='rounded' size={40}>
-                  <i className={`${c.icon} text-[22px]`} />
-                </CustomAvatar>
-                <div className='flex flex-col items-start gap-1'>
-                  <Typography className='font-medium'>{c.title}</Typography>
-                  <Typography variant='body2' color='text.secondary'>
-                    {c.body}
-                  </Typography>
-                  <LinkButton href={c.href} size='small' variant='text' className='p-0 min-is-0'>
-                    {c.action}
-                  </LinkButton>
-                </div>
-              </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
+      <SectionHead
+        title='How federated training works'
+        lede='Institutions that cannot pool their data train one shared model by exchanging updates instead. Step through a round to see what moves, and what never does.'
+      />
+      <FederatedRound />
 
-      <Typography variant='h5' className='mbe-4'>
-        The three research questions
-      </Typography>
-      <div className='grid grid-cols-1 lg:grid-cols-3 gap-6 mbe-6'>
-        {RQS.map(rq => (
-          <Card key={rq.id}>
-            <CardContent className='flex flex-col gap-3 bs-full'>
-              <div className='flex items-center gap-3'>
-                <CustomAvatar color={rq.color} skin='light' variant='rounded' size={40}>
-                  <i className={`${rq.icon} text-[24px]`} />
-                </CustomAvatar>
-                <div className='flex flex-col'>
-                  <Typography className='font-medium'>{rq.id}</Typography>
-                  <Typography variant='caption' color='text.secondary'>
-                    {rq.objective} · {rq.phase}
-                  </Typography>
-                </div>
-                <Chip
-                  size='small'
-                  variant='tonal'
-                  color={rq.status === 'answered' ? 'success' : 'default'}
-                  label={rq.status}
-                  className='mis-auto'
-                />
+      <SectionHead
+        title='The three research questions'
+        lede='Five phases answer three questions. Each question below links to the pages that answer it, in the order they are best read.'
+      />
+      <ol className='rq-list'>
+        {RQS.map((rq, i) => (
+          <li key={rq.id} className='rq-list__item'>
+            <span className='rq-list__id'>{rq.id}</span>
+            <div className='rq-list__body'>
+              <p className='rq-list__q'>{rq.q}</p>
+              <div className='rq-list__meta'>
+                <span>
+                  {rq.objective}, {rq.phase}
+                </span>
+                <Chip size='small' variant='tonal' color={rq.status === 'answered' ? 'success' : 'default'} label={rq.status} />
               </div>
-              <Typography variant='body2'>{rq.short}</Typography>
-              <div className='flex gap-1 flex-wrap mbs-auto'>
+              <div className='rq-list__links'>
                 {rq.links.map(l => (
-                  <LinkButton key={l.href} href={l.href} size='small' variant='tonal' color={rq.color}>
+                  <Link key={l.href} href={l.href} className='rq-list__link'>
                     {l.label}
-                  </LinkButton>
+                    <i className='tabler-arrow-right' aria-hidden />
+                  </Link>
                 ))}
               </div>
-            </CardContent>
-          </Card>
+            </div>
+            <span className='rq-list__n' aria-hidden>
+              {i + 1}
+            </span>
+          </li>
         ))}
+      </ol>
+
+      <div className='mbs-8'>
+        <ConceptualFramework />
       </div>
 
-      <div className='grid grid-cols-1 lg:grid-cols-2 gap-6 mbe-6'>
+      <SectionHead title='What you can do here' />
+      <ul className='cap-grid'>
+        {CAPABILITIES.map(c => (
+          <li key={c.title}>
+            <Link href={c.href} className='cap-grid__item'>
+              <i className={`${c.icon} cap-grid__icon`} aria-hidden />
+              <span className='cap-grid__title'>{c.title}</span>
+              <span className='cap-grid__body'>{c.body}</span>
+              <span className='cap-grid__action'>
+                {c.action}
+                <i className='tabler-arrow-right' aria-hidden />
+              </span>
+            </Link>
+          </li>
+        ))}
+      </ul>
+
+      <SectionHead title='Before reading the results' lede='Four commitments that shape every number on this site.' />
+      <div className='grid grid-cols-1 lg:grid-cols-2 gap-4 mbe-4'>
         <Card>
           <CardHeader title='What the study measures' />
           <CardContent className='flex flex-col gap-3'>
@@ -301,34 +321,41 @@ const Page = () => {
               parameter alone. α is what was asked for; Hellinger is what was obtained, and the two do not map onto each
               other cleanly.
             </Typography>
-            <LinkButton href='/rq1' variant='tonal' size='small' className='self-start'>
+            <Link href='/rq1' className='text-link self-start text-sm'>
               See the headline result
-            </LinkButton>
+            </Link>
           </CardContent>
         </Card>
       </div>
 
-      <Card className='mbe-6'>
+      <Card className='mbe-4'>
         <CardHeader
           title='Implementation'
           subheader='Three things that are commonly assumed about work like this, and are not true here'
         />
-        <CardContent className='flex flex-col gap-3'>
-          <Typography>
-            <strong>No federated-learning framework is used.</strong> The round loop, the four strategies, the
-            partitioning, the differential-privacy path and the masking are all implemented directly. Flower was
-            evaluated and dropped because it ships FedAvg and FedProx but neither SCAFFOLD nor MOON.
-          </Typography>
-          <Typography>
-            <strong>Communication cost is analytic, not measured.</strong> Nothing is transmitted — this is a
-            single-process simulation. Byte counts are computed from parameter counts and client counts, and should be
-            read as a protocol quantity rather than as network traffic.
-          </Typography>
-          <Typography>
-            <strong>Wall-clock timings are not a measurement.</strong> Identical configurations differ by up to 17.9×
-            because system sleep is counted as compute. Timings are recorded on this site but never plotted as if they
-            meant something.
-          </Typography>
+        <CardContent className='grid grid-cols-1 md:grid-cols-3 gap-6'>
+          <div className='flex flex-col gap-2'>
+            <Typography className='font-medium'>No federated-learning framework is used.</Typography>
+            <Typography variant='body2' color='text.secondary'>
+              The round loop, the four strategies, the partitioning, the differential-privacy path and the masking are
+              all implemented directly. Flower was evaluated and dropped because it ships FedAvg and FedProx but neither
+              SCAFFOLD nor MOON.
+            </Typography>
+          </div>
+          <div className='flex flex-col gap-2'>
+            <Typography className='font-medium'>Communication cost is analytic, not measured.</Typography>
+            <Typography variant='body2' color='text.secondary'>
+              Nothing is transmitted — this is a single-process simulation. Byte counts are computed from parameter
+              counts and client counts, and should be read as a protocol quantity rather than as network traffic.
+            </Typography>
+          </div>
+          <div className='flex flex-col gap-2'>
+            <Typography className='font-medium'>Wall-clock timings are not a measurement.</Typography>
+            <Typography variant='body2' color='text.secondary'>
+              Identical configurations differ by up to 17.9× because system sleep is counted as compute. Timings are
+              recorded on this site but never plotted as if they meant something.
+            </Typography>
+          </div>
         </CardContent>
       </Card>
 
@@ -346,17 +373,10 @@ const Page = () => {
           <Typography variant='body2' color='text.secondary'>
             {downloads.note}
           </Typography>
-          <Button
-            component='a'
-            href={archiveUrl()}
-            download
-            variant='tonal'
-            size='small'
-            className='self-start'
-            startIcon={<i className='tabler-download' />}
-          >
+          <a href={archiveUrl()} download className='btn self-start'>
+            <i className='tabler-download text-base' aria-hidden />
             Download all results ({downloads.archive.sizeLabel})
-          </Button>
+          </a>
         </CardContent>
       </Card>
 
