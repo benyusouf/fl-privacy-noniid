@@ -46,7 +46,7 @@ const PhaseProgress = ({ phases }: Props) => {
         <div className='flex items-baseline justify-between gap-3 flex-wrap'>
           <Typography variant='h6'>Progress through the five phases</Typography>
           <Typography variant='body2' color='text.secondary'>
-            {totalDone} of {totalPlanned} training runs recorded
+            {totalDone} of {totalPlanned} training runs counted
           </Typography>
         </div>
 

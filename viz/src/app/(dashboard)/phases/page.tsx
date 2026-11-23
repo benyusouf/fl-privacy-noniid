@@ -134,8 +134,12 @@ const FACETS = [
 const Page = () => {
   // Counts come from the recorded runs, never from a literal — a phase cannot
   // claim progress the data does not show.
+  //
+  // Training phases are measured in COUNTED runs, the unit Table 3.6 plans in.
+  // A diagnostic (Phase D's uniform-averaging control) is recorded and shown
+  // but sits outside the 120, so counting it would read 9 of 8 and 121 of 120.
   const recorded = (id: string) =>
-    id === 'E' ? (attack?.recorded ?? 0) : allRuns.filter(r => r.phase === id).length
+    id === 'E' ? (attack?.recorded ?? 0) : allRuns.filter(r => r.phase === id && r.counted).length
 
   const statusOf = (p: Phase): PhaseProgressItem['status'] => {
     const done = recorded(p.id)
